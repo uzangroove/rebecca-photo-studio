@@ -1,0 +1,12 @@
+import {test} from "node:test";
+import assert from "node:assert/strict";
+import worker from "../worker/index.ts";
+const headers={authorization:`Basic ${Buffer.from("rebecca:test-password").toString("base64")}`};
+const env={STUDIO_PASSWORD:"test-password",ASSETS:{fetch:async()=>new Response("asset")}};
+test("unconfigured server fails closed",async()=>{assert.equal((await worker.fetch(new Request("https://studio.test/"),{...env,STUDIO_PASSWORD:""} as any)).status,503)});
+test("assets and generation both require credentials",async()=>{for(const path of ["/","/assets/logo.png","/api/generate"]){assert.equal((await worker.fetch(new Request(`https://studio.test${path}`),env as any)).status,401)}});
+test("wrong password is rejected",async()=>{assert.equal((await worker.fetch(new Request("https://studio.test/",{headers:{authorization:"Basic cmViZWNjYTpiYWQ="}}),env as any)).status,401)});
+test("authenticated assets are private",async()=>{const result=await worker.fetch(new Request("https://studio.test/",{headers}),env as any);assert.equal(await result.text(),"asset");assert.equal(result.headers.get("cache-control"),"private, no-store")});
+test("generation requires POST",async()=>{assert.equal((await worker.fetch(new Request("https://studio.test/api/generate",{headers}),env as any)).status,405)});
+test("foreign origin generation is rejected",async()=>{assert.equal((await worker.fetch(new Request("https://studio.test/api/generate",{method:"POST",headers:{...headers,origin:"https://other.test"}}),env as any)).status,403)});
+test("missing API key has actionable response",async()=>{assert.equal((await worker.fetch(new Request("https://studio.test/api/generate",{method:"POST",headers}),env as any)).status,503)});
