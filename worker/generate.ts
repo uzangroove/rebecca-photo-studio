@@ -12,16 +12,7 @@ const scenes: Record<string,string> = {
   editorial:"an artistic editorial studio photograph with bold but realistic shadows",
   gift:"a thoughtful gift and hosting scene with natural fabric and elegant table styling"
 };
-const colors: Record<string,string> = {
-  rebecca:"warm cream, deep forest green and restrained antique gold",
-  earth:"sand, terracotta brown and muted olive",
-  city:"soft concrete gray, charcoal and warm copper",
-  clean:"ivory, pale sage and cool green",
-  garden:"leaf green, soft moss and pale peach",
-  romance:"blush, dusty rose and warm mauve",
-  sea:"chalk white, sea glass blue-green and sand",
-  evening:"deep forest green, muted charcoal and warm brass"
-};
+import {paletteById} from "../shared/palettes.ts";
 const props: Record<string,string> = {
   none:"No styling props. Use only the product and the surface.",
   subtle:"Use one or two subtle contextual props well away from the product.",
@@ -41,18 +32,18 @@ export async function generate(request: Request, env: {OPENAI_API_KEY?: string; 
     const density=String(form.get("density")||""),ratio=String(form.get("ratio")||"");
     const product=String(form.get("product")||"");
     if (!(photo instanceof File) || !["image/png","image/jpeg","image/webp"].includes(photo.type) || photo.size<1000 || photo.size>10*1024*1024 ||
-      !scenes[style] || !colors[palette] || !props[density] || !["square","portrait"].includes(ratio) || !["soap","candle"].includes(product))
+      !scenes[style] || !paletteById[palette] || !props[density] || !["square","portrait","landscape"].includes(ratio) || !["soap","candle"].includes(product))
       return Response.json({error:"הצילום או אפשרויות העיצוב אינם תקינים"},{status:400});
     const item=product==="soap"?"handmade soaps":"handmade candles";
     const prompt=`Create a single photorealistic commercial product photograph by editing the supplied photo of ${item}.
 The image itself must become one coherent edge-to-edge scene. No frames, mats, borders, poster layouts, inset source photos, cards, text overlays, typography, additional logos or watermarks.
 Keep the exact number, shape, silhouette, arrangement, scale, material, colors, surface details and existing labels of the actual products in the supplied photo. Do not redesign or invent products. Do not change the words on any existing label. Keep the products central and recognizable.
-Replace and integrate the background and surrounding surface as ${scenes[style]}. Use this color direction in the ENVIRONMENT ONLY: ${colors[palette]}. Do not recolor the products. ${props[density]}
-Make perspective, natural lighting, contact shadows and reflections consistent so the products feel physically present. Leave sufficient breathing room. Output one finished photograph, no graphic layout.`;
+Replace and integrate the background and surrounding surface as ${scenes[style]}. Use the '${paletteById[palette].name}' palette in the ENVIRONMENT ONLY, with these exact three colors as guidance: ${paletteById[palette].colors.join(", ")}. Do not recolor the products. ${props[density]}
+Make perspective, natural lighting, contact shadows and reflections consistent so the products feel physically present. Leave generous breathing room on every side because the image may be cropped for social publishing. Keep the full product safely inside the central 60 percent. Output one finished photograph, no graphic layout.`;
     const upstream=new FormData();
     upstream.append("model",env.OPENAI_IMAGE_MODEL || "gpt-image-2.5-sunburst");
     upstream.append("prompt",prompt);
-    upstream.append("size",ratio==="portrait"?"1024x1536":"1024x1024");
+    upstream.append("size",ratio==="portrait"?"1024x1536":ratio==="landscape"?"1536x1024":"1024x1024");
     upstream.append("quality","medium");
     upstream.append("image",photo,photo.name||"product.png");
     const response=await fetch("https://api.openai.com/v1/images/edits",{

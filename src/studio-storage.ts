@@ -2,6 +2,7 @@ export type SavedBranding = {
   logo: boolean; slogan: boolean; logoSource: string; sloganSource: string;
   logoName: string; sloganName: string; logoX: number; logoY: number;
   sloganX: number; sloganY: number;
+  logoScale?: number; sloganScale?: number;
 };
 export type SavedImage = {key: string; createdAt: number; blob: Blob; style: string; palette: string};
 type RecordValue = SavedImage | {key:"branding"; value:SavedBranding};

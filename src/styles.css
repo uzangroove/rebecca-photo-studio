@@ -80,3 +80,18 @@
 .top-links{display:flex;align-items:center;gap:16px;font-size:14px;color:#637268}
 .top-links a{color:#215b43;text-decoration:underline;white-space:nowrap}
 @media(max-width:640px){.top-links{font-size:12px}.top-links span{display:none}}
+
+/* Center the supplied artwork and give the image the space vacated by its former heading. */
+.top{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;min-height:82px;padding-bottom:8px;margin-bottom:10px}
+.brand{grid-column:2;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;min-width:0}
+.brand img:first-child{display:block;width:clamp(210px,22vw,330px);height:auto;max-height:45px;object-fit:contain}
+.brand img:last-child{display:block;width:clamp(190px,20vw,300px);height:auto;max-height:24px;object-fit:contain}
+.top-links{grid-column:3;justify-self:end}
+.stage{grid-template-rows:minmax(0,1fr) auto}
+.scale-control{display:flex;align-items:center;gap:8px;margin:0 0 10px;font-size:13px;font-weight:700}
+.scale-control input[type=range]{accent-color:#17513d;width:130px;max-width:35%}
+.scale-control input[type=number]{width:56px;padding:5px;border:1px solid #a8c2ae;border-radius:6px;text-align:center}
+.palettes strong{line-height:1.25}
+.options select{max-width:100%}
+@media(max-width:970px){.top{min-height:67px}.brand img:first-child{width:clamp(180px,28vw,270px);max-height:34px}.brand img:last-child{width:clamp(170px,26vw,245px);max-height:18px}}
+@media(max-width:640px){.top{min-height:59px}.brand img:first-child{width:clamp(150px,44vw,220px);max-height:28px}.brand img:last-child{width:clamp(143px,42vw,210px);max-height:15px}.top-links{font-size:11px}.scale-control{flex-wrap:wrap}}
