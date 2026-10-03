@@ -14,8 +14,8 @@
 
 ## פריסה דרך Cloudflare Workers
 
-1. העלו את תוכן הפרויקט למאגר GitHub פרטי.
-2. ב־Cloudflare, בחרו Workers & Pages ויצירת Worker מתוך מאגר Git, וחברו את המאגר.
+1. העלו את תוכן הפרויקט למאגר GitHub.
+2. ב־Cloudflare, בחרו Workers & Pages ויצירת Worker מתוך מאגר Git, וחברו את המאגר. ודאו שהחשבון המקושר מעניק ליישום Cloudflare Workers and Pages גישה למאגר.
 3. תיקיית הבסיס היא שורש המאגר. פקודת בנייה: `npm run build`; פקודת פריסה: `npx wrangler deploy`. השתמשו ב־Node 22.13 ומעלה.
 4. בהגדרות Variables and Secrets של ה־Worker הגדירו כסודות מוצפנים:
    - `OPENAI_API_KEY` — המפתח האישי של חשבון OpenAI API.
