@@ -1,7 +1,7 @@
 import {test} from "node:test";
 import assert from "node:assert/strict";
 import worker from "../worker/index.ts";
-import {defaultSettings,parseSettings,validSource,MAX_SETTINGS_BYTES,MAX_NEVER_ITEMS,type StudioSettings} from "../shared/settings.ts";
+import {defaultSettings,defaultNeverList,parseSettings,validSource,MAX_SETTINGS_BYTES,MAX_NEVER_ITEMS,type StudioSettings} from "../shared/settings.ts";
 
 const headers={authorization:`Basic ${Buffer.from("rebecca:test-password").toString("base64")}`};
 const fakeKv=()=>{const data=new Map<string,string>();return {data,get:async(key:string)=>data.get(key)??null,put:async(key:string,value:string)=>{data.set(key,value)}}};
@@ -28,7 +28,7 @@ test("settings responses are never cached",async()=>{
 test("invalid settings are rejected and not stored",async()=>{
   const kv=fakeKv();
   const bad:unknown[]=[
-    "not json","[]",{},{...settings(),version:2},
+    "not json","[]",{},{...settings(),version:3},
     settings({neverList:"שיש" as any}),
     settings({neverList:["a\nb"]}),
     settings({neverList:Array.from({length:MAX_NEVER_ITEMS+1},(_,i)=>`x${i}`)}),
@@ -100,5 +100,44 @@ test("generation rejects values outside the catalog",async()=>{
       assert.equal((await call("/api/generate",{method:"POST",body},fakeKv(),{OPENAI_API_KEY:"test-only"})).status,400,JSON.stringify(bad));
     }
     assert.ok(!called);
+  }finally{globalThis.fetch=originalFetch}
+});
+test("defaults: never-list has marble and clutter, and the four built-in recipes are present",()=>{
+  assert.deepEqual(defaultSettings.neverList,["שיש","עומס"]);
+  assert.deepEqual(defaultSettings.recipes.map(r=>r.id),["boutique-bw","boutique-desert","minimal-bw","minimal-desert"]);
+  assert.equal(defaultSettings.version,2);
+});
+test("recipes sync with the rest of the settings and invalid ones are refused",async()=>{
+  const kv=fakeKv();
+  const mine={id:"mine-1",name:"הסתיו שלי",look:{style:"rustic",palette:"autumn",props:"subtle",surface:"oak",background:null,light:"golden"}};
+  const next=settings({recipes:[...defaultSettings.recipes,mine]});
+  assert.equal((await put(next,kv)).status,200);
+  assert.deepEqual(await (await call("/api/settings",{},kv)).json(),{settings:next});
+  assert.equal((await put(settings({recipes:[{...mine,look:{...mine.look,palette:"nope"}}]}),kv)).status,400);
+  assert.equal((await put({...settings(),recipes:"x"},kv)).status,400);
+});
+test("settings saved by phase 0 (version 1) are upgraded: empty never-list becomes the default",()=>{
+  const v1={version:1,neverList:[],brand:defaultSettings.brand};
+  assert.deepEqual(parseSettings(v1),{...defaultSettings});
+  const custom=parseSettings({...v1,neverList:["ורוד"]});
+  assert.deepEqual(custom?.neverList,["ורוד"]);
+  assert.equal(custom?.version,2);
+  assert.deepEqual(defaultNeverList,["שיש","עומס"]);
+});
+test("generation accepts the look fields and the special request, and refuses bad ones",async()=>{
+  const originalFetch=globalThis.fetch;let prompt="";
+  globalThis.fetch=async(_input,init)=>{prompt=String((init?.body as FormData).get("prompt"));return Response.json({data:[{b64_json:"dGVzdA=="}]})};
+  const send=async(extra:Record<string,string>)=>{
+    const body=new FormData();body.set("image",new File([new Uint8Array(1200)],"soap.png",{type:"image/png"}));
+    for(const [key,value] of Object.entries({style:"boutique",palette:"desert",density:"none",ratio:"square",product:"soap",...extra}))body.set(key,value);
+    return call("/api/generate",{method:"POST",body},fakeKv(),{OPENAI_API_KEY:"test-only"});
+  };
+  try{
+    assert.equal((await send({surface:"plaster",background:"blur",light:"golden",wish:"בוקר שבת"})).status,200);
+    assert.ok(prompt.includes("Surface: a soft plaster surface.")&&prompt.includes("Background: a softly blurred interior.")&&prompt.includes("Lighting: warm golden hour light."));
+    assert.ok(prompt.endsWith("Additional wish from the maker (Hebrew): בוקר שבת"));
+    assert.equal((await send({surface:"",background:"",light:""})).status,200);
+    assert.ok(prompt.includes("Surface: a textured fine paper surface."),"empty field falls back to the style default");
+    for(const bad of [{surface:"gold"},{background:"mars"},{light:"neon"},{wish:"א".repeat(201)}])assert.equal((await send(bad)).status,400,JSON.stringify(bad));
   }finally{globalThis.fetch=originalFetch}
 });

@@ -1,3 +1,5 @@
+import {builtInRecipes, parseRecipes, type Recipe} from "./recipes.ts";
+
 // ההגדרות שמסתנכרנות בין מכשירים (נשמרות ב-KV). ההיסטוריה והתמונות נשארות ב-IndexedDB במכשיר.
 export const MAX_SETTINGS_BYTES = 1024 * 1024;
 export const MAX_SOURCE_CHARS = 700_000;
@@ -12,7 +14,7 @@ export type BrandSettings = {
   logoX: number; logoY: number; logoScale: number;
   sloganX: number; sloganY: number; sloganScale: number;
 };
-export type StudioSettings = {version: 1; neverList: string[]; brand: BrandSettings};
+export type StudioSettings = {version: 2; neverList: string[]; recipes: Recipe[]; brand: BrandSettings};
 
 export const defaultBrand: BrandSettings = {
   logo: false, slogan: false,
@@ -20,7 +22,9 @@ export const defaultBrand: BrandSettings = {
   logoName: "הלוגו של רבקה", sloganName: "הסלוגן של רבקה",
   logoX: 0, logoY: 0, logoScale: 100, sloganX: 10, sloganY: 20, sloganScale: 100
 };
-export const defaultSettings: StudioSettings = {version: 1, neverList: [], brand: defaultBrand};
+// ברירת המחדל של רבקה: שיש ועומס.
+export const defaultNeverList: readonly string[] = ["שיש", "עומס"];
+export const defaultSettings: StudioSettings = {version: 2, neverList: [...defaultNeverList], recipes: [...builtInRecipes], brand: defaultBrand};
 
 const builtInSources = new Set(["/assets/rebecca_studio_logo.png", "/assets/rebecca_studio_slogan.png", "/assets/logo.png"]);
 
@@ -67,11 +71,14 @@ export function parseNeverList(value: unknown): string[] | null {
 }
 
 // מחזיר הגדרות תקינות (עם שדות נקיים בלבד) או null אם משהו בהן לא תקין.
+// גרסה 1 (שלב 0) לא כללה מתכונים, ורשימת "אף פעם לא" בה הייתה ריקה כברירת מחדל: מעבירים אותה לברירות המחדל של היום.
 export function parseSettings(value: unknown): StudioSettings | null {
   if (typeof value !== "object" || value === null) return null;
   const v = value as Record<string, unknown>;
-  if (v.version !== 1) return null;
+  if (v.version !== 1 && v.version !== 2) return null;
   const neverList = parseNeverList(v.neverList), brand = parseBrand(v.brand);
   if (!neverList || !brand) return null;
-  return {version: 1, neverList, brand};
+  if (v.version === 1) return {version: 2, neverList: neverList.length ? neverList : [...defaultNeverList], recipes: [...builtInRecipes], brand};
+  const recipes = parseRecipes(v.recipes);
+  return recipes ? {version: 2, neverList, recipes, brand} : null;
 }

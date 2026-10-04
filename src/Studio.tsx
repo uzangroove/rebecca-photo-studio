@@ -10,14 +10,14 @@ export default function Studio() {
   const studio = useStudio();
   const {state, dispatch} = studio;
   return <div className="app">
-    <Header sync={state.sync}/>
+    <Header studio={studio}/>
     <div className="body">
       <TabRail tab={state.tab} onTab={tab => dispatch({type: "tab", tab})}/>
       <OptionPanel studio={studio}/>
       <div className="main">
         <Stage studio={studio}/>
         <ActionBar studio={studio}/>
-        <HistoryStrip items={state.history} onOpen={studio.openRecent}/>
+        <HistoryStrip studio={studio}/>
       </div>
     </div>
   </div>;

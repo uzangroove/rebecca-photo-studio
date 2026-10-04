@@ -1,14 +1,55 @@
-import {hasItem} from "./catalog.ts";
+import {findItem, hasItem} from "./catalog.ts";
 
-// הבחירה של רבקה למסך אחד. כל שדה הוא מזהה מתוך הקטלוג.
-export type Selection = {product: string; style: string; palette: string; props: string};
+export const MAX_WISH_CHARS = 200;
 
-export const defaultSelection: Selection = {product: "soap", style: "boutique", palette: "forest", props: "subtle"};
+// הבחירה של רבקה למסך אחד. surface, background ו-light ריקים (null) = ברירת המחדל של הסגנון.
+export type Selection = {
+  product: string; style: string; palette: string; props: string;
+  surface: string | null; background: string | null; light: string | null;
+  wish: string;
+};
+export type SceneKey = "surface" | "background" | "light";
 
-// מחזיר בחירה תקינה או null. משמש גם את השרת (בקשת יצירה) וגם אימות הגדרות שמורות.
-export function parseSelection(value: unknown): Selection | null {
+// מה שמתכון קובע: הכול חוץ ממוצר ובקשה מיוחדת.
+export type LookSelection = Pick<Selection, "style" | "palette" | "props" | SceneKey>;
+
+// פתיחת הסטודיו: מתכון "מינימליסטי שחור-לבן" (ראו shared/recipes.ts).
+export const defaultSelection: Selection = {
+  product: "soap", style: "minimal", palette: "mono", props: "none",
+  surface: "paper", background: null, light: null, wish: ""
+};
+
+const sceneCategory = {surface: "surfaces", background: "backgrounds", light: "lights"} as const;
+
+// אפשרות ריקה (null, undefined או מחרוזת ריקה מטופס) = ברירת מחדל. ערך שאינו בקטלוג = לא תקין.
+function optional(category: "surfaces" | "backgrounds" | "lights", value: unknown): string | null | undefined {
+  if (value === null || value === undefined || value === "") return null;
+  return hasItem(category, value) ? value : undefined;
+}
+
+export function parseLook(value: unknown): LookSelection | null {
   if (typeof value !== "object" || value === null) return null;
   const v = value as Record<string, unknown>;
-  if (!hasItem("productTypes", v.product) || !hasItem("styles", v.style) || !hasItem("palettes", v.palette) || !hasItem("props", v.props)) return null;
-  return {product: v.product, style: v.style, palette: v.palette, props: v.props};
+  if (!hasItem("styles", v.style) || !hasItem("palettes", v.palette) || !hasItem("props", v.props)) return null;
+  const surface = optional("surfaces", v.surface), background = optional("backgrounds", v.background), light = optional("lights", v.light);
+  if (surface === undefined || background === undefined || light === undefined) return null;
+  return {style: v.style, palette: v.palette, props: v.props, surface, background, light};
 }
+
+// מחזיר בחירה תקינה או null. משמש את השרת (בקשת יצירה) ואת טעינת ההיסטוריה.
+export function parseSelection(value: unknown): Selection | null {
+  const look = parseLook(value);
+  if (!look) return null;
+  const v = value as Record<string, unknown>;
+  if (!hasItem("productTypes", v.product)) return null;
+  const wish = v.wish === undefined || v.wish === null ? "" : v.wish;
+  if (typeof wish !== "string" || wish.length > MAX_WISH_CHARS) return null;
+  return {...look, product: v.product, wish};
+}
+
+// הערך בפועל: בחירה מפורשת, ואם אין אז ברירת המחדל של הסגנון.
+export function effectiveScene(selection: Selection, key: SceneKey): string {
+  return selection[key] ?? findItem("styles", selection.style)!.defaults[key];
+}
+
+export const sceneItem = (selection: Selection, key: SceneKey) => findItem(sceneCategory[key], effectiveScene(selection, key));

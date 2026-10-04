@@ -1,13 +1,14 @@
 import {useEffect, useMemo, useReducer, useRef} from "react";
 import type {MouseEvent} from "react";
-import {hasItem} from "../shared/catalog";
+import type {Recipe} from "../shared/recipes";
+import {lookOf} from "../shared/recipes";
 import type {Selection} from "../shared/selection";
 import {defaultBrand, type BrandSettings, type StudioSettings} from "../shared/settings";
 import {fetchSettings, putSettings, requestImage} from "./api";
 import {composeImage, readBrandFile} from "./brand";
 import {formatById, ratioOf} from "./social-formats";
-import {initialState, reducer} from "./state";
-import {loadStudio, saveBranding, saveImage, type SavedBranding, type SavedImage} from "./studio-storage";
+import {currentImage, initialState, reducer} from "./state";
+import {loadStudio, rateImage, saveBranding, saveImage, type Rating, type SavedBranding, type SavedImage} from "./studio-storage";
 
 // גרסאות ישנות שמרו את הלוגו והסלוגן כקובץ אחד.
 const migrateSource = (source: string, fallback: string) => source === "/assets/logo.png" ? fallback : source;
@@ -24,11 +25,11 @@ export function useStudio() {
   // סנכרון: כותבים לשרת רק אחרי שקראנו ממנו בהצלחה, כדי לא לדרוס הגדרות ממכשיר אחר.
   const remoteReadable = useRef(false), lastSynced = useRef("");
 
-  function showHistory(images: SavedImage[]) {
+  function showHistory(images: SavedImage[], currentKey?: string) {
     const urls = images.map(image => URL.createObjectURL(image.blob));
     const previous = historyUrls.current;
     historyUrls.current = urls;
-    dispatch({type: "history", items: images.map((image, i) => ({...image, url: urls[i]}))});
+    dispatch({type: "history", items: images.map((image, i) => ({...image, url: urls[i]})), currentKey});
     previous.forEach(url => URL.revokeObjectURL(url));
   }
 
@@ -38,7 +39,7 @@ export function useStudio() {
       try {
         const {branding, images} = await loadStudio();
         if (cancelled) return;
-        if (branding) dispatch({type: "settings", settings: {version: 1, neverList: [], brand: brandFromSaved(branding)}});
+        if (branding) dispatch({type: "brand", patch: brandFromSaved(branding)});
         showHistory(images);
       } catch {
         if (!cancelled) dispatch({type: "say", text: "השמירה המקומית אינה זמינה בדפדפן הזה. אפשר להמשיך ליצור תמונות"});
@@ -63,7 +64,7 @@ export function useStudio() {
     };
   }, []);
 
-  const settings = useMemo<StudioSettings>(() => ({version: 1, neverList: state.neverList, brand: state.brand}), [state.neverList, state.brand]);
+  const settings = useMemo<StudioSettings>(() => ({version: 2, neverList: state.neverList, recipes: state.recipes, brand: state.brand}), [state.neverList, state.recipes, state.brand]);
   useEffect(() => {
     if (!state.ready) return;
     const timer = setTimeout(async () => {
@@ -112,9 +113,29 @@ export function useStudio() {
     return () => { cancelled = true; clearTimeout(timer); if (url) URL.revokeObjectURL(url); };
   }, [state.result, state.brand, state.caption, state.formatId]);
 
-  function select(key: keyof Selection, id: string) {
+  // כל שינוי בחירה מבטל יצירה שעדיין רצה, כדי שתוצאה ישנה לא תחליף את המסך.
+  function select(key: Exclude<keyof Selection, "wish">, id: string | null) {
     request.current++;
     dispatch({type: "select", key, id});
+  }
+  function chooseRecipe(recipe: Recipe) {
+    request.current++;
+    dispatch({type: "recipe", recipe});
+  }
+  function resetScene() {
+    request.current++;
+    dispatch({type: "resetScene"});
+  }
+  function saveRecipe(name: string) {
+    dispatch({type: "saveRecipe", recipe: {id: crypto.randomUUID(), name: name.trim(), look: lookOf(state.selection)}});
+  }
+  async function rate(rating: Rating) {
+    const image = currentImage(state);
+    if (!image) return;
+    const next = image.rating === rating ? null : rating;
+    dispatch({type: "rated", key: image.key, rating: next});
+    try { await rateImage(image.key, next); }
+    catch { dispatch({type: "say", text: "הדירוג לא נשמר בדפדפן", error: true}); }
   }
 
   function choosePhoto(file?: File) {
@@ -144,9 +165,7 @@ export function useStudio() {
     recentUrl.current = URL.createObjectURL(image.blob);
     if (photoUrl.current) { URL.revokeObjectURL(photoUrl.current); photoUrl.current = null; }
     request.current++;
-    dispatch({type: "openRecent", url: recentUrl.current,
-      style: hasItem("styles", image.style) ? image.style : state.selection.style,
-      palette: hasItem("palettes", image.palette) ? image.palette : "forest"});
+    dispatch({type: "openRecent", url: recentUrl.current, key: image.key, selection: image.selection, formatId: image.formatId});
   }
 
   async function generate() {
@@ -159,9 +178,10 @@ export function useStudio() {
       dispatch({type: "generated", image});
       try {
         const blob = await fetch(image).then(r => r.blob());
-        showHistory(await saveImage(blob, selection.style, selection.palette));
+        const saved = await saveImage(blob, selection, state.formatId);
+        showHistory(saved.images, saved.key);
       } catch {
-        dispatch({type: "say", text: "התמונה נוצרה, אך לא נשמרה בארבע האחרונות. אפשר להוריד אותה כעת"});
+        dispatch({type: "say", text: "התמונה נוצרה, אך לא נשמרה בהיסטוריה. אפשר להוריד אותה כעת"});
       }
     } catch (e) {
       if (id === request.current) dispatch({type: "failed", text: e instanceof Error ? e.message : "לא הצלחנו ליצור תמונה"});
@@ -190,7 +210,7 @@ export function useStudio() {
     }
   }
 
-  return {state, dispatch, select, choosePhoto, chooseBrandFile, openRecent, generate, download};
+  return {state, dispatch, select, chooseRecipe, resetScene, saveRecipe, rate, choosePhoto, chooseBrandFile, openRecent, generate, download};
 }
 
 export const downloadName = (s: Selection) => `rebecca-${s.style}-${s.palette}.png`;

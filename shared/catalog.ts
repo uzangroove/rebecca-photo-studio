@@ -8,34 +8,66 @@ export type CatalogItem = {
   favorite?: boolean;
   detail?: string;
 };
+export type SceneDefaults = {surface: string; background: string; light: string};
+export type StyleItem = CatalogItem & {defaults: SceneDefaults};
+export type SurfaceItem = CatalogItem & {swatch: string};
 export type PaletteItem = CatalogItem & {colors: readonly [string, string, string]; iconFill?: string};
 
-export const styles: readonly CatalogItem[] = [
-  {id:"boutique",label:"בוטיק",detail:"תאורה מדויקת ומשטח עשיר",icon:"M6 4h12l3 5-9 11L3 9l3-5z M3 9h18 M12 20L8.5 9 10 4 M12 20l3.5-11L14 4",
-    prompt:"a refined luxury boutique product photograph, premium stone or textured paper, sculptural light"},
+// הסגנון קובע את האווירה ואת ברירות המחדל של משטח, רקע ותאורה. בחירה מפורשת של רבקה גוברת עליהן.
+// בכוונה אין כאן אבן ושיש, ואין אביזרים בטקסט של הסגנון: אביזרים נקבעים רק בבחירת האביזרים.
+export const styles: readonly StyleItem[] = [
+  {id:"boutique",label:"בוטיק",favorite:true,detail:"נייר, טיח ותאורה מפוסלת",icon:"M6 4h12l3 5-9 11L3 9l3-5z M3 9h18 M12 20L8.5 9 10 4 M12 20l3.5-11L14 4",
+    prompt:"a refined luxury boutique product photograph, sculpted directional light, refined and quiet",defaults:{surface:"paper",background:"wall",light:"window"}},
+  {id:"minimal",label:"מינימליסטי",favorite:true,detail:"מרחב נקי ושקט",icon:"M4 18h16 M9 18V10h6v8",
+    prompt:"a calm minimal studio scene with generous negative space and simple surfaces",defaults:{surface:"paper",background:"wall",light:"studio"}},
   {id:"rustic",label:"כפרי",detail:"עץ טבעי ופשתן",icon:"M3 9h18v6H3z M8 9v6 M14 10.5c1 1 1 2 0 3",
-    prompt:"a rustic handcrafted setting with natural wood and linen, warm window light"},
+    prompt:"a rustic handcrafted setting, warm and natural",defaults:{surface:"oak",background:"wall",light:"window"}},
   {id:"urban",label:"אורבני",detail:"קיר בטון ואור חלון",icon:"M4 20V9h6v11 M10 20V4h8v16 M3 20h18 M13 8h2 M13 12h2 M13 16h2 M6.5 13h1 M6.5 16.5h1",
-    prompt:"a contemporary urban studio with concrete and architectural window light"},
-  {id:"minimal",label:"מינימליסטי",detail:"מרחב נקי ומעט פריטים",icon:"M4 18h16 M9 18V10h6v8",
-    prompt:"a calm minimal studio scene with generous negative space and simple surfaces"},
+    prompt:"a contemporary urban studio with architectural shadows",defaults:{surface:"concrete",background:"wall",light:"window"}},
   {id:"botanical",label:"בוטני",detail:"עלים ואור יום",icon:"M5 19C5 10 11 5 19 5c0 8-5 14-14 14z M5 19l9-9",
-    prompt:"a botanical scene with real leaves and soft natural daylight"},
-  {id:"spa",label:"ספא",detail:"אבן ואווירה שקטה",icon:"M5 19a7 2.5 0 1 0 14 0a7 2.5 0 1 0-14 0z M7.5 14a4.5 2 0 1 0 9 0a4.5 2 0 1 0-9 0z M12 3c2 2.5 3 4 3 5.2a3 3 0 0 1-6 0C9 7 10 5.5 12 3z",
-    prompt:"a peaceful spa setting with stone, folded fabric and diffused light"},
+    prompt:"a fresh botanical scene with soft natural daylight",defaults:{surface:"linen",background:"plants",light:"window"}},
+  {id:"spa",label:"ספא",detail:"בד מקופל ואור רך",icon:"M5 19a7 2.5 0 1 0 14 0a7 2.5 0 1 0-14 0z M7.5 14a4.5 2 0 1 0 9 0a4.5 2 0 1 0-9 0z M12 3c2 2.5 3 4 3 5.2a3 3 0 0 1-6 0C9 7 10 5.5 12 3z",
+    prompt:"a peaceful spa setting with folded fabric and diffused light",defaults:{surface:"linen",background:"blur",light:"studio"}},
   {id:"mediterranean",label:"ים תיכוני",detail:"טיח, שמש וזית",icon:"M12 4v2 M5.5 7l1.4 1.4 M18.5 7l-1.4 1.4 M8 13a4 4 0 0 1 8 0 M3 13h18 M3 17c2-1.5 4-1.5 6 0s4 1.5 6 0 4-1.5 6 0",
-    prompt:"a Mediterranean scene with warm plaster, sunlight and an olive branch"},
+    prompt:"a Mediterranean scene with warm sunlight",defaults:{surface:"plaster",background:"window",light:"golden"}},
   {id:"japandi",label:"ג׳פנדי",detail:"עץ בהיר וקרמיקה",icon:"M4 12h16a8 7 0 0 1-16 0z M9 19.5h6 M13 4l-2.5 6.5 M18 5l-4 5.5",
-    prompt:"a warm Japandi interior with pale wood and quiet ceramic details"},
-  {id:"editorial",label:"אמנותי",detail:"צללים וקומפוזיציה נועזת",icon:"M4 8h3l2-3h6l2 3h3v11H4z M12 16.5a3.5 3.5 0 1 0 0-7a3.5 3.5 0 1 0 0 7z",
-    prompt:"an artistic editorial studio photograph with bold but realistic shadows"},
-  {id:"gift",label:"מתנה ואירוח",detail:"בד ושולחן חגיגי",icon:"M4 10h16v4H4z M5 14h14v6H5z M12 10v10 M12 10c-2-4-6-4-6-1.5S10 10 12 10c2 0 6 1 6-1.5S14 6 12 10z",
-    prompt:"a thoughtful gift and hosting scene with natural fabric and elegant table styling"}
+    prompt:"a warm, quiet Japandi interior",defaults:{surface:"oak",background:"wall",light:"window"}},
+  {id:"editorial",label:"אמנותי",detail:"צללים וקומפוזיציה",icon:"M4 8h3l2-3h6l2 3h3v11H4z M12 16.5a3.5 3.5 0 1 0 0-7a3.5 3.5 0 1 0 0 7z",
+    prompt:"an artistic editorial studio photograph with bold but realistic shadows",defaults:{surface:"plaster",background:"wall",light:"studio"}},
+  {id:"gift",label:"מתנה ואירוח",detail:"שולחן חגיגי",icon:"M4 10h16v4H4z M5 14h14v6H5z M12 10v10 M12 10c-2-4-6-4-6-1.5S10 10 12 10c2 0 6 1 6-1.5S14 6 12 10z",
+    prompt:"a thoughtful gift and hosting scene with elegant table styling",defaults:{surface:"linen",background:"blur",light:"golden"}}
+];
+
+export const surfaces: readonly SurfaceItem[] = [
+  {id:"paper",label:"נייר מרקם",swatch:"#EFE9DE",icon:"M6 3h9l3 3v15H6z M15 3v3h3 M9 11h6 M9 15h6",prompt:"a textured fine paper surface"},
+  {id:"plaster",label:"טיח",swatch:"#E6DACB",icon:"M4 8c3-2 5 2 8 0s5 2 8 0 M4 14c3-2 5 2 8 0s5 2 8 0 M4 20h16",prompt:"a soft plaster surface"},
+  {id:"linen",label:"פשתן",swatch:"#DCD0BC",icon:"M4 8h16 M4 12h16 M4 16h16 M8 4v16 M12 4v16 M16 4v16",prompt:"a natural linen cloth surface"},
+  {id:"oak",label:"עץ בהיר",swatch:"#D2B48C",icon:"M3 8h18 M3 12c4-2 6 2 10 0s6 0 8 0 M3 16h18",prompt:"a pale oak wood surface"},
+  {id:"walnut",label:"עץ כהה",swatch:"#6B4A36",icon:"M3 7h18 M3 17h18 M3 12h6 M15 12h6 M12 14a3 2 0 1 0 0-4a3 2 0 1 0 0 4z",prompt:"a dark walnut wood surface"},
+  {id:"ceramic",label:"קרמיקה",swatch:"#EDE6DA",icon:"M4 6h16v12H4z M4 12h16 M12 6v12",prompt:"a matte ceramic tile surface"},
+  {id:"terrazzo",label:"טרצו",swatch:"#E2DDD3",icon:"M6 7h.01 M11 6l2 1 M17 8h.01 M8 12l2 1 M15 12h.01 M18 15l-2 1 M6 16h.01 M11 17h.01",prompt:"a fine terrazzo surface"},
+  {id:"concrete",label:"בטון",swatch:"#A9A6A0",icon:"M4 5h16v14H4z M8 9h.01 M14 8h.01 M10 14h.01 M16 15h.01 M6 16h.01",prompt:"a smooth concrete surface"},
+  {id:"marble",label:"שיש",swatch:"#F2F1EE",icon:"M4 5h16v14H4z M6 9c4 0 4 4 8 4s3 3 4 5 M10 5c0 3 3 4 3 7",prompt:"a marble surface"}
+];
+
+export const lights: readonly CatalogItem[] = [
+  {id:"window",label:"חלון",icon:"M4 4h16v16H4z M12 4v16 M4 12h16",prompt:"soft directional natural window light"},
+  {id:"golden",label:"שעת זהב",icon:"M5 17a7 7 0 0 1 14 0 M2 17h20 M12 5v3 M4.5 10l2 1.5 M19.5 10l-2 1.5",prompt:"warm golden hour light"},
+  {id:"candle",label:"אור נרות",icon:"M12 3c2.5 3 3.5 5 3.5 7a3.5 3.5 0 0 1-7 0c0-2 1-4 3.5-7z M9 20h6 M12 13.5V20",prompt:"warm candlelight glow"},
+  {id:"studio",label:"סטודיו רך",icon:"M4 6h9l5 4v4l-5 4H4z M18 12h3",prompt:"soft diffused studio light"}
+];
+
+export const backgrounds: readonly CatalogItem[] = [
+  {id:"wall",label:"קיר חלק",icon:"M4 4h16v16H4z",prompt:"a plain smooth wall"},
+  {id:"blur",label:"פנים מטושטש",icon:"M8 10a3 3 0 1 0 0-6a3 3 0 1 0 0 6z M16 14a4 4 0 1 0 0-8a4 4 0 1 0 0 8z M9 20a3 3 0 1 0 0-6a3 3 0 1 0 0 6z",prompt:"a softly blurred interior"},
+  {id:"window",label:"חלון",icon:"M5 21V9a7 7 0 0 1 14 0v12z M12 2v19 M5 13h14",prompt:"a quiet window"},
+  {id:"plants",label:"צמחייה",icon:"M12 21v-8 M12 13C8 13 5 10 5 6c4 0 7 3 7 7z M12 16c0-4 3-7 7-7 0 4-3 7-7 7z",prompt:"soft out-of-focus greenery"}
 ];
 
 // ה-prompt של פלטה הוא קודי ה-HEX בלבד, בסדר שבו הם מוצגים.
+const FAVORITE_PALETTES = new Set(["mono", "desert"]);
 const palette = (id: string, label: string, colors: readonly [string, string, string], icon: string, iconFill?: string): PaletteItem =>
-  ({id, label, colors, icon, iconFill, prompt: colors.join(", ")});
+  ({id, label, colors, icon, iconFill, prompt: colors.join(", "), favorite: FAVORITE_PALETTES.has(id) || undefined});
 
 export const palettes: readonly PaletteItem[] = [
   palette("mono","מונוכרום",["#1A1A1A","#8C8C8C","#F5F5F5"],"M12 3a9 9 0 1 0 0 18a9 9 0 1 0 0-18z","M12 3a9 9 0 0 0 0 18z"),
@@ -65,18 +97,20 @@ export const productTypes: readonly CatalogItem[] = [
   {id:"candle",label:"נר",icon:"M7 8h10v11a1 1 0 0 1-1 1H8a1 1 0 0 1-1-1z M7 12h10 M12 8V6 M12 6c.8-.8 1-1.8 0-3-1 1.2-.8 2.2 0 3z",prompt:"handmade candles"}
 ];
 
+// ה-prompt של אביזרים משלים את ההנחיה הקבועה "uncluttered composition, generous negative space, ...".
 export const props: readonly CatalogItem[] = [
-  {id:"none",label:"בלי אביזרים",icon:"M12 20a8 8 0 1 0 0-16a8 8 0 1 0 0 16z M6.3 6.3l11.4 11.4",
-    prompt:"No styling props. Use only the product and the surface."},
-  {id:"subtle",label:"מעט",icon:"M12 21v-8 M12 13C8 13 5 10 5 6c4 0 7 3 7 7z M12 16c0-4 3-7 7-7 0 4-3 7-7 7z",
-    prompt:"Use one or two subtle contextual props well away from the product."},
+  {id:"none",label:"ללא אביזרים",icon:"M12 20a8 8 0 1 0 0-16a8 8 0 1 0 0 16z M6.3 6.3l11.4 11.4",prompt:"no props at all"},
+  {id:"subtle",label:"אביזר אחד עדין",icon:"M12 21v-8 M12 13C8 13 5 10 5 6c4 0 7 3 7 7z M12 16c0-4 3-7 7-7 0 4-3 7-7 7z",prompt:"at most one small prop"},
+  // מוסתר בהגדרות מתקדמות
   {id:"rich",label:"עשיר",icon:"M5 20v-6 M5 14c-2-1-3-3-3-5 3 0 3 3 3 5z M12 20V9 M12 9c-3-1-4-4-3-7 3 1 4 4 3 7z M19 20v-6 M19 14c-2-1-3-3-3-5 3 0 3 3 3 5z M3 20h18",
-    prompt:"Use a few tasteful contextual props while keeping the product clearly dominant."}
+    prompt:"a few tasteful contextual props while keeping the product clearly dominant"}
 ];
 
-export const catalog = {styles, palettes, productTypes, props} as const;
+export const catalog = {styles, surfaces, lights, backgrounds, palettes, productTypes, props} as const;
 export type CatalogCategory = keyof typeof catalog;
 
+export function findItem(category: "styles", id: string): StyleItem | undefined;
+export function findItem(category: "surfaces", id: string): SurfaceItem | undefined;
 export function findItem(category: "palettes", id: string): PaletteItem | undefined;
 export function findItem(category: CatalogCategory, id: string): CatalogItem | undefined;
 export function findItem(category: CatalogCategory, id: string): CatalogItem | undefined {
@@ -84,4 +118,13 @@ export function findItem(category: CatalogCategory, id: string): CatalogItem | u
 }
 export function hasItem(category: CatalogCategory, id: unknown): id is string {
   return typeof id === "string" && catalog[category].some(item => item.id === id);
+}
+
+// מועדפים ראשונים, ובתוך כל קבוצה הסדר המקורי של הקטלוג.
+export function favoritesFirst<T extends CatalogItem>(items: readonly T[]): T[] {
+  return [...items.filter(i => i.favorite), ...items.filter(i => !i.favorite)];
+}
+// פריט שהשם שלו מופיע ב"אף פעם לא" חסום: לא נבחר בממשק ולא נכנס לפרומפט.
+export function isBlocked(item: CatalogItem, neverList: readonly string[]): boolean {
+  return neverList.some(entry => entry.trim() === item.label);
 }
