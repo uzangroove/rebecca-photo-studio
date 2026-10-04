@@ -1,3 +1,4 @@
+import {hasItem} from "./catalog.ts";
 import {layoutsFromLegacy, parseLayouts, type LegacyBrand, type Layouts} from "./brand-layout.ts";
 import {builtInRecipes, parseRecipes, type Recipe} from "./recipes.ts";
 
@@ -10,7 +11,8 @@ const MAX_NAME_CHARS = 120;
 
 // מקורות הלוגו והסלוגן. המיקום, הגודל והמראה שלהם יושבים בפריסה לכל פורמט (layouts).
 export type BrandSettings = {logoSource: string; sloganSource: string; logoName: string; sloganName: string};
-export type StudioSettings = {version: 3; neverList: string[]; recipes: Recipe[]; brand: BrandSettings; layouts: Layouts};
+// theme: מזהה פלטה שצבעי הממשק נגזרים ממנה, או null לברירת המחדל (ירוק וזהב של רבקה).
+export type StudioSettings = {version: 3; neverList: string[]; recipes: Recipe[]; brand: BrandSettings; layouts: Layouts; theme: string | null};
 
 export const defaultBrand: BrandSettings = {
   logoSource: "/assets/rebecca_studio_logo.png", sloganSource: "/assets/rebecca_studio_slogan.png",
@@ -19,7 +21,7 @@ export const defaultBrand: BrandSettings = {
 
 // ברירת המחדל של רבקה: שיש ועומס.
 export const defaultNeverList: readonly string[] = ["שיש", "עומס"];
-export const defaultSettings: StudioSettings = {version: 3, neverList: [...defaultNeverList], recipes: [...builtInRecipes], brand: defaultBrand, layouts: {}};
+export const defaultSettings: StudioSettings = {version: 3, neverList: [...defaultNeverList], recipes: [...builtInRecipes], brand: defaultBrand, layouts: {}, theme: null};
 
 const builtInSources = new Set(["/assets/rebecca_studio_logo.png", "/assets/rebecca_studio_slogan.png", "/assets/logo.png"]);
 
@@ -83,11 +85,13 @@ export function parseSettings(value: unknown): StudioSettings | null {
   if (!neverList) return null;
   if (v.version === 3) {
     const brand = parseBrand(v.brand), recipes = parseRecipes(v.recipes), layouts = parseLayouts(v.layouts);
-    return brand && recipes && layouts ? {version: 3, neverList, recipes, brand, layouts} : null;
+    // הערך אופציונלי: הגדרות שנשמרו לפני שנוסף בחירת צבעי הממשק נקראות כברירת מחדל.
+    const theme = v.theme === undefined || v.theme === null ? null : hasItem("palettes", v.theme) ? v.theme : undefined;
+    return brand && recipes && layouts && theme !== undefined ? {version: 3, neverList, recipes, brand, layouts, theme} : null;
   }
   const legacy = parseLegacyBrand(v.brand);
   if (!legacy) return null;
   const recipes = v.version === 1 ? [...builtInRecipes] : parseRecipes(v.recipes);
   if (!recipes) return null;
-  return {version: 3, neverList: v.version === 1 && !neverList.length ? [...defaultNeverList] : neverList, recipes, brand: legacy.brand, layouts: legacy.layouts};
+  return {version: 3, neverList: v.version === 1 && !neverList.length ? [...defaultNeverList] : neverList, recipes, brand: legacy.brand, layouts: legacy.layouts, theme: null};
 }

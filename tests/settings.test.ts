@@ -173,3 +173,15 @@ test("the old combined logo file is replaced by the separate logo and slogan fil
   assert.equal(parsed?.brand.logoSource,"/assets/rebecca_studio_logo.png");
   assert.equal(parsed?.brand.sloganSource,"/assets/rebecca_studio_slogan.png");
 });
+
+test("the interface theme is a palette id (or none), synced with the other settings",async()=>{
+  const kv=fakeKv();
+  assert.equal(defaultSettings.theme,null);
+  const next=settings({theme:"forest"});
+  assert.equal((await put(next,kv)).status,200);
+  assert.deepEqual(await (await call("/api/settings",{},kv)).json(),{settings:next});
+  assert.equal((await put(settings({theme:"not-a-palette"}),kv)).status,400);
+  assert.equal((await put(settings({theme:5 as any}),kv)).status,400);
+  assert.equal(parseSettings({...defaultSettings,theme:undefined})?.theme,null,"settings saved before themes existed read as the default theme");
+  assert.equal((await put(settings({theme:null}),kv)).status,200);
+});

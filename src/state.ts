@@ -9,6 +9,7 @@ import type {Rating, SavedImage} from "./studio-storage.ts";
 
 export type TabId = "style" | "details" | "palette" | "product" | "brand" | "format";
 export type Screen = "studio" | "editor";
+export type Zoom = "fit" | "full";
 export type ViewMode = "split" | "single" | "compare";
 export type SyncState = "checking" | "synced" | "saving" | "offline";
 export type HistoryItem = SavedImage & {url: string};
@@ -19,10 +20,13 @@ export type Photo = {file: File; url: string};
 export type State = {
   tab: TabId;
   view: ViewMode;
+  // התאמה למסך (ברירת מחדל): כל התמונה נראית בשלמותה. "full": גודל מלא, עם גלילה.
+  zoom: Zoom;
   selection: Selection;
   formatId: string;
   brand: BrandSettings;
   layouts: Layouts;
+  theme: string | null;
   screen: Screen;
   // חיתוך ידני לכל פורמט, לתמונה שעל המסך. לא נשמר ולא מסתנכרן.
   crops: Record<string, Focal>;
@@ -41,9 +45,9 @@ export type State = {
 };
 
 export const initialState: State = {
-  tab: "style", view: "split",
+  tab: "style", view: "split", zoom: "fit",
   selection: defaultSelection, formatId: "instagram-square",
-  brand: defaultBrand, layouts: {}, screen: "studio", crops: {}, neverList: [...defaultNeverList], recipes: [...builtInRecipes],
+  brand: defaultBrand, layouts: {}, theme: null, screen: "studio", crops: {}, neverList: [...defaultNeverList], recipes: [...builtInRecipes],
   photo: null, result: null, composed: null, downloadFallback: false, busy: false,
   status: {text: "העלו צילום של סבון או נר כדי להתחיל", error: false},
   history: [], currentKey: null, ready: false, sync: "checking"
@@ -52,6 +56,7 @@ export const initialState: State = {
 export type Action =
   | {type: "tab"; tab: TabId}
   | {type: "view"; view: ViewMode}
+  | {type: "zoom"; zoom: Zoom}
   | {type: "select"; key: Exclude<keyof Selection, "wish">; id: string | null}
   | {type: "wish"; text: string}
   | {type: "recipe"; recipe: Recipe}
@@ -63,6 +68,7 @@ export type Action =
   | {type: "rated"; key: string; rating: Rating}
   | {type: "format"; id: string}
   | {type: "brand"; patch: Partial<BrandSettings>}
+  | {type: "theme"; id: string | null}
   | {type: "screen"; screen: Screen}
   | {type: "branding"; brand: BrandSettings; layouts: Layouts}
   | {type: "layout"; layout: BrandLayout}
@@ -94,6 +100,7 @@ export function reducer(state: State, action: Action): State {
   switch (action.type) {
     case "tab": return {...state, tab: action.tab};
     case "view": return {...state, view: action.view};
+    case "zoom": return {...state, zoom: action.zoom};
     case "select":
       return {...state, ...cleared, selection: {...state.selection, [action.key]: action.id}, status: ready};
     // בקשה מיוחדת היא טקסט חופשי: הקלדה לא מוחקת את התמונה שעל המסך, היא נכנסת ליצירה הבאה.
@@ -119,6 +126,7 @@ export function reducer(state: State, action: Action): State {
     case "format": return {...state, formatId: action.id};
     case "brand": return {...state, brand: {...state.brand, ...action.patch}};
     case "branding": return {...state, brand: action.brand, layouts: action.layouts};
+    case "theme": return {...state, theme: action.id};
     case "screen": return {...state, screen: action.screen};
     // הפריסה נשמרת לכל פורמט בנפרד. "החלה על כל הפורמטים" מעתיקה את הפריסה של הפורמט הנוכחי לכולם.
     case "layout": return {...state, layouts: {...state.layouts, [state.formatId]: action.layout}};
@@ -131,7 +139,7 @@ export function reducer(state: State, action: Action): State {
       return {...state, layouts: rest};
     }
     case "crop": return {...state, crops: {...state.crops, [action.formatId]: action.focal}};
-    case "settings": return {...state, brand: action.settings.brand, layouts: action.settings.layouts, neverList: action.settings.neverList, recipes: action.settings.recipes};
+    case "settings": return {...state, brand: action.settings.brand, layouts: action.settings.layouts, theme: action.settings.theme, neverList: action.settings.neverList, recipes: action.settings.recipes};
     case "ready": return {...state, ready: true};
     case "sync": return {...state, sync: action.sync};
     case "history": return {...state, history: action.items, currentKey: action.currentKey ?? state.currentKey};

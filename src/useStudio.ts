@@ -6,6 +6,7 @@ import type {Selection} from "../shared/selection";
 import type {StudioSettings} from "../shared/settings";
 import type {BrandLayout} from "../shared/brand-layout";
 import {fetchSettings, putSettings, requestImage} from "./api";
+import {applyTheme, readLocalTheme, saveLocalTheme} from "./theme";
 import {renderBranded} from "./brand/export";
 import {readBrandFile} from "./brand/upload";
 import {findItem} from "../shared/catalog";
@@ -15,7 +16,7 @@ import {centerFocal} from "../shared/brand-geometry";
 import {loadStudio, rateImage, saveBranding, saveImage, type Rating, type SavedImage} from "./studio-storage";
 
 export function useStudio() {
-  const [state, dispatch] = useReducer(reducer, initialState);
+  const [state, dispatch] = useReducer(reducer, initialState, s => ({...s, theme: readLocalTheme()}));
   const photoUrl = useRef<string | null>(null), recentUrl = useRef<string | null>(null), historyUrls = useRef<string[]>([]);
   const request = useRef(0);
   // סנכרון: כותבים לשרת רק אחרי שקראנו ממנו בהצלחה, כדי לא לדרוס הגדרות ממכשיר אחר.
@@ -29,9 +30,13 @@ export function useStudio() {
     previous.forEach(url => URL.revokeObjectURL(url));
   }
 
+  // צבעי הממשק: מוחלים מיד, ונשמרים גם במכשיר כדי שלא יהבהבו בטעינה הבאה.
+  useEffect(() => { applyTheme(state.theme); saveLocalTheme(state.theme); }, [state.theme]);
+
   useEffect(() => {
     let cancelled = false;
     (async () => {
+
       try {
         const {branding, images} = await loadStudio();
         if (cancelled) return;
@@ -60,7 +65,7 @@ export function useStudio() {
     };
   }, []);
 
-  const settings = useMemo<StudioSettings>(() => ({version: 3, neverList: state.neverList, recipes: state.recipes, brand: state.brand, layouts: state.layouts}), [state.neverList, state.recipes, state.brand, state.layouts]);
+  const settings = useMemo<StudioSettings>(() => ({version: 3, neverList: state.neverList, recipes: state.recipes, brand: state.brand, layouts: state.layouts, theme: state.theme}), [state.neverList, state.recipes, state.brand, state.layouts, state.theme]);
   useEffect(() => {
     if (!state.ready) return;
     const timer = setTimeout(async () => {

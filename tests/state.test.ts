@@ -150,3 +150,15 @@ test("the editor is a separate screen",()=>{
   assert.equal(initialState.screen,"studio");
   assert.equal(reducer(initialState,{type:"screen",screen:"editor"}).screen,"editor");
 });
+
+test("the picture is shown fitted to the screen by default, and 100% is a choice",()=>{
+  assert.equal(initialState.zoom,"fit");
+  assert.equal(reducer(initialState,{type:"zoom",zoom:"full"}).zoom,"full");
+  assert.equal(reducer(withResult(),{type:"zoom",zoom:"full"}).result,"data:image/png;base64,AAAA");
+});
+test("the interface theme is a palette choice or the default",()=>{
+  assert.equal(initialState.theme,null);
+  assert.equal(reducer(initialState,{type:"theme",id:"desert"}).theme,"desert");
+  assert.equal(reducer(reducer(initialState,{type:"theme",id:"desert"}),{type:"theme",id:null}).theme,null);
+  assert.equal(reducer(initialState,{type:"settings",settings:{...defaultSettings,theme:"mint"}}).theme,"mint");
+});

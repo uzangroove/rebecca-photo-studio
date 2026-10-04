@@ -15,7 +15,7 @@ export function Stage({studio}: {studio: Studio}) {
   const [divider, setDivider] = useState(50);
   const result = imageToShow(state), source = state.photo?.url ?? null, format = formatById(state.formatId);
   // השוואה דורשת גם מקור וגם תוצאה; בלי שניהם מציגים תמונה אחת.
-  const view = state.view === "compare" && !(result && source) ? "single" : state.view;
+  const view = state.zoom === "full" ? "single" : state.view === "compare" && !(result && source) ? "single" : state.view;
   const chips = [
     `סגנון: ${findItem("styles", state.selection.style)?.label}`,
     `פלטה: ${findItem("palettes", state.selection.palette)?.label}`,
@@ -27,9 +27,13 @@ export function Stage({studio}: {studio: Studio}) {
       <div className="views" role="group" aria-label="מצב תצוגה">
         {views.map(v => <button key={v.id} type="button" className={`view-btn${v.id === state.view ? " is-active" : ""}`} aria-pressed={v.id === state.view} onClick={() => dispatch({type: "view", view: v.id})}>{v.label}</button>)}
       </div>
+      <div className="views views-zoom" role="group" aria-label="גודל התצוגה">
+        <button type="button" className={`view-btn${state.zoom === "fit" ? " is-active" : ""}`} aria-pressed={state.zoom === "fit"} onClick={() => dispatch({type: "zoom", zoom: "fit"})}>התאמה למסך</button>
+        <button type="button" className={`view-btn${state.zoom === "full" ? " is-active" : ""}`} aria-pressed={state.zoom === "full"} onClick={() => dispatch({type: "zoom", zoom: "full"})}>100%</button>
+      </div>
       <div className="chips">{chips.map(c => <span key={c}>{c}</span>)}</div>
     </div>
-    <div className={`canvas${state.busy ? " is-busy" : ""}`}>
+    <div className={`canvas${state.busy ? " is-busy" : ""}${state.zoom === "full" ? " is-full" : ""}`}>
       {!result && !source ? <div className="empty">
         <strong>הצילום הבא של רבקה מתחיל כאן</strong><span>העלו צילום מוצר כדי להתחיל בעיצוב</span>
         <UploadButton label="העלאת צילום" onFile={choosePhoto} variant="primary"/>
@@ -39,7 +43,7 @@ export function Stage({studio}: {studio: Studio}) {
         {result ? <figure><img src={result} alt="סצנה חדשה"/><figcaption className="is-result">תוצאה</figcaption></figure>
           : <div className="placeholder">התוצאה תופיע כאן</div>}
       </div>
-      : view === "compare" && result && source ? <figure className="compare" style={{aspectRatio: `${format.width} / ${format.height}`}}>
+      : view === "compare" && result && source ? <figure className="compare" style={{"--ratio": format.width / format.height} as React.CSSProperties}>
         <img src={result} alt="סצנה חדשה"/>
         <img className="compare-source" src={source} alt="צילום מקורי" style={{clipPath: `inset(0 0 0 ${divider}%)`}}/>
         <span className="compare-line" style={{left: `${divider}%`}}/>
@@ -47,7 +51,7 @@ export function Stage({studio}: {studio: Studio}) {
         <span className="compare-tag">מקור</span><span className="compare-tag is-result">תוצאה</span>
         <input className="compare-range" type="range" min={0} max={100} step={1} dir="ltr" value={divider} aria-label="מחיצת לפני ואחרי" onChange={e => setDivider(Number(e.target.value))}/>
       </figure>
-      : <figure className="single"><img src={result ?? source ?? ""} alt={result ? "תמונה מעוצבת" : "צילום מוצר מקורי"}/>{result && <figcaption className="is-result">תוצאה</figcaption>}</figure>}
+      : <figure className="single"><span className="single-box"><img src={result ?? source ?? ""} alt={result ? "תמונה מעוצבת" : "צילום מוצר מקורי"}/>{result && <figcaption className="is-result">תוצאה</figcaption>}</span></figure>}
       {saved && <div className="rate" role="group" aria-label="דירוג התמונה">
         <button type="button" aria-pressed={saved.rating === "up"} aria-label="תמונה טובה" title="תמונה טובה" onClick={() => rate("up")}><Icon d={icons.thumb} size={22}/></button>
         <button type="button" aria-pressed={saved.rating === "down"} aria-label="תמונה לא טובה" title="תמונה לא טובה" onClick={() => rate("down")}><Icon d={icons.thumb} size={22} flip/></button>
