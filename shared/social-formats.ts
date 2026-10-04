@@ -16,3 +16,8 @@ export const formats = [
   {id:"youtube-thumbnail",group:"YouTube",name:"תמונה ממוזערת",width:1280,height:720},
   {id:"x-post",group:"X",name:"פוסט לרוחב",width:1200,height:675}
 ] as const;
+export type SocialFormat = typeof formats[number];
+export const formatById = (id: string): SocialFormat => formats.find(f => f.id === id) ?? formats[0];
+// היחס שנשלח לשרת, כדי שהתמונה שנוצרת תהיה קרובה לפורמט היעד.
+export const ratioOf = (f: {width: number; height: number}): "square" | "portrait" | "landscape" =>
+  f.width === f.height ? "square" : f.width > f.height ? "landscape" : "portrait";
