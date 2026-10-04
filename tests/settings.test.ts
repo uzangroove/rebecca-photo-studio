@@ -191,12 +191,12 @@ test("when the image service rejects the key, the answer says why and never echo
     globalThis.fetch=async()=>Response.json(body,{status});
     const form=new FormData();form.set("image",new File([new Uint8Array(1200)],"soap.png",{type:"image/png"}));
     for(const [key,value] of Object.entries({style:"boutique",palette:"forest",density:"none",ratio:"square",product:"soap"}))form.set(key,value);
-    const response=await call("/api/generate",{method:"POST",body:form},fakeKv(),{OPENAI_API_KEY:"test-only"});
+    const response=await call("/api/generate",{method:"POST",body:form},fakeKv(),{OPENAI_API_KEY:"  sk-test-only-secretbytes  "});
     return {status:response.status,json:await response.json() as {error:string;code:string;detail:string}};
   };
   try{
     const bad=await send(401,{error:{code:"invalid_api_key",message:"Incorrect API key provided: sk-proj-abcd***wxyz. You can find your API key at https://platform.openai.com."}});
-    assert.equal(bad.status,502);assert.match(bad.json.error,/401/);assert.equal(bad.json.code,"invalid_api_key");
+    assert.equal(bad.status,502);assert.match(bad.json.error,/401/);assert.match(bad.json.error,/מסתיים ב־ytes/,"only the last four characters of the key are shown");assert.ok(!bad.json.error.includes("secretby"));assert.equal(bad.json.code,"invalid_api_key");
     assert.ok(bad.json.detail.includes("Incorrect API key provided"));assert.ok(!/sk-proj/.test(bad.json.detail),"the key is masked");
     const verify=await send(403,{error:{code:"model_not_found",message:"Your organization must be verified to use the model."}});
     assert.match(verify.json.error,/403/);assert.match(verify.json.detail,/must be verified/);
