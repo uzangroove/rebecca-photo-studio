@@ -99,3 +99,7 @@ npm test
 - `public/assets/` — תוכן ותמונות מקוריות.
 - `wrangler.jsonc` — תצורת Cloudflare.
 - `tests/` — בדיקות (`npm test`, ללא פניות בתשלום): גישה ונתיבי שרת, קטלוג, גיאומטריית המיתוג, בניית הפרומפט ומקטעי המוצר (כולל snapshot של פרומפטים שנבדקו ביד, ב־`tests/fixtures/`), מתכונים, ההיסטוריה, הגדרות ו־KV, והמצב של הממשק.
+
+## חוברת הפעלה לרבקה
+`docs/guide/rebecca-studio-guide.pdf` — חוברת מצולמת בת 15 עמודים (A4, עברית).
+המקור: `docs/guide/booklet.html`. לעדכון צילומי המסך: `docs/guide/screenshots.cjs` (יצירה מדומה, בלי OpenAI), ואחר כך `node docs/guide/build-pdf.cjs` ליצירת ה־PDF.

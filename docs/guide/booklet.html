@@ -1,0 +1,502 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<title>חוברת הפעלה · סטודיו התמונות של רבקה</title>
+<style>
+@font-face{font-family:Assistant;font-weight:400;src:url(fonts/assistant-hebrew-400-normal.woff2) format("woff2");unicode-range:U+0590-05FF,U+200C-2010,U+20AA,U+25CC,U+FB1D-FB4F}
+@font-face{font-family:Assistant;font-weight:600;src:url(fonts/assistant-hebrew-600-normal.woff2) format("woff2");unicode-range:U+0590-05FF,U+200C-2010,U+20AA,U+25CC,U+FB1D-FB4F}
+@font-face{font-family:Assistant;font-weight:700;src:url(fonts/assistant-hebrew-700-normal.woff2) format("woff2");unicode-range:U+0590-05FF,U+200C-2010,U+20AA,U+25CC,U+FB1D-FB4F}
+@font-face{font-family:Assistant;font-weight:400;src:url(fonts/assistant-latin-400-normal.woff2) format("woff2");unicode-range:U+0000-00FF,U+2000-206F,U+2190-21FF}
+@font-face{font-family:Assistant;font-weight:600;src:url(fonts/assistant-latin-600-normal.woff2) format("woff2");unicode-range:U+0000-00FF,U+2000-206F,U+2190-21FF}
+@font-face{font-family:Assistant;font-weight:700;src:url(fonts/assistant-latin-700-normal.woff2) format("woff2");unicode-range:U+0000-00FF,U+2000-206F,U+2190-21FF}
+@font-face{font-family:"Frank Ruhl Libre";font-weight:500;src:url(fonts/frank-ruhl-libre-hebrew-500-normal.woff2) format("woff2");unicode-range:U+0590-05FF,U+200C-2010,U+20AA,U+25CC,U+FB1D-FB4F}
+@font-face{font-family:"Frank Ruhl Libre";font-weight:700;src:url(fonts/frank-ruhl-libre-hebrew-700-normal.woff2) format("woff2");unicode-range:U+0590-05FF,U+200C-2010,U+20AA,U+25CC,U+FB1D-FB4F}
+@font-face{font-family:"Frank Ruhl Libre";font-weight:500;src:url(fonts/frank-ruhl-libre-latin-500-normal.woff2) format("woff2");unicode-range:U+0000-00FF,U+2000-206F}
+@font-face{font-family:"Frank Ruhl Libre";font-weight:700;src:url(fonts/frank-ruhl-libre-latin-700-normal.woff2) format("woff2");unicode-range:U+0000-00FF,U+2000-206F}
+
+:root{--bg:#F3EDE1;--surface:#FBF8F2;--green:#163B30;--gold:#8A6A2F;--line:#E7DFCF;--text:#1F2A24;--muted:#5E675F;--pink:#D93F7C}
+@page{size:A4;margin:0}
+*{box-sizing:border-box}
+html{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+body{margin:0;background:#888;font:400 11.5pt/1.55 Assistant,sans-serif;color:var(--text)}
+.page{width:210mm;height:297mm;margin:0 auto 6mm;background:var(--bg);padding:15mm 16mm 17mm;position:relative;overflow:hidden;page-break-after:always;break-after:page;display:flex;flex-direction:column}
+@media print{body{background:none}.page{margin:0}}
+h1,h2,h3{font-family:"Frank Ruhl Libre",serif;color:var(--green);margin:0;font-weight:700;line-height:1.15}
+h2{font-size:25pt;margin-bottom:2mm}
+h3{font-size:14.5pt;margin:0 0 1.5mm}
+.kicker{font:700 9.5pt Assistant;letter-spacing:.04em;color:var(--gold);margin-bottom:1.5mm}
+.lead{font-size:12.5pt;color:var(--muted);margin:0 0 5mm}
+p{margin:0 0 2.5mm}
+.folio{position:absolute;bottom:7mm;left:0;right:0;text-align:center;font-size:9pt;color:var(--muted)}
+.folio b{color:var(--green)}
+.rule{height:2px;background:linear-gradient(90deg,var(--gold),transparent);border:0;margin:0 0 5mm;width:40mm;margin-inline-start:0}
+.shot{border-radius:3.5mm;box-shadow:0 1.2mm 4mm rgba(22,59,48,.22),0 0 0 .3mm var(--line);display:block;width:100%;background:#fff}
+.row{display:grid;gap:7mm;align-items:start}
+.legend{list-style:none;margin:0;padding:0;counter-reset:n}
+.legend li{counter-increment:n;position:relative;padding-inline-start:10mm;margin-bottom:4.2mm;min-height:7.5mm}
+.legend li::before{content:counter(n);position:absolute;inset-inline-start:0;top:.4mm;width:7mm;height:7mm;border-radius:50%;background:var(--pink);color:#fff;font:700 11pt/7mm Assistant;text-align:center;box-shadow:0 .4mm 1.2mm rgba(0,0,0,.3)}
+.legend b{color:var(--green)}
+.legend span{display:block;font-size:10.5pt;color:var(--muted);line-height:1.4}
+.tip{background:var(--surface);border:1px solid var(--line);border-inline-start:1.6mm solid var(--gold);border-radius:3mm;padding:3mm 4mm;margin:0 0 4mm;font-size:10.8pt}
+.tip b:first-child{color:var(--gold)}
+.warn{border-inline-start-color:var(--pink)}
+.warn b:first-child{color:var(--pink)}
+.steps{display:grid;gap:3.5mm;counter-reset:s}
+.step{counter-increment:s;display:grid;grid-template-columns:13mm 1fr;gap:4mm;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:4mm;padding:3.2mm 4mm}
+.step::before{content:counter(s);width:11mm;height:11mm;border-radius:50%;background:var(--green);color:#e8c98a;font:700 17pt/11mm "Frank Ruhl Libre",serif;text-align:center;box-shadow:inset 0 -.6mm 0 rgba(0,0,0,.25)}
+.step b{color:var(--green);font-size:12.5pt;display:block}
+.step span{color:var(--muted);font-size:10.5pt}
+.caption{font-size:9.5pt;color:var(--muted);margin-top:1.5mm;text-align:center}
+.grow{flex:1}
+.cols2{display:grid;grid-template-columns:1fr 1fr;gap:5mm}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:4mm;padding:4mm 4.5mm}
+.card h3{font-size:13pt}
+.chip{display:inline-block;background:var(--surface);border:1px solid var(--line);border-radius:5mm;padding:.4mm 3mm;font-size:10pt;margin:0 0 1.2mm 1.2mm;color:var(--green);font-weight:600}
+table{border-collapse:separate;border-spacing:0;width:100%;font-size:10.5pt;background:var(--surface);border:1px solid var(--line);border-radius:3mm;overflow:hidden}
+th{background:var(--green);color:#fff;text-align:start;padding:2mm 3mm;font-weight:600}
+td{padding:2mm 3mm;border-top:1px solid var(--line);vertical-align:top}
+td:first-child{font-weight:700;color:var(--green);width:34%}
+.faq{display:grid;gap:3mm}
+.faq .card{padding:3mm 4mm}
+.faq .q{font-weight:700;color:var(--green);margin-bottom:.8mm;font-size:11.5pt}
+.faq .a{font-size:10.5pt;color:var(--text)}
+code{font-family:Assistant;font-weight:700;background:var(--line);padding:0 1.5mm;border-radius:1mm;direction:ltr;unicode-bidi:embed}
+.ltr{direction:ltr;unicode-bidi:embed}
+/* cover */
+.cover{background:var(--green);color:#f3ede1;padding:0;justify-content:center;align-items:center;text-align:center}
+.cover::before{content:"";position:absolute;inset:9mm;border:.35mm solid rgba(232,201,138,.55);border-radius:3mm}
+.cover .logo{background:var(--bg);border-radius:5mm;padding:9mm 14mm;margin-bottom:12mm;box-shadow:0 2mm 8mm rgba(0,0,0,.35)}
+.cover .logo img{width:104mm;display:block}
+.cover h1{color:#f7efdc;font-size:36pt;margin-bottom:4mm}
+.cover p{font-size:15pt;color:#e8c98a;margin:0}
+.cover .small{position:absolute;bottom:20mm;font-size:10.5pt;color:#cdbf9d;left:0;right:0}
+.cover .shots{display:flex;gap:6mm;margin-top:14mm}
+.cover .shots img{height:48mm;border-radius:3mm;box-shadow:0 1.5mm 5mm rgba(0,0,0,.45);border:.6mm solid #f3ede1}
+.cheat{background:var(--green);color:#f3ede1}
+.cheat h2,.cheat h3{color:#f7efdc}
+.cheat .kicker{color:#e8c98a}
+.cheat .card{background:rgba(255,255,255,.07);border-color:rgba(232,201,138,.35);color:#f3ede1}
+.cheat .card h3{color:#e8c98a}
+.cheat ol,.cheat ul{margin:0;padding-inline-start:5mm}
+.cheat li{margin-bottom:1.3mm}
+.cheat .folio,.cheat .folio b{color:#cdbf9d}
+.roomy{font-size:12.5pt}
+.roomy .card{padding:5mm 6mm}.roomy .card h3{font-size:15pt;margin-bottom:2.5mm}
+.roomy li{margin-bottom:2mm}
+.roomy .tip{padding:4.5mm 5.5mm;font-size:12pt;margin-bottom:5mm}
+.roomy .faq{gap:3mm}.roomy .faq .card{padding:3mm 5mm}.roomy .faq .q{font-size:12.5pt;margin-bottom:1mm}.roomy .faq .a{font-size:11pt}
+.cheat.roomy .card{padding:6mm 7mm}.cheat.roomy li{font-size:12.3pt;margin-bottom:2.6mm}
+</style>
+</head>
+<body>
+
+<!-- 1 · שער -->
+<section class="page cover">
+  <div class="logo"><img src="../../public/assets/rebecca_studio_logo.png" alt="Rebecca"></div>
+  <h1>סטודיו התמונות של רבקה</h1>
+  <p>חוברת הפעלה מצולמת · צעד אחר צעד</p>
+  <div class="shots">
+    <img src="../../public/assets/candle-garden.jpg" alt="">
+    <img src="../../public/assets/candle-cactus.jpg" alt="">
+    <img src="../../public/assets/candle-flower.jpg" alt="">
+  </div>
+  <div class="small">נעשה באהבה, בשבילך · מהצילום מהטלפון ועד תמונה מוכנה לפרסום</div>
+</section>
+
+<!-- 2 · ברוכה הבאה -->
+<section class="page">
+  <div class="kicker">ברוכה הבאה</div>
+  <h2>מה זה הסטודיו, ואיך מתחילים</h2>
+  <hr class="rule">
+  <p class="lead">הסטודיו לוקח צילום רגיל של הסבון או הנר שלך, ומכין ממנו תמונת מוצר מעוצבת: משטח, תאורה, רקע וצבעים לפי הטעם שלך. בסוף הוא מוסיף את הלוגו והסלוגן, ומכין את התמונה במידות המדויקות של אינסטגרם, פייסבוק, וואטסאפ ועוד.</p>
+
+  <div class="steps">
+    <div class="step"><div><b>מצלמים ומעלים</b><span>צילום פשוט של המוצר, באור יום. לא צריך להיות מושלם. המוצר עצמו נשמר כמו שהוא.</span></div></div>
+    <div class="step"><div><b>בוחרים מראה</b><span>סגנון, צבעים ופרטים. אפשר גם לשמור את הצירוף שאהבת כמתכון, ולחזור אליו בלחיצה.</span></div></div>
+    <div class="step"><div><b>לוחצים "יצירת תמונה"</b><span>כחצי דקה של המתנה. אם משהו לא מוצא חן, לוחצים שוב ומקבלים גרסה אחרת.</span></div></div>
+    <div class="step"><div><b>מוסיפים לוגו וסלוגן, ושומרים</b><span>הלוגו והסלוגן כבר מוכנים. אפשר להזיז אותם בעורך המיתוג, ואז "שמירה".</span></div></div>
+  </div>
+
+  <h3 style="margin-top:6mm">איך נכנסים</h3>
+  <div class="cols2">
+    <div class="card">
+      <p><b>כתובת האתר</b></p>
+      <p class="ltr" style="font-weight:700;color:var(--green);font-size:10.5pt;direction:ltr;text-align:right">rebecca-photo-studio.uzan2bay.workers.dev</p>
+      <p style="font-size:10.5pt;color:var(--muted);margin:0">כדאי לשמור במועדפים, ובטלפון להוסיף למסך הבית (בעמוד האחרון בחוברת).</p>
+    </div>
+    <div class="card">
+      <p><b>שם משתמש וסיסמה</b></p>
+      <p style="margin:0 0 1mm">שם משתמש: <code>rebecca</code></p>
+      <p style="margin:0">סיסמה: ______________________</p>
+      <p style="font-size:10pt;color:var(--muted);margin:1mm 0 0">את הסיסמה כותבים כאן ביד, ולא בשום מקום אחר.</p>
+    </div>
+  </div>
+  <div class="tip" style="margin-top:4mm"><b>בכל פתיחה</b> של האתר מתנגן סרטון קצר. אפשר לדלג עליו בלחיצה על "דילוג" או במקש Esc.</div>
+  <div class="grow"></div>
+  <div class="folio"><b>2</b> · סטודיו התמונות של רבקה</div>
+</section>
+
+<!-- 3 · סיור במסך -->
+<section class="page">
+  <div class="kicker">סיור במסך</div>
+  <h2>כל המסך במבט אחד</h2>
+  <hr class="rule">
+  <img class="shot" src="img/overview.png" alt="המסך הראשי">
+  <ol class="legend" style="columns:2;column-gap:7mm;margin-top:5mm;font-size:10.8pt">
+    <li><b>מתכונים</b><span>צירופים שמורים של מראה, בלחיצה אחת</span></li>
+    <li><b>הלוגו שלך</b><span>במרכז הכותרת, תמיד</span></li>
+    <li><b>הגדרות</b><span>"אף פעם לא", צבעי הממשק, וסימן הסנכרון</span></li>
+    <li><b>פס הלשוניות</b><span>סגנון, פרטים, צבעים, מוצר, מיתוג, פורמט</span></li>
+    <li><b>לוח האפשרויות</b><span>כל אפשרות היא אריח, והכול נכנס במסך בלי לגלול</span></li>
+    <li><b>מצבי תצוגה</b><span>זה לצד זה · תמונה אחת · לפני ואחרי</span></li>
+    <li><b>התמונה</b><span>המקור והתוצאה, גדולים ובמרכז</span></li>
+    <li><b>דירוג והודעות</b><span>אגודל למעלה או למטה, והסטטוס</span></li>
+    <li><b>כפתורי פעולה</b><span>יצירה, החלפת צילום, מיתוג ושמירה</span></li>
+    <li><b>אחרונות</b><span>30 התמונות האחרונות, עם ההגדרות שיצרו אותן</span></li>
+  </ol>
+  <div class="grow"></div>
+  <div class="folio"><b>3</b> · סטודיו התמונות של רבקה</div>
+</section>
+
+<!-- 4 · התמונה הראשונה -->
+<section class="page">
+  <div class="kicker">התחלה</div>
+  <h2>התמונה הראשונה שלך</h2>
+  <hr class="rule">
+  <p class="lead">בפתיחה הסטודיו כבר מוגדר על "מינימליסטי שחור-לבן". אפשר פשוט להעלות צילום וללחוץ יצירה.</p>
+  <div class="row" style="grid-template-columns:1fr 100mm">
+    <ol class="legend">
+      <li><b>העלאת צילום</b><span>לוחצים על הכפתור הירוק במרכז. בטלפון אפשר לצלם ישר מהמצלמה או לבחור מהגלריה.</span></li>
+      <li><b>פס הלשוניות</b><span>כאן בוחרים מה להשתנות. אפשר לדלג על הכול ולהשאיר את ברירות המחדל.</span></li>
+      <li><b>מתכון פעיל</b><span>השם שמופיע כאן הוא המראה הנוכחי. לחיצה פותחת את רשימת המתכונים.</span></li>
+    </ol>
+    <div><img class="shot" src="img/empty.png" alt="" ><div class="caption">מסך הפתיחה, עוד לפני שהעלית צילום</div></div>
+  </div>
+  <h3 style="margin-top:6mm">אחרי ההעלאה</h3>
+  <div class="steps" style="grid-template-columns:1fr 1fr">
+    <div class="step"><div><b>בלשונית "מוצר"</b><span>בוחרים מה צילמת (נר בכלי זכוכית, סבון חתוך…).</span></div></div>
+    <div class="step"><div><b>בלשונית "סגנון"</b><span>בוחרים מראה כללי, או משאירים.</span></div></div>
+    <div class="step"><div><b>לוחצים</b><span>"יצירת תמונה" (הכפתור הזהוב), וממתינים.</span></div></div>
+    <div class="step"><div><b>שומרים</b><span>"שמירה" בפינה. התמונה נשמרת בפורמט שבחרת.</span></div></div>
+  </div>
+  <div class="tip warn" style="margin-top:4mm"><b>חשוב לדעת</b> כל לחיצה על "יצירה" יוצרת תמונה חדשה ועולה כסף קטן (כמה סנטים, לפי חשבון OpenAI של בעלך). לכן כדאי לבחור קודם, וללחוץ אחר כך. שינוי בצבעי הממשק, במצב התצוגה או בעורך המיתוג לא עולה כלום.</div>
+  <div class="grow"></div>
+  <div class="folio"><b>4</b> · סטודיו התמונות של רבקה</div>
+</section>
+
+<!-- 5 · סגנון ופרטים -->
+<section class="page">
+  <div class="kicker">לשוניות · 1 ו־2</div>
+  <h2>סגנון ופרטים</h2>
+  <hr class="rule">
+  <div class="row" style="grid-template-columns:1fr 1fr;gap:6mm">
+    <div>
+      <h3>סגנון</h3>
+      <img class="shot" src="img/tab-style.png" alt="">
+      <ol class="legend" style="margin-top:4mm">
+        <li><b>הסגנונות</b><span>בוטיק ומינימליסטי ראשונים כי הם המועדפים שלך. הסגנון קובע ברירות מחדל למשטח, לרקע ולתאורה.</span></li>
+        <li><b>אביזרים</b><span>"ללא אביזרים" (ברירת המחדל) או "אביזר אחד עדין".</span></li>
+        <li><b>אף פעם לא</b><span>דברים שלעולם לא יופיעו. כרגע: שיש ועומס. X מסיר, "הוספה" מוסיפה.</span></li>
+      </ol>
+    </div>
+    <div>
+      <h3>פרטים</h3>
+      <img class="shot" src="img/tab-details.png" alt="">
+      <ol class="legend" style="margin-top:4mm">
+        <li><b>משטח</b><span>נייר, טיח, פשתן, עץ, בטון ועוד. מה שבחרת כאן גובר על ברירת הסגנון. משטח שבאף פעם לא מסומן "חסום".</span></li>
+        <li><b>תאורה</b><span>חלון, שעת זהב, אור נרות, סטודיו רך.</span></li>
+        <li><b>רקע</b><span>קיר חלק, פנים מטושטש, חלון, צמחייה.</span></li>
+        <li><b>בקשה מיוחדת</b><span>משפט חופשי בעברית, עד 200 תווים. למשל: "שירגיש כמו בוקר שבת שקט".</span></li>
+        <li><b>חזרה לברירות הסגנון</b><span>מאפס את הפרטים.</span></li>
+      </ol>
+    </div>
+  </div>
+  <div class="grow"></div>
+  <div class="folio"><b>5</b> · סטודיו התמונות של רבקה</div>
+</section>
+
+<!-- 6 · צבעים ומוצר -->
+<section class="page">
+  <div class="kicker">לשוניות · 3 ו־4</div>
+  <h2>צבעים ומוצר</h2>
+  <hr class="rule">
+  <div class="row" style="grid-template-columns:1fr 1fr;gap:6mm">
+    <div>
+      <h3>צבעים</h3>
+      <img class="shot" src="img/tab-colors.png" alt="">
+      <ol class="legend" style="margin-top:4mm">
+        <li><b>המועדפות שלך</b><span>מונוכרום ומדבר, תמיד למעלה.</span></li>
+        <li><b>עוד 18 פלטות</b><span>הצבעים חלים על הסביבה בלבד, אף פעם לא על המוצר עצמו.</span></li>
+      </ol>
+      <div class="tip">הפלטה משפיעה גם על צבעי הטקסט בעורך המיתוג.</div>
+    </div>
+    <div>
+      <h3>מוצר</h3>
+      <img class="shot" src="img/tab-product.png" alt="">
+      <ol class="legend" style="margin-top:4mm;font-size:10.8pt">
+        <li><b>סוג המוצר</b><span>נר בכלי זכוכית, בקרמיקה, עמוד או מפוסל, נמסים, סבון חתוך, בתבנית, פצצת אמבט, מארז מתנה.</span></li>
+        <li><b>מצב הנר</b><span>כבוי, דולק, או "כמו בצילום". מופיע רק בנרות.</span></li>
+        <li><b>הזכוכית</b><span>שקופה, חלבית או ענברית.</span></li>
+        <li><b>זווית</b><span>גובה עיניים, 45°, מלמעלה, תקריב.</span></li>
+        <li><b>אירוע</b><span>חנוכה, ראש השנה ועוד. משנה רק את הסצנה סביב, לא את המוצר.</span></li>
+      </ol>
+    </div>
+  </div>
+  <div class="grow"></div>
+  <div class="folio"><b>6</b> · סטודיו התמונות של רבקה</div>
+</section>
+
+<!-- 7 · מתכונים -->
+<section class="page">
+  <div class="kicker">חוסכים זמן</div>
+  <h2>מתכונים: מראה שמור בלחיצה אחת</h2>
+  <hr class="rule">
+  <p class="lead">מתכון הוא צירוף של סגנון, פלטה, משטח ואביזרים. כשמצאת צירוף שאהבת, שומרים אותו, וממשיכים בלחיצה אחת בכל מכשיר.</p>
+  <div class="row" style="grid-template-columns:1fr 85mm">
+    <div>
+      <ol class="legend">
+        <li><b>כפתור המתכונים</b><span>בפינה הימנית העליונה. מציג את שם המתכון הפעיל, ולחיצה פותחת את הרשימה.</span></li>
+        <li><b>מתכון</b><span>לחיצה מפעילה אותו מיד: הסגנון, הצבעים והפרטים מתעדכנים.</span></li>
+        <li><b>פח האשפה</b><span>מופיע ליד המתכון הפעיל ומוחק אותו.</span></li>
+        <li><b>שמירת מתכון</b><span>נותנים שם, "שמירה", ואפשר עד 20 מתכונים.</span></li>
+      </ol>
+      <h3 style="margin-top:5mm">ארבעת המתכונים המובנים</h3>
+      <table>
+        <tr><th>מתכון</th><th>המראה</th></tr>
+        <tr><td>בוטיק שחור-לבן</td><td>בוטיק · מונוכרום · נייר · בלי אביזרים</td></tr>
+        <tr><td>בוטיק מדבר</td><td>בוטיק · מדבר · טיח · אביזר אחד</td></tr>
+        <tr><td>מינימליסטי שחור-לבן</td><td>מינימליסטי · מונוכרום · נייר (נפתח כברירת מחדל)</td></tr>
+        <tr><td>מינימליסטי מדבר</td><td>מינימליסטי · מדבר · פשתן · אור חלון</td></tr>
+      </table>
+    </div>
+    <div><img class="shot" src="img/recipes.png" alt=""><div class="caption">רשימת המתכונים פתוחה</div></div>
+  </div>
+  <div class="tip" style="margin-top:6mm"><b>דוגמה:</b> בחרת בוטיק, פלטת מדבר, משטח טיח, ותאורת חלון והתוצאה יפה? לוחצים "+ שמירת מתכון", כותבים "מדבר חם לנרות" ושומרים. מהיום זה אריח אחד.</div>
+  <div class="tip"><b>סנכרון:</b> המתכונים, רשימת "אף פעם לא" ופריסות המיתוג נשמרים בענן, ולכן מופיעים גם בטלפון וגם במחשב. ענן ירוק בכותרת = מסונכרן.</div>
+  <div class="grow"></div>
+  <div class="folio"><b>7</b> · סטודיו התמונות של רבקה</div>
+</section>
+
+<!-- 8 · יצירה ותצוגה -->
+<section class="page">
+  <div class="kicker">היצירה עצמה</div>
+  <h2>יוצרים, מסתכלים, מדרגים</h2>
+  <hr class="rule">
+  <div class="row" style="grid-template-columns:1fr 1fr;gap:6mm">
+    <div>
+      <img class="shot" src="img/views.png" alt="">
+      <ol class="legend" style="margin-top:4mm">
+        <li><b>מצב תצוגה</b><span>"זה לצד זה", "תמונה אחת", או "לפני ואחרי".</span></li>
+        <li><b>התאמה למסך / 100%</b><span>התמונה תמיד מוצגת שלמה. 100% להסתכל על פרטים קטנים.</span></li>
+        <li><b>דירוג</b><span>אגודל למעלה או למטה. נשמר יחד עם התמונה וההגדרות שיצרו אותה.</span></li>
+      </ol>
+    </div>
+    <div>
+      <img class="shot" src="img/compare.png" alt="">
+      <p class="caption">"לפני ואחרי": גוררים את הקו האמצעי, או משתמשים בחיצים במקלדת</p>
+      <img class="shot" src="img/actions.png" alt="" style="margin-top:4mm">
+      <ol class="legend" style="margin-top:4mm">
+        <li><b>יצירת תמונה</b><span>הכפתור הזהוב. אחרי היצירה הוא הופך ל"יצירת גרסה נוספת".</span></li>
+        <li><b>החלפת צילום</b><span>מעלה צילום אחר.</span></li>
+        <li><b>עריכת מיתוג</b><span>פותח את עורך הלוגו והסלוגן.</span></li>
+        <li><b>שמירה</b><span>שומר את התמונה המוכנה בגודל הפורמט.</span></li>
+      </ol>
+    </div>
+  </div>
+  <div class="tip" style="margin-top:2mm"><b>טיפ:</b> לא אהבת? אל תשני הכול. שנו דבר אחד, למשל המשטח או התאורה, וצרו שוב. כך מבינים מה גורם למה.</div>
+  <div class="grow"></div>
+  <div class="folio"><b>8</b> · סטודיו התמונות של רבקה</div>
+</section>
+
+<!-- 9 · מיתוג -->
+<section class="page">
+  <div class="kicker">הלוגו והסלוגן</div>
+  <h2>מיתוג ועורך המיתוג</h2>
+  <hr class="rule">
+  <div class="row" style="grid-template-columns:62mm 1fr;gap:6mm">
+    <div>
+      <img class="shot" src="img/tab-brand.png" alt="">
+      <ol class="legend" style="margin-top:3mm;font-size:10.5pt">
+        <li><b>לוגו</b><span>מסמנים כדי להציג. "החלפת לוגו" להעלאת אחר.</span></li>
+        <li><b>סלוגן</b><span>אותו דבר.</span></li>
+        <li><b>טקסט חופשי</b><span>למשל "נר ריחני בעבודת יד".</span></li>
+        <li><b>הטקסט</b><span>כותבים כאן. אפשר למחוק ולכתוב מחדש.</span></li>
+        <li><b>פתיחת העורך</b><span>להזיז ולשנות גודל.</span></li>
+      </ol>
+    </div>
+    <div>
+      <img class="shot" src="img/editor.png" alt="">
+      <ol class="legend" style="margin-top:3mm;columns:2;column-gap:6mm;font-size:10.3pt">
+        <li><b>שכבות</b><span>לוגו, סלוגן, טקסט. העין מציגה או מסתירה.</span></li>
+        <li><b>מיקום וגודל</b><span>באחוזים, בדיוק של 0.1. כולל "קריאות על הרקע" וחיצי הזזה עדינה.</span></li>
+        <li><b>סרגל יישור</b><span>שש פעולות יישור ופיזור, ביחס לתמונה, לשכבה אחרת, או לאזור המוצר.</span></li>
+        <li><b>הבד</b><span>גוררים ישירות. הקווים הורודים מצמידים למרכז ולשוליים. הקו המקווקו הוא אזור המוצר.</span></li>
+        <li><b>פריסה לכל פורמט</b><span>כל גודל תמונה זוכר פריסה משלו.</span></li>
+        <li><b>שמירת הפריסה</b><span>וחוזרים לסטודיו.</span></li>
+      </ol>
+    </div>
+  </div>
+  <div class="tip"><b>מה שרואים הוא מה שנשמר.</b> התמונה בעורך זהה לקובץ שיורד אחר כך, בדיוק.</div>
+  <div class="tip" style="margin-bottom:0"><b>אם הלוגו לא קריא</b> על הרקע: מוסיפים "צל עדין" או "מסגרת", או מחליפים ל"לוגו בהיר" או "לוגו כהה".</div>
+  <div class="grow"></div>
+  <div class="folio"><b>9</b> · סטודיו התמונות של רבקה</div>
+</section>
+
+<!-- 10 · פורמטים ושמירה -->
+<section class="page">
+  <div class="kicker">לכל רשת חברתית</div>
+  <h2>פורמטים ושמירה</h2>
+  <hr class="rule">
+  <p class="lead">כל פלטפורמה רוצה גודל אחר. בוחרים פורמט, והתמונה נחתכת ומתכווננת בדיוק לו.</p>
+  <div class="row" style="grid-template-columns:1fr 78mm">
+    <div>
+      <ol class="legend">
+        <li><b>הפורמט הנבחר</b><span>הברירה הנוכחית. השם הכתוב על כפתור "שמירה" משקף את הגודל.</span></li>
+        <li><b>שישה־עשר פורמטים</b><span>אינסטגרם, פייסבוק, וואטסאפ, טיקטוק, פינטרסט, לינקדאין, יוטיוב ו־X.</span></li>
+      </ol>
+      <table style="margin-top:4mm">
+        <tr><th>אני רוצה</th><th>בוחרת</th></tr>
+        <tr><td>פוסט בפיד באינסטגרם</td><td>אינסטגרם · פוסט מרובע (1080×1080) או לאורך (1080×1350)</td></tr>
+        <tr><td>סטורי, ריל או סטטוס</td><td>סטורי (1080×1920), או וואטסאפ · סטטוס</td></tr>
+        <tr><td>דף העסק בפייסבוק</td><td>פייסבוק · תמונת נושא (1640×624)</td></tr>
+        <tr><td>הצמדה בפינטרסט</td><td>פינטרסט · סיכה (1000×1500)</td></tr>
+      </table>
+      <h3 style="margin-top:5mm">איך שומרים</h3>
+      <div class="steps">
+        <div class="step"><div><b>לוחצים "שמירה"</b><span>במחשב: הקובץ יורד לתיקיית ההורדות.</span></div></div>
+        <div class="step"><div><b>בטלפון</b><span>אם לא יורד, לוחצים "פתיחת התמונה בחלון נפרד לשמירה", לחיצה ארוכה, ו"שמירה לגלריה".</span></div></div>
+      </div>
+    </div>
+    <div><img class="shot" src="img/tab-format.png" alt=""></div>
+  </div>
+  <div class="grow"></div>
+  <div class="folio"><b>10</b> · סטודיו התמונות של רבקה</div>
+</section>
+
+<!-- 11 · היסטוריה וצבעי ממשק -->
+<section class="page">
+  <div class="kicker">נוחות</div>
+  <h2>היסטוריה וצבעי הממשק</h2>
+  <hr class="rule">
+  <h3>ההיסטוריה שלי</h3>
+  <p>הסטודיו זוכר את 30 התמונות האחרונות. בשורה "אחרונות" מתחת לתמונה אפשר ללחוץ על ממוזערת כדי לחזור אליה. "הכל" פותח גלריה.</p>
+  <div class="row" style="grid-template-columns:1fr 84mm;margin-bottom:5mm">
+    <ol class="legend">
+      <li><b>כרטיס תמונה</b><span>מציג את הסגנון והפלטה שיצרו אותה, ואת הפורמט. לחיצה טוענת אותה, יחד עם כל ההגדרות.</span></li>
+      <li><b>סגירה</b><span>חזרה לסטודיו.</span></li>
+    </ol>
+    <div><img class="shot" src="img/gallery.png" alt=""></div>
+  </div>
+  <div class="tip"><b>היסטוריה נשמרת בדפדפן של המכשיר הזה.</b> בטלפון ובמחשב ההיסטוריה נפרדת. מה שמסונכרן בין המכשירים הם ההגדרות והמתכונים, לא התמונות.</div>
+
+  <h3 style="margin-top:4mm">צבעי הממשק</h3>
+  <p>כפתור הפלטה בכותרת צובע את כל הסטודיו באחת מ־20 הפלטות. זה רק לנוחות ולנעימות, ולא משפיע על התמונה. בחירה אחת נשמרת בכל המכשירים.</p>
+  <div class="row" style="grid-template-columns:1fr 1fr;gap:5mm">
+    <div><img class="shot" src="img/theme.png" alt="" style="max-height:78mm;object-fit:cover;object-position:top"><div class="caption">רשימת הפלטות</div></div>
+    <div><img class="shot" src="img/theme-forest.png" alt="" style="max-height:78mm;object-fit:cover;object-position:top"><div class="caption">למשל "יער": כל הממשק מתכוונן</div></div>
+  </div>
+  <div class="grow"></div>
+  <div class="folio"><b>11</b> · סטודיו התמונות של רבקה</div>
+</section>
+
+<!-- 12 · טלפון -->
+<section class="page">
+  <div class="kicker">בכל מקום</div>
+  <h2>בטלפון</h2>
+  <hr class="rule">
+  <p class="lead">הכול זהה לגמרי למחשב. רק הסידור משתנה: לשונית פעילה אחת, ומחליפים בין הלשוניות בפס הירוק.</p>
+  <div class="row" style="grid-template-columns:repeat(3,1fr);gap:5mm">
+    <div><img class="shot" src="img/phone-main.png" alt=""><div class="caption"><b>המסך הראשי</b><br>תמונה, אחר כך לשוניות</div></div>
+    <div><img class="shot" src="img/phone-colors.png" alt=""><div class="caption"><b>לשונית צבעים</b><br>בלי גלילה בתוך הלשונית</div></div>
+    <div><img class="shot" src="img/phone-recipes.png" alt=""><div class="caption"><b>מתכונים</b><br>נפתחים מהכפתור העליון</div></div>
+  </div>
+  <h3 style="margin-top:7mm">להוסיף למסך הבית</h3>
+  <div class="cols2">
+    <div class="card"><h3>אייפון</h3>
+      <ol style="margin:0;padding-inline-start:5mm"><li>פותחים את האתר בדפדפן Safari.</li><li>לוחצים על סימן השיתוף (ריבוע עם חץ).</li><li>"הוספה למסך הבית".</li></ol></div>
+    <div class="card"><h3>אנדרואיד</h3>
+      <ol style="margin:0;padding-inline-start:5mm"><li>פותחים את האתר בדפדפן Chrome.</li><li>שלוש הנקודות בפינה.</li><li>"הוספה למסך הבית" (או "התקנת אפליקציה").</li></ol></div>
+  </div>
+  <div class="tip" style="margin-top:4mm"><b>טיפ:</b> מסובבים את הטלפון לרוחב כדי לראות תמונה גדולה יותר, ומחזירים לאורך כדי לבחור אפשרויות.</div>
+  <div class="grow"></div>
+  <div class="folio"><b>12</b> · סטודיו התמונות של רבקה</div>
+</section>
+
+<!-- 13 · צילום מקור -->
+<section class="page roomy">
+  <div class="kicker">איכות מתחילה בצילום</div>
+  <h2>איך מצלמים את התמונה שמעלים</h2>
+  <hr class="rule">
+  <p class="lead">הסטודיו משנה את הסביבה, ושומר על המוצר. ככל שהמוצר ברור יותר בצילום, התוצאה נאמנה יותר.</p>
+  <div class="cols2">
+    <div class="card"><h3>כן</h3>
+      <ul style="margin:0;padding-inline-start:5mm">
+        <li>אור יום, ליד חלון, בלי פלאש.</li>
+        <li>המוצר כולו בפריים, עם מעט מקום סביבו.</li>
+        <li>התווית והכיתוב פונים למצלמה וקריאים.</li>
+        <li>צילום ישר וחד. מחכים שהטלפון יתפוס פוקוס.</li>
+        <li>רקע פשוט, ככל האפשר.</li>
+        <li>מוצר אחד או מארז אחד בכל תמונה.</li>
+      </ul></div>
+    <div class="card"><h3>עדיף לא</h3>
+      <ul style="margin:0;padding-inline-start:5mm">
+        <li>צילום מרחוק מאוד, כשהמוצר קטן.</li>
+        <li>הברקות חזקות על הזכוכית או על התווית.</li>
+        <li>כמה מוצרים שונים זה על זה.</li>
+        <li>תמונה מטושטשת או חשוכה.</li>
+        <li>אצבע או יד על המוצר.</li>
+      </ul></div>
+  </div>
+  <div class="tip" style="margin-top:5mm"><b>הסטודיו נאמן למוצר:</b> הוא מקפיד על מספר המוצרים, הצורה והתוויות, ולא ממציא מוצרים. אם משהו בכל זאת השתנה, מחליפים צילום או מנסים שוב.</div>
+  <div class="tip"><b>ללא אביזרים?</b> זו ברירת המחדל. בלשונית "סגנון" אפשר לבחור "אביזר אחד עדין". אביזרים עשירים מוסתרים בהגדרות מתקדמות.</div>
+  <div class="tip"><b>בקשה מיוחדת</b> היא המקום לדברים שנראים לך חשובים, למשל "אור רך משמאל", או "בלי צמחים". כתבי בעברית, משפט קצר.</div>
+  <div class="grow"></div>
+  <div class="folio"><b>13</b> · סטודיו התמונות של רבקה</div>
+</section>
+
+<!-- 14 · בעיות -->
+<section class="page roomy">
+  <div class="kicker">אם משהו לא עובד</div>
+  <h2>שאלות ותשובות</h2>
+  <hr class="rule">
+  <div class="faq">
+    <div class="card"><div class="q">הסטודיו לא נפתח / מבקש שם משתמש וסיסמה שוב ושוב</div><div class="a">שם המשתמש הוא <code>rebecca</code> באותיות קטנות. הסיסמה היא זו שבעמוד 2. אם עדיין לא נכנס, פנו לבן זוגך.</div></div>
+    <div class="card"><div class="q">כתוב "יש להגדיר סיסמת כניסה בהגדרות השרת"</div><div class="a">נכנסת לכתובת בדיקה ולא לכתובת הראשית. נכנסים לכתובת מעמוד 2.</div></div>
+    <div class="card"><div class="q">כתוב "מפתח ה־API או הרשאת מודל התמונות דורשים בדיקה"</div><div class="a">זו בעיה בחיבור ל־OpenAI, לא בשום דבר ששגית בו. מעבירים את ההודעה, כולל ה"פירוט מ־OpenAI" שמופיע מתחתיה, לבן זוגך.</div></div>
+    <div class="card"><div class="q">היצירה לוקחת הרבה זמן</div><div class="a">בדרך כלל כחצי דקה, לפעמים יותר. מחכים בלי ללחוץ שוב ושוב: כל לחיצה היא יצירה נוספת בתשלום.</div></div>
+    <div class="card"><div class="q">התמונה יצאה לא כמו שרציתי</div><div class="a">לוחצים "יצירת גרסה נוספת". אם עדיין לא, משנים דבר אחד (משטח, תאורה, בקשה מיוחדת). אם המוצר השתנה, מחליפים לצילום חד וברור יותר.</div></div>
+    <div class="card"><div class="q">הלוגו או הטקסט מסתירים משהו או לא קריאים</div><div class="a">לשונית "מיתוג" ← "פתיחת עורך המיתוג". מזיזים ומקטינים, או בוחרים צל עדין ולוגו בהיר או כהה.</div></div>
+    <div class="card"><div class="q">איבדתי תמונה שיצרתי</div><div class="a">שורת "אחרונות" או "הכל". הן שמורות במכשיר הזה (עד 30). אם ניקית את נתוני הדפדפן, הן נמחקות.</div></div>
+    <div class="card"><div class="q">הענן בכותרת עם קו חוצה</div><div class="a">אין סנכרון כרגע, ההגדרות נשמרות במכשיר הזה בלבד. ברגע שחוזר החיבור, הוא יתעדכן.</div></div>
+    <div class="card"><div class="q">ה"שמירה" לא מורידה כלום בטלפון</div><div class="a">לוחצים על "פתיחת התמונה בחלון נפרד לשמירה", לחיצה ארוכה על התמונה ואז "שמירה לגלריה".</div></div>
+  </div>
+  <div class="grow"></div>
+  <div class="folio"><b>14</b> · סטודיו התמונות של רבקה</div>
+</section>
+
+<!-- 15 · דף עזר -->
+<section class="page cheat roomy">
+  <div class="kicker">דף עזר</div>
+  <h2>הכול על דף אחד</h2>
+  <hr class="rule" style="background:linear-gradient(90deg,#e8c98a,transparent)">
+  <div class="cols2" style="gap:5mm">
+    <div class="card"><h3>שגרה של תמונה</h3>
+      <ol><li>העלאת צילום (חד, באור יום).</li><li>לשונית "מוצר": מה צילמתי.</li><li>"סגנון" ו"צבעים", או מתכון.</li><li>"יצירת תמונה", ממתינים.</li><li>לא אהבתי? שינוי אחד ועוד פעם.</li><li>"מיתוג": לוגו, סלוגן, טקסט.</li><li>פורמט, ואז "שמירה".</li></ol></div>
+    <div class="card"><h3>מה בכל לשונית</h3>
+      <ul><li><b>סגנון:</b> המראה הכללי, אביזרים, "אף פעם לא".</li><li><b>פרטים:</b> משטח, תאורה, רקע, בקשה מיוחדת.</li><li><b>צבעים:</b> 20 פלטות. מדבר ומונוכרום למעלה.</li><li><b>מוצר:</b> סוג, מצב נר, זווית, אירוע.</li><li><b>מיתוג:</b> לוגו, סלוגן, טקסט, עורך.</li><li><b>פורמט:</b> אינסטגרם, פייסבוק, וואטסאפ ועוד.</li></ul></div>
+    <div class="card"><h3>קיצורים בעורך המיתוג</h3>
+      <ul><li>חצים: הזזה של פיקסל אחד.</li><li>Shift + חץ: הזזה של 10.</li><li>גרירה: הזזה חופשית עם הצמדה.</li><li>ידיות בפינות: שינוי גודל בפרופורציות.</li><li>"החלה על כל הפורמטים": אותה פריסה לכולם.</li></ul></div>
+    <div class="card"><h3>כמה כללי זהב</h3>
+      <ul><li>כל "יצירה" עולה כסף קטן. מכינים, ואז לוחצים.</li><li>שינוי צבעי ממשק, תצוגה ומיתוג: חינם.</li><li>המתכון האהוב עליי נשמר כמתכון.</li><li>הסיסמה נשארת אצלי בלבד.</li><li>משהו מוזר? צילום מסך והודעה לבן הזוג.</li></ul></div>
+  </div>
+  <div style="text-align:center;margin-top:9mm">
+    <p style="font:700 20pt 'Frank Ruhl Libre',serif;color:#e8c98a;margin:0 0 1mm">בהצלחה, רבקה!</p>
+    <p style="color:#cdbf9d;margin:0">כל תמונה יפה מתחילה בצילום אחד.</p>
+  </div>
+  <div class="grow"></div>
+  <div class="folio"><b>15</b> · סטודיו התמונות של רבקה</div>
+</section>
+
+</body>
+</html>
