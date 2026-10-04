@@ -75,7 +75,7 @@ npm test
 
 ### חיבור ה־KV בפריסה הראשונה
 
-ב־`wrangler.jsonc` מוגדר binding בשם `STUDIO_KV` בלי מזהה. `wrangler deploy` יוצר את ה־namespace בעצמו בפריסה הראשונה (הקצאה אוטומטית). אם הפריסה אצלכם לא יוצרת אותו, צרו namespace ב־Cloudflare והוסיפו את ה־`id` שלו לאותה שורה. לא בוצעה פריסה בשלב הזה.
+ב־`wrangler.jsonc` מוגדר binding בשם `STUDIO_KV` עם המזהה של ה־namespace `rebecca-photo-studio-settings` בחשבון ה־Cloudflare של רבקה. אם מקימים את הפרויקט בחשבון אחר, יוצרים namespace חדש (`npx wrangler kv namespace create STUDIO_KV`) ומחליפים את ה־`id`.
 
 המודל שהיה מוגדר בגרסה המקורית נשמר במשתנה `OPENAI_IMAGE_MODEL`. יש לוודא שהוא זמין בחשבון ה־API שלכם, או להגדיר מזהה מודל תמונות זמין התומך ב־images/edits ובאפשרויות המוגדרות בשרת. לא בוצעה יצירה בתשלום בגרסה העצמאית ללא חיבור המפתח.
 
