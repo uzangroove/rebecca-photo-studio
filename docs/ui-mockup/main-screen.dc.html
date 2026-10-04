@@ -1,0 +1,491 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<title>סטודיו התמונות של רבקה — מסך ראשי</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;500;600;700&amp;family=Frank+Ruhl+Libre:wght@500;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#F3EDE1}
+a{color:#163B30}a:hover{color:#0E2A21}
+.tile{transition:transform .2s ease, box-shadow .2s ease, background-color .2s ease;cursor:pointer;font-family:inherit}
+.tile:hover{transform:translateY(-4px);box-shadow:0 14px 28px rgba(22,59,48,.18)}
+.tile:focus-visible,.rail-btn:focus-visible,.pill:focus-visible{outline:2px solid #9A7737;outline-offset:2px}
+.rail-btn{transition:background-color .2s ease;cursor:pointer;font-family:inherit}
+.rail-btn:hover{background:rgba(246,241,231,.10)}
+.pill{cursor:pointer;font-family:inherit;transition:transform .2s ease, box-shadow .2s ease}
+.pill:hover{transform:translateY(-2px);box-shadow:0 8px 18px rgba(22,59,48,.14)}
+.cta{transition:transform .2s ease, box-shadow .2s ease;cursor:pointer;font-family:inherit}
+.cta:hover{transform:translateY(-3px);box-shadow:0 16px 30px rgba(122,92,38,.35)}
+.thumb{transition:transform .2s ease, box-shadow .2s ease}
+.thumb:hover{transform:translateY(-3px) scale(1.04);box-shadow:0 10px 20px rgba(0,0,0,.18)}
+</style>
+</helmet>
+<div dir="rtl" style="font-family: 'Assistant', 'Segoe UI', sans-serif; color: #1F2A24; background: #F3EDE1; min-height: 900px; display: flex; flex-direction: column">
+
+  <header style="height: 68px; box-sizing: border-box; padding: 0 24px; background: #FBF8F2; border-bottom: 1px solid #E7DFCF; display: flex; align-items: center; gap: 20px; flex-wrap: wrap">
+    <div style="display: flex; align-items: center; gap: 14px">
+      <img src="/_blob/6c38f4bbe9d0854a2017cee6787f5035" alt="RÉBECCA" style="height: 24px; width: auto">
+      <span style="width: 1px; height: 26px; background: #D9CFBC"></span>
+      <span style="font-family: 'Frank Ruhl Libre', serif; font-size: 20px; font-weight: 500; color: #163B30">סטודיו</span>
+    </div>
+    <nav aria-label="מתכונים שמורים" style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap">
+      <span style="font-size: 13px; color: #5E675F; font-weight: 600">מתכונים</span>
+      <sc-for list="{{recipes}}" as="r" hint-placeholder-count="4">
+        <button class="pill" onClick="{{r.pick}}" style="{{r.st}}">
+          <span style="display: flex; gap: 3px">
+            <sc-for list="{{r.colors}}" as="c" hint-placeholder-count="3"><i style="width: 10px; height: 10px; border-radius: 50%; display: block; background: {{c.c}}; box-shadow: inset 0 0 0 1px rgba(0,0,0,.12)"></i></sc-for>
+          </span>
+          <span>{{r.name}}</span>
+        </button>
+      </sc-for>
+      <button class="pill" style="height: 36px; padding: 0 14px; border-radius: 18px; border: 1px dashed #B9AD95; background: transparent; color: #163B30; font-size: 14px; font-weight: 600">+ שמירת מתכון</button>
+    </nav>
+    <div style="display: flex; align-items: center; gap: 10px">
+      <span style="display: flex; align-items: center; gap: 6px; font-size: 13px; color: #2F6B4F; font-weight: 600">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 18h10a4 4 0 0 0 .6-7.96A6 6 0 0 0 6.2 9.1 4.5 4.5 0 0 0 7 18z M9.5 13.5l2 2 3.5-4"></path></svg>
+        מסונכרן בכל המכשירים
+      </span>
+      <button class="pill" aria-label="רשימת אף פעם לא" style="width: 40px; height: 40px; border-radius: 20px; border: 1px solid #E7DFCF; background: #FFFFFF; color: #163B30; display: grid; place-items: center">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6z M9 9l6 6 M15 9l-6 6"></path></svg>
+      </button>
+    </div>
+  </header>
+
+  <div style="flex: 1; display: flex; flex-wrap: wrap; min-height: 832px">
+
+    <nav aria-label="נושאים" style="width: 88px; background: #163B30; display: flex; flex-direction: column; align-items: stretch; padding: 14px 8px; gap: 6px; box-sizing: border-box">
+      <sc-for list="{{tabs}}" as="t" hint-placeholder-count="6">
+        <button class="rail-btn" onClick="{{t.pick}}" aria-pressed="{{t.on}}" style="{{t.st}}">
+          <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{t.d}}"></path></svg>
+          <span style="font-size: 13px; font-weight: 600">{{t.name}}</span>
+        </button>
+      </sc-for>
+    </nav>
+
+    <aside aria-label="אפשרויות" style="width: 380px; box-sizing: border-box; background: #FBF8F2; border-left: 1px solid #E7DFCF; padding: 22px 20px; display: flex; flex-direction: column; gap: 18px">
+
+      <sc-if value="{{isStyle}}" hint-placeholder-val="{{ true }}">
+        <div style="display: flex; flex-direction: column; gap: 16px">
+          <div>
+            <h2 style="margin: 0; font-family: 'Frank Ruhl Libre', serif; font-size: 24px; font-weight: 500; color: #163B30">סגנון הסצנה</h2>
+            <p style="margin: 4px 0 0; font-size: 13px; color: #5E675F">נקודת התחלה. כל פרט אפשר לשנות בלשונית "פרטים".</p>
+          </div>
+          <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px">
+            <sc-for list="{{styles}}" as="s" hint-placeholder-count="10">
+              <button class="tile" onClick="{{s.pick}}" aria-pressed="{{s.on}}" style="{{s.st}}">
+                <span style="{{s.ic}}"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{s.d}}"></path></svg></span>
+                <span style="display: flex; flex-direction: column; align-items: flex-start; gap: 1px; min-width: 0">
+                  <strong style="font-size: 15px; font-weight: 700">{{s.name}}</strong>
+                  <small style="font-size: 12px; opacity: .78; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%">{{s.detail}}</small>
+                </span>
+              </button>
+            </sc-for>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 8px">
+            <span style="font-size: 14px; font-weight: 700; color: #163B30">אביזרים</span>
+            <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px">
+              <sc-for list="{{propsOpts}}" as="p" hint-placeholder-count="2">
+                <button class="tile" onClick="{{p.pick}}" aria-pressed="{{p.on}}" style="{{p.st}}">{{p.name}}</button>
+              </sc-for>
+            </div>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 8px; padding: 14px; border-radius: 14px; background: #F4ECDF; border: 1px solid #E7DAC2">
+            <span style="display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 700; color: #7A3B2E">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6z M9 9l6 6 M15 9l-6 6"></path></svg>
+              אף פעם לא
+            </span>
+            <div style="display: flex; gap: 8px; flex-wrap: wrap">
+              <span style="display: inline-flex; align-items: center; gap: 6px; height: 32px; padding: 0 12px; border-radius: 16px; background: #FFFFFF; border: 1px solid #DCC9AC; font-size: 14px; font-weight: 600">שיש <button aria-label="הסרת שיש" style="border: 0; background: transparent; color: #7A3B2E; font-size: 16px; cursor: pointer; padding: 0">×</button></span>
+              <span style="display: inline-flex; align-items: center; gap: 6px; height: 32px; padding: 0 12px; border-radius: 16px; background: #FFFFFF; border: 1px solid #DCC9AC; font-size: 14px; font-weight: 600">עומס <button aria-label="הסרת עומס" style="border: 0; background: transparent; color: #7A3B2E; font-size: 16px; cursor: pointer; padding: 0">×</button></span>
+              <button class="pill" style="height: 32px; padding: 0 12px; border-radius: 16px; border: 1px dashed #B9AD95; background: transparent; color: #163B30; font-size: 14px; font-weight: 600">+ הוספה</button>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{isDetails}}" hint-placeholder-val="{{ false }}">
+        <div style="display: flex; flex-direction: column; gap: 16px">
+          <h2 style="margin: 0; font-family: 'Frank Ruhl Libre', serif; font-size: 24px; font-weight: 500; color: #163B30">פרטי הסצנה</h2>
+          <div style="display: flex; flex-direction: column; gap: 8px">
+            <span style="font-size: 14px; font-weight: 700; color: #163B30">משטח</span>
+            <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px">
+              <sc-for list="{{surfaces}}" as="s" hint-placeholder-count="9">
+                <button class="tile" onClick="{{s.pick}}" aria-pressed="{{s.on}}" disabled="{{s.blocked}}" style="{{s.st}}">
+                  <span style="height: 34px; border-radius: 8px; display: block; background: {{s.sw}}; box-shadow: inset 0 0 0 1px rgba(0,0,0,.08)"></span>
+                  <span style="{{s.lab}}">{{s.name}}</span>
+                </button>
+              </sc-for>
+            </div>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 8px">
+            <span style="font-size: 14px; font-weight: 700; color: #163B30">תאורה</span>
+            <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px">
+              <sc-for list="{{lights}}" as="s" hint-placeholder-count="4">
+                <button class="tile" onClick="{{s.pick}}" aria-pressed="{{s.on}}" style="{{s.st}}">
+                  <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{s.d}}"></path></svg>
+                  <span style="font-size: 12px; font-weight: 600">{{s.name}}</span>
+                </button>
+              </sc-for>
+            </div>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 8px">
+            <span style="font-size: 14px; font-weight: 700; color: #163B30">רקע</span>
+            <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px">
+              <sc-for list="{{bgs}}" as="s" hint-placeholder-count="4">
+                <button class="tile" onClick="{{s.pick}}" aria-pressed="{{s.on}}" style="{{s.st}}">
+                  <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{s.d}}"></path></svg>
+                  <span style="font-size: 12px; font-weight: 600">{{s.name}}</span>
+                </button>
+              </sc-for>
+            </div>
+          </div>
+          <label style="display: flex; flex-direction: column; gap: 6px; font-size: 14px; font-weight: 700; color: #163B30">בקשה מיוחדת
+            <textarea rows="2" placeholder="למשל: שירגיש כמו בוקר שבת שקט" style="font-family: inherit; font-size: 14px; font-weight: 400; padding: 10px 12px; border-radius: 12px; border: 1px solid #DCD2C0; background: #FFFFFF; resize: none; color: #1F2A24"></textarea>
+          </label>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{isPalette}}" hint-placeholder-val="{{ false }}">
+        <div style="display: flex; flex-direction: column; gap: 14px">
+          <h2 style="margin: 0; font-family: 'Frank Ruhl Libre', serif; font-size: 24px; font-weight: 500; color: #163B30">פלטת צבעים</h2>
+          <span style="font-size: 13px; font-weight: 700; color: #8A6A2F">המועדפות של רבקה</span>
+          <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px">
+            <sc-for list="{{favPalettes}}" as="p" hint-placeholder-count="2">
+              <button class="tile" onClick="{{p.pick}}" aria-pressed="{{p.on}}" style="{{p.bigSt}}">
+                <span style="display: flex; align-items: center; justify-content: space-between; width: 100%">
+                  <svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{p.d}}"></path><path d="{{p.f}}" fill="currentColor" stroke="none"></path></svg>
+                  <strong style="font-size: 17px">{{p.name}}</strong>
+                </span>
+                <span style="display: flex; width: 100%; height: 18px; border-radius: 9px; overflow: hidden; box-shadow: inset 0 0 0 1px rgba(0,0,0,.1)">
+                  <sc-for list="{{p.colors}}" as="c" hint-placeholder-count="3"><i style="flex: 1; display: block; background: {{c.c}}"></i></sc-for>
+                </span>
+              </button>
+            </sc-for>
+          </div>
+          <span style="font-size: 13px; font-weight: 700; color: #5E675F">כל הפלטות</span>
+          <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px">
+            <sc-for list="{{otherPalettes}}" as="p" hint-placeholder-count="18">
+              <button class="tile" onClick="{{p.pick}}" aria-pressed="{{p.on}}" style="{{p.st}}">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{p.d}}"></path><path d="{{p.f}}" fill="currentColor" stroke="none"></path></svg>
+                <span style="display: flex; flex-direction: column; align-items: flex-start; gap: 3px">
+                  <span style="font-size: 13px; font-weight: 700">{{p.name}}</span>
+                  <span style="display: flex; gap: 2px"><sc-for list="{{p.colors}}" as="c" hint-placeholder-count="3"><i style="width: 9px; height: 9px; border-radius: 50%; display: block; background: {{c.c}}; box-shadow: inset 0 0 0 1px rgba(0,0,0,.12)"></i></sc-for></span>
+                </span>
+              </button>
+            </sc-for>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{isProduct}}" hint-placeholder-val="{{ false }}">
+        <div style="display: flex; flex-direction: column; gap: 14px">
+          <h2 style="margin: 0; font-family: 'Frank Ruhl Libre', serif; font-size: 24px; font-weight: 500; color: #163B30">המוצר</h2>
+          <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px">
+            <sc-for list="{{products}}" as="s" hint-placeholder-count="8">
+              <button class="tile" onClick="{{s.pick}}" aria-pressed="{{s.on}}" style="{{s.st}}">
+                <span style="{{s.ic}}"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{s.d}}"></path></svg></span>
+                <strong style="font-size: 14px; font-weight: 700">{{s.name}}</strong>
+              </button>
+            </sc-for>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 8px">
+            <span style="font-size: 14px; font-weight: 700; color: #163B30">מצב הנר</span>
+            <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px">
+              <sc-for list="{{candleStates}}" as="s" hint-placeholder-count="3">
+                <button class="tile" onClick="{{s.pick}}" aria-pressed="{{s.on}}" style="{{s.st}}">
+                  <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{s.d}}"></path></svg>
+                  <span style="font-size: 13px; font-weight: 600">{{s.name}}</span>
+                </button>
+              </sc-for>
+            </div>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 8px">
+            <span style="font-size: 14px; font-weight: 700; color: #163B30">זווית צילום</span>
+            <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px">
+              <sc-for list="{{angles}}" as="s" hint-placeholder-count="4">
+                <button class="tile" onClick="{{s.pick}}" aria-pressed="{{s.on}}" style="{{s.st}}">
+                  <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{s.d}}"></path></svg>
+                  <span style="font-size: 12px; font-weight: 600">{{s.name}}</span>
+                </button>
+              </sc-for>
+            </div>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 8px">
+            <span style="font-size: 14px; font-weight: 700; color: #163B30">אירוע</span>
+            <div style="display: flex; gap: 6px; flex-wrap: wrap">
+              <sc-for list="{{occasions}}" as="o" hint-placeholder-count="7">
+                <button class="pill" onClick="{{o.pick}}" aria-pressed="{{o.on}}" style="{{o.st}}">{{o.name}}</button>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{isBrand}}" hint-placeholder-val="{{ false }}">
+        <div style="display: flex; flex-direction: column; gap: 14px">
+          <h2 style="margin: 0; font-family: 'Frank Ruhl Libre', serif; font-size: 24px; font-weight: 500; color: #163B30">מיתוג</h2>
+          <div style="display: flex; flex-direction: column; gap: 10px">
+            <label style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 14px; background: #FFFFFF; border: 1px solid #E7DFCF; cursor: pointer">
+              <input type="checkbox" checked="checked" style="width: 20px; height: 20px; accent-color: #163B30">
+              <span style="flex: 1; font-weight: 700">לוגו</span>
+              <img src="/_blob/6c38f4bbe9d0854a2017cee6787f5035" alt="" style="height: 16px; width: auto">
+            </label>
+            <label style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 14px; background: #FFFFFF; border: 1px solid #E7DFCF; cursor: pointer">
+              <input type="checkbox" checked="checked" style="width: 20px; height: 20px; accent-color: #163B30">
+              <span style="flex: 1; font-weight: 700">סלוגן</span>
+              <img src="/_blob/e7df57220daef79e3b9950b949c46ba4" alt="" style="height: 12px; width: auto">
+            </label>
+            <label style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 14px; background: #FFFFFF; border: 1px solid #E7DFCF; cursor: pointer">
+              <input type="checkbox" style="width: 20px; height: 20px; accent-color: #163B30">
+              <span style="flex: 1; font-weight: 700">טקסט חופשי</span>
+              <span style="font-size: 13px; color: #5E675F">Heebo · 32</span>
+            </label>
+          </div>
+          <div style="padding: 14px; border-radius: 14px; background: #EEF3EF; border: 1px solid #CFDDD3; font-size: 14px; color: #1F3B30; line-height: 1.5">הפריסה נשמרת לכל פורמט בנפרד. כרגע: אינסטגרם לאורך · לוגו למעלה במרכז, סלוגן מתחתיו.</div>
+          <a href="BrandEditor.dc.html" class="cta" style="display: flex; align-items: center; justify-content: center; gap: 10px; height: 54px; border-radius: 16px; background: #163B30; color: #F6F1E7; text-decoration: none; font-size: 17px; font-weight: 700">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h6v6H4z M14 14h6v6h-6z M10 7h7v7 M7 10v7h7"></path></svg>
+            פתיחת עורך המיתוג
+          </a>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{isFormat}}" hint-placeholder-val="{{ false }}">
+        <div style="display: flex; flex-direction: column; gap: 14px">
+          <h2 style="margin: 0; font-family: 'Frank Ruhl Libre', serif; font-size: 24px; font-weight: 500; color: #163B30">פורמט פרסום</h2>
+          <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px">
+            <sc-for list="{{formatsList}}" as="f" hint-placeholder-count="8">
+              <button class="tile" onClick="{{f.pick}}" aria-pressed="{{f.on}}" style="{{f.st}}">
+                <span style="width: 44px; height: 44px; display: grid; place-items: center"><i style="{{f.frame}}"></i></span>
+                <span style="display: flex; flex-direction: column; align-items: flex-start; gap: 1px">
+                  <strong style="font-size: 14px">{{f.name}}</strong>
+                  <small style="font-size: 12px; opacity: .78" dir="ltr">{{f.dims}}</small>
+                </span>
+              </button>
+            </sc-for>
+          </div>
+          <button class="pill" style="height: 40px; border-radius: 12px; border: 1px solid #E7DFCF; background: #FFFFFF; color: #163B30; font-size: 14px; font-weight: 700">כל 16 הפורמטים</button>
+        </div>
+      </sc-if>
+    </aside>
+
+    <main style="flex: 999 1 560px; min-width: 0; box-sizing: border-box; padding: 18px 24px 16px; display: flex; flex-direction: column; gap: 14px">
+      <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap">
+        <div style="display: flex; gap: 6px; padding: 4px; border-radius: 14px; background: #E9E1D2">
+          <sc-for list="{{views}}" as="v" hint-placeholder-count="3">
+            <button class="pill" onClick="{{v.pick}}" aria-pressed="{{v.on}}" style="{{v.st}}">{{v.name}}</button>
+          </sc-for>
+        </div>
+        <div style="display: flex; gap: 6px; flex-wrap: wrap; font-size: 13px; font-weight: 600; color: #163B30">
+          <span style="padding: 6px 12px; border-radius: 12px; background: #FBF8F2; border: 1px solid #E7DFCF">{{sumStyle}}</span>
+          <span style="padding: 6px 12px; border-radius: 12px; background: #FBF8F2; border: 1px solid #E7DFCF">{{sumPalette}}</span>
+          <span style="padding: 6px 12px; border-radius: 12px; background: #FBF8F2; border: 1px solid #E7DFCF">{{sumProduct}}</span>
+        </div>
+      </div>
+
+      <div style="height: 560px; display: flex; gap: 18px; justify-content: center">
+        <sc-if value="{{isSplit}}" hint-placeholder-val="{{ true }}">
+          <figure style="margin: 0; flex: 1; min-width: 0; position: relative; border-radius: 20px; overflow: hidden; background: #E3DACA; box-shadow: 0 18px 40px rgba(31,42,36,.14)">
+            <img src="/_blob/2ad225743fcae6646af6e596ffcd613b" alt="צילום המקור" style="width: 100%; height: 100%; object-fit: cover; display: block">
+            <figcaption style="position: absolute; top: 14px; right: 14px; padding: 6px 14px; border-radius: 14px; background: rgba(251,248,242,.92); font-size: 14px; font-weight: 700; color: #163B30">מקור</figcaption>
+          </figure>
+          <figure style="margin: 0; flex: 1; min-width: 0; position: relative; border-radius: 20px; overflow: hidden; background: #E3DACA; box-shadow: 0 18px 40px rgba(31,42,36,.18)">
+            <img src="/_blob/472985fa7b7b406cf99f4dc5be7ebe79" alt="התוצאה, המחשה" style="width: 100%; height: 100%; object-fit: cover; display: block">
+            <figcaption style="position: absolute; top: 14px; right: 14px; padding: 6px 14px; border-radius: 14px; background: #163B30; font-size: 14px; font-weight: 700; color: #F6F1E7">תוצאה</figcaption>
+            <span style="position: absolute; top: 14px; left: 14px; padding: 4px 10px; border-radius: 10px; background: rgba(251,248,242,.9); font-size: 12px; font-weight: 600; color: #5E675F">המחשה</span>
+            <img src="/_blob/6c38f4bbe9d0854a2017cee6787f5035" alt="" style="position: absolute; top: 56px; left: 50%; transform: translateX(-50%); width: 42%; height: auto; filter: invert(1) brightness(1.4); opacity: .92">
+          </figure>
+        </sc-if>
+        <sc-if value="{{isSingle}}" hint-placeholder-val="{{ false }}">
+          <figure style="margin: 0; height: 100%; aspect-ratio: 3 / 4; position: relative; border-radius: 20px; overflow: hidden; box-shadow: 0 22px 48px rgba(31,42,36,.2)">
+            <img src="/_blob/472985fa7b7b406cf99f4dc5be7ebe79" alt="התוצאה, המחשה" style="width: 100%; height: 100%; object-fit: cover; display: block">
+            <figcaption style="position: absolute; top: 14px; right: 14px; padding: 6px 14px; border-radius: 14px; background: #163B30; font-size: 14px; font-weight: 700; color: #F6F1E7">תוצאה</figcaption>
+            <img src="/_blob/6c38f4bbe9d0854a2017cee6787f5035" alt="" style="position: absolute; top: 56px; left: 50%; transform: translateX(-50%); width: 42%; height: auto; filter: invert(1) brightness(1.4); opacity: .92">
+          </figure>
+        </sc-if>
+        <sc-if value="{{isCompare}}" hint-placeholder-val="{{ false }}">
+          <figure style="margin: 0; height: 100%; aspect-ratio: 3 / 4; position: relative; border-radius: 20px; overflow: hidden; box-shadow: 0 22px 48px rgba(31,42,36,.2)">
+            <img src="/_blob/472985fa7b7b406cf99f4dc5be7ebe79" alt="התוצאה, המחשה" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover">
+            <img src="/_blob/2ad225743fcae6646af6e596ffcd613b" alt="צילום המקור" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; clip-path: inset(0 0 0 50%)">
+            <span style="position: absolute; top: 0; bottom: 0; left: 50%; width: 2px; background: #FBF8F2"></span>
+            <span style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 44px; height: 44px; border-radius: 22px; background: #FBF8F2; display: grid; place-items: center; box-shadow: 0 6px 16px rgba(0,0,0,.25); color: #163B30">
+              <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 7l-5 5 5 5 M15 7l5 5-5 5"></path></svg>
+            </span>
+            <span style="position: absolute; top: 14px; right: 14px; padding: 6px 14px; border-radius: 14px; background: rgba(251,248,242,.92); font-size: 14px; font-weight: 700; color: #163B30">מקור</span>
+            <span style="position: absolute; top: 14px; left: 14px; padding: 6px 14px; border-radius: 14px; background: #163B30; font-size: 14px; font-weight: 700; color: #F6F1E7">תוצאה</span>
+          </figure>
+        </sc-if>
+      </div>
+
+      <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap">
+        <button class="cta" style="height: 60px; padding: 0 34px; border: 0; border-radius: 18px; background: #8A6A2F; color: #FFFFFF; font-size: 20px; font-weight: 700; display: flex; align-items: center; gap: 10px; box-shadow: 0 10px 22px rgba(122,92,38,.28)">
+          <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z M19 16l.8 2.2L22 19l-2.2.8L19 22l-.8-2.2L16 19l2.2-.8z"></path></svg>
+          יצירת תמונה
+        </button>
+        <label style="display: flex; align-items: center; gap: 8px; height: 48px; padding: 0 14px; border-radius: 14px; background: #FBF8F2; border: 1px solid #E7DFCF; font-size: 14px; font-weight: 600; cursor: pointer">
+          <input type="checkbox" style="width: 18px; height: 18px; accent-color: #163B30"> שתי גרסאות לבחירה
+        </label>
+        <span style="flex: 1"></span>
+        <a href="BrandEditor.dc.html" class="pill" style="height: 48px; padding: 0 18px; border-radius: 14px; background: #FBF8F2; border: 1px solid #E7DFCF; color: #163B30; text-decoration: none; font-size: 15px; font-weight: 700; display: flex; align-items: center; gap: 8px">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12V4h8l10 10-8 8z M7.5 8.5h.01"></path></svg>
+          עריכת מיתוג
+        </a>
+        <button class="pill" style="height: 48px; padding: 0 18px; border-radius: 14px; background: #163B30; border: 0; color: #F6F1E7; font-size: 15px; font-weight: 700; display: flex; align-items: center; gap: 8px">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11 M7 10l5 5 5-5 M5 20h14"></path></svg>
+          שמירה · {{sumFormat}}
+        </button>
+      </div>
+
+      <div style="display: flex; align-items: center; gap: 10px">
+        <span style="font-size: 13px; font-weight: 700; color: #5E675F">אחרונות</span>
+        <sc-for list="{{history}}" as="h" hint-placeholder-count="6">
+          <button class="thumb" aria-label="{{h.label}}" style="width: 58px; height: 58px; padding: 0; border-radius: 12px; overflow: hidden; border: 2px solid #FBF8F2; box-shadow: 0 4px 10px rgba(0,0,0,.1); cursor: pointer; position: relative">
+            <img src="{{h.src}}" alt="" style="width: 100%; height: 100%; object-fit: cover; display: block">
+          </button>
+        </sc-for>
+        <button class="pill" style="height: 40px; padding: 0 14px; border-radius: 12px; border: 1px solid #E7DFCF; background: #FBF8F2; color: #163B30; font-size: 14px; font-weight: 700">הכל (30)</button>
+      </div>
+    </main>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  constructor(props){ super(props); this.state = { tab:'style', style:'boutique', palette:'desert', props:'none', surface:'plaster', light:'window', bg:'wall', product:'jar', candle:'lit', angle:'eye', occasion:'none', view:'split', format:'ig-portrait', recipe:'r2' }; }
+  renderVals() {
+    var S = this.state, self = this;
+    var set = function(k, v){ return function(){ var o = {}; o[k] = v; self.setState(o); }; };
+    var tileRow = function(on){ return 'display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:14px;text-align:right;min-height:64px;' + (on ? 'background:#163B30;color:#F6F1E7;border:1px solid #163B30;box-shadow:0 12px 24px rgba(22,59,48,.24);transform:translateY(-2px)' : 'background:#FFFFFF;color:#1F2A24;border:1px solid #E7DFCF'); };
+    var tileCol = function(on){ return 'display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:10px 4px;border-radius:14px;min-height:72px;' + (on ? 'background:#163B30;color:#F6F1E7;border:1px solid #163B30;box-shadow:0 12px 24px rgba(22,59,48,.24);transform:translateY(-2px)' : 'background:#FFFFFF;color:#1F2A24;border:1px solid #E7DFCF'); };
+    var iconBox = function(on){ return 'width:42px;height:42px;flex:none;border-radius:12px;display:grid;place-items:center;' + (on ? 'background:rgba(246,241,231,.14);color:#E7C98E' : 'background:#F3EDE1;color:#163B30'); };
+    var pillSt = function(on){ return 'height:36px;padding:0 14px;border-radius:18px;font-size:14px;font-weight:600;display:inline-flex;align-items:center;gap:8px;' + (on ? 'background:#163B30;color:#F6F1E7;border:1px solid #163B30' : 'background:#FFFFFF;color:#1F2A24;border:1px solid #E7DFCF'); };
+
+    var tabDefs = [
+      ['style','סגנון','M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z M19 16l.8 2.2L22 19l-2.2.8L19 22l-.8-2.2L16 19l2.2-.8z'],
+      ['details','פרטים','M4 6h9 M17 6h3 M15 4v4 M4 12h3 M11 12h9 M9 10v4 M4 18h11 M19 18h1 M17 16v4'],
+      ['palette','צבעים','M12 3a9 9 0 1 0 0 18c1.5 0 2-1 2-2s-1-1.5-1-2.5 1-1.5 2-1.5h2a4 4 0 0 0 4-4c0-4.5-4-8-9-8z M7.5 12h.01 M9.5 7.5h.01 M14.5 7.5h.01'],
+      ['product','מוצר','M7 9h10v10a1 1 0 0 1-1 1H8a1 1 0 0 1-1-1z M7 13h10 M12 9V7 M12 7c.8-.8 1-1.8 0-3-1 1.2-.8 2.2 0 3z'],
+      ['brand','מיתוג','M3 12V4h8l10 10-8 8z M7.5 8.5h.01'],
+      ['format','פורמט','M6 2v16h16 M2 6h16v16']
+    ];
+    var tabs = tabDefs.map(function(t){ var on = S.tab === t[0]; return { name:t[1], d:t[2], on:on, pick:set('tab', t[0]), st:'display:flex;flex-direction:column;align-items:center;gap:5px;padding:12px 4px;border:0;border-radius:14px;color:' + (on ? '#E7C98E' : '#E9E3D6') + ';background:' + (on ? 'rgba(246,241,231,.14)' : 'transparent') + ';box-shadow:' + (on ? 'inset -3px 0 0 #C9A764' : 'none') }; });
+
+    var styleDefs = [
+      ['boutique','בוטיק','נייר, טיח ותאורה מפוסלת','M6 4h12l3 5-9 11L3 9l3-5z M3 9h18 M12 20L8.5 9 10 4 M12 20l3.5-11L14 4'],
+      ['minimal','מינימליסטי','מרחב נקי ושקט','M4 18h16 M9 18V10h6v8'],
+      ['rustic','כפרי','עץ טבעי ופשתן','M3 9h18v6H3z M8 9v6 M14 10.5c1 1 1 2 0 3'],
+      ['urban','אורבני','קיר בטון ואור חלון','M4 20V9h6v11 M10 20V4h8v16 M3 20h18 M13 8h2 M13 12h2 M13 16h2 M6.5 13h1 M6.5 16.5h1'],
+      ['botanical','בוטני','עלים ואור יום','M5 19C5 10 11 5 19 5c0 8-5 14-14 14z M5 19l9-9'],
+      ['spa','ספא','בד מקופל ואור רך','M5 19a7 2.5 0 1 0 14 0a7 2.5 0 1 0-14 0z M7.5 14a4.5 2 0 1 0 9 0a4.5 2 0 1 0-9 0z M12 3c2 2.5 3 4 3 5.2a3 3 0 0 1-6 0C9 7 10 5.5 12 3z'],
+      ['mediterranean','ים תיכוני','טיח, שמש וזית','M12 4v2 M5.5 7l1.4 1.4 M18.5 7l-1.4 1.4 M8 13a4 4 0 0 1 8 0 M3 13h18 M3 17c2-1.5 4-1.5 6 0s4 1.5 6 0 4-1.5 6 0'],
+      ['japandi','ג׳פנדי','עץ בהיר וקרמיקה','M4 12h16a8 7 0 0 1-16 0z M9 19.5h6 M13 4l-2.5 6.5 M18 5l-4 5.5'],
+      ['editorial','אמנותי','צללים וקומפוזיציה','M4 8h3l2-3h6l2 3h3v11H4z M12 16.5a3.5 3.5 0 1 0 0-7a3.5 3.5 0 1 0 0 7z'],
+      ['gift','מתנה ואירוח','שולחן חגיגי','M4 10h16v4H4z M5 14h14v6H5z M12 10v10 M12 10c-2-4-6-4-6-1.5S10 10 12 10c2 0 6 1 6-1.5S14 6 12 10z']
+    ];
+    var styles = styleDefs.map(function(s){ var on = S.style === s[0]; return { name:s[1], detail:s[2], d:s[3], on:on, pick:function(){ self.setState({ style:s[0], recipe:'' }); }, st:tileRow(on), ic:iconBox(on) }; });
+
+    var propsOpts = [['none','ללא אביזרים'],['one','אביזר אחד עדין']].map(function(p){ var on = S.props === p[0]; return { name:p[1], on:on, pick:set('props', p[0]), st:'height:44px;border-radius:12px;font-size:14px;font-weight:700;' + (on ? 'background:#163B30;color:#F6F1E7;border:1px solid #163B30' : 'background:#FFFFFF;color:#1F2A24;border:1px solid #E7DFCF') }; });
+
+    var surfDefs = [
+      ['paper','נייר מרקם','#EFE9DE'],['plaster','טיח','#E6DACB'],['linen','פשתן','#DCD0BC'],
+      ['oak','עץ בהיר','#D2B48C'],['walnut','עץ כהה','#6B4A36'],['ceramic','קרמיקה','#EDE6DA'],
+      ['terrazzo','טרצו','#E2DDD3'],['concrete','בטון','#A9A6A0'],['marble','שיש','#F2F1EE']
+    ];
+    var surfaces = surfDefs.map(function(s){ var blocked = s[0] === 'marble'; var on = !blocked && S.surface === s[0]; return { name: blocked ? 'שיש · חסום' : s[1], sw:s[2], on:on, blocked:blocked, pick: blocked ? function(){} : set('surface', s[0]), st:'display:flex;flex-direction:column;gap:6px;padding:6px;border-radius:12px;' + (blocked ? 'background:#F7F4EE;border:1px dashed #D3C7B2;opacity:.5;cursor:not-allowed' : on ? 'background:#163B30;color:#F6F1E7;border:1px solid #163B30;box-shadow:0 12px 24px rgba(22,59,48,.24);transform:translateY(-2px)' : 'background:#FFFFFF;color:#1F2A24;border:1px solid #E7DFCF'), lab:'font-size:12px;font-weight:600;' + (blocked ? 'text-decoration:line-through' : '') }; });
+
+    var lightDefs = [['window','חלון','M4 4h16v16H4z M12 4v16 M4 12h16'],['golden','שעת זהב','M5 17a7 7 0 0 1 14 0 M2 17h20 M12 5v3 M4.5 10l2 1.5 M19.5 10l-2 1.5'],['candle','אור נרות','M12 3c2.5 3 3.5 5 3.5 7a3.5 3.5 0 0 1-7 0c0-2 1-4 3.5-7z M9 20h6 M12 13.5V20'],['studio','סטודיו רך','M4 6h9l5 4v4l-5 4H4z M18 12h3']];
+    var lights = lightDefs.map(function(s){ var on = S.light === s[0]; return { name:s[1], d:s[2], on:on, pick:set('light', s[0]), st:tileCol(on) }; });
+    var bgDefs = [['wall','קיר חלק','M4 4h16v16H4z'],['blur','פנים מטושטש','M8 10a3 3 0 1 0 0-6a3 3 0 1 0 0 6z M16 14a4 4 0 1 0 0-8a4 4 0 1 0 0 8z M9 20a3 3 0 1 0 0-6a3 3 0 1 0 0 6z'],['window','חלון','M5 21V9a7 7 0 0 1 14 0v12z M12 2v19 M5 13h14'],['plants','צמחייה','M12 21v-8 M12 13C8 13 5 10 5 6c4 0 7 3 7 7z M12 16c0-4 3-7 7-7 0 4-3 7-7 7z']];
+    var bgs = bgDefs.map(function(s){ var on = S.bg === s[0]; return { name:s[1], d:s[2], on:on, pick:set('bg', s[0]), st:tileCol(on) }; });
+
+    var palDefs = [
+      ['mono','מונוכרום',['#1A1A1A','#8C8C8C','#F5F5F5'],'M12 3a9 9 0 1 0 0 18a9 9 0 1 0 0-18z','M12 3a9 9 0 0 0 0 18z'],
+      ['desert','מדבר',['#B07D62','#D8A47F','#F3E1D4'],'M16 8.5a2.5 2.5 0 1 0 0-5a2.5 2.5 0 1 0 0 5z M2 18c3-5 7-6 11-2 M9 13c3-3 8-3 13 4 M2 21h20',''],
+      ['charcoal','פחם',['#2B2D42','#8D99AE','#EDF2F4'],'M12 3c3 4 5 6 5 10a5 5 0 0 1-10 0c0-2 1-3.5 2-4.5 0 2 1 3 2 3 0-3-1-5 1-8.5z',''],
+      ['metal','מתכת',['#4A5568','#A0AEC0','#E2E8F0'],'M7.5 4h9l4.5 8-4.5 8h-9L3 12z M12 15a3 3 0 1 0 0-6a3 3 0 1 0 0 6z',''],
+      ['stone','אבן',['#5C6B73','#9DB4C0','#C2DFE3'],'M4 17c0-3 3-5 7-5s7 2 7 4-3 3-7 3-7 0-7-2z M8 10c0-2 2-4 5-4s4 1.5 4 3',''],
+      ['coffee','קפה',['#4A3B32','#8E735B','#D9CDBF'],'M5 9h11v5a5 5 0 0 1-5 5h-1a5 5 0 0 1-5-5z M16 10h2a2.5 2.5 0 0 1 0 5h-2 M9 3c-1 1.5 1 2.5 0 4 M12.5 3c-1 1.5 1 2.5 0 4',''],
+      ['vintage','וינטג׳',['#8B5A2B','#CD853F','#F5DEB3'],'M12 21a8 8 0 1 0 0-16a8 8 0 1 0 0 16z M12 9v4l2.5 2 M10 3h4',''],
+      ['spice','תבלין',['#9B2226','#CA6702','#EE9B00'],'M17 6c1.5 1 2 3 1 5-2 5-7 8-13 8-1 0-2-1-1.5-2C9 16 13 13 15 8 M17 6c0-1.5 1-2.5 2.5-3',''],
+      ['autumn','סתיו',['#823329','#B85D43','#EDC4B3'],'M12 21v-6 M12 15c-4 0-7-3-7-7 2 0 3 1 4 2 0-3 1-5 3-7 2 2 3 4 3 7 1-1 2-2 4-2 0 4-3 7-7 7z',''],
+      ['wood','עץ',['#3E2723','#795548','#D7CCC8'],'M12 20a8 7 0 1 0 0-14a8 7 0 1 0 0 14z M12 16.5a4 3.5 0 1 0 0-7a4 3.5 0 1 0 0 7z',''],
+      ['forest','יער',['#2A4B3C','#6B8E76','#C6D8CB'],'M8 3l-4 7h2l-3 5h10l-3-5h2z M8 15v5 M17 7l-3 5h1.5L13 16h8l-2.5-4H20z M17 16v4',''],
+      ['olive','זית',['#3B4D36','#708238','#A2B57B'],'M4 20C9 15 14 10 20 4 M9 15c-2-1-3-3-2.5-5 2 .5 3 2.5 2.5 5z M13 11c-1-2-.5-4 1-5.5 1.5 1.5 1.5 3.5-1 5.5z M15 13c2-1 4-.5 5 1-1.5 1.5-3.5 1-5-1z',''],
+      ['mint','מנטה',['#2D6A4F','#52B788','#B7E4C7'],'M12 21V11 M12 11C8 11 5 8 5 4c4 0 7 3 7 7z M12 14c0-4 3-7 7-7 0 4-3 7-7 7z',''],
+      ['ocean','אוקיינוס',['#13315C','#134074','#8DA9C4'],'M2 9c2.5-2 5-2 7.5 0s5 2 7.5 0 3.5-1.5 5 0 M2 14c2.5-2 5-2 7.5 0s5 2 7.5 0 3.5-1.5 5 0 M2 19c2.5-2 5-2 7.5 0s5 2 7.5 0 3.5-1.5 5 0',''],
+      ['space','חלל',['#1E1E3F','#4B4B7C','#A6A6CC'],'M12 17a5 5 0 1 0 0-10a5 5 0 1 0 0 10z M4 16c-1.5 2.5 3 2.5 8.5-.5S21 8.5 20 6.5 15 6 15 6',''],
+      ['lilac','לילך',['#5E548E','#9F86C0','#E0B1CB'],'M12 8a2.5 2.5 0 1 0 0-5a2.5 2.5 0 1 0 0 5z M8 12a2.5 2.5 0 1 0 0-5a2.5 2.5 0 1 0 0 5z M16 12a2.5 2.5 0 1 0 0-5a2.5 2.5 0 1 0 0 5z M12 15a2.5 2.5 0 1 0 0-5a2.5 2.5 0 1 0 0 5z M12 15v6',''],
+      ['peach','אפרסק',['#E29578','#FFB5A7','#FEC5BB'],'M12 20c-4.5 0-7.5-3-7.5-6.5S7.5 7 12 8c4.5-1 7.5 2 7.5 5.5S16.5 20 12 20z M12 8c1-2.5 3-3.5 5-3-1 2-3 3-5 3z',''],
+      ['sunset','שקיעה',['#E07A5F','#F4A261','#F2CC8F'],'M5 17a7 7 0 0 1 14 0 M2 17h20 M5 21h14 M12 4v3 M4.5 9.5l2 1.5 M19.5 9.5l-2 1.5',''],
+      ['soap','סבון',['#CDB4DB','#FFC8DD','#FFAFCC'],'M9 15a5 5 0 1 0 0-10a5 5 0 1 0 0 10z M17 20a3 3 0 1 0 0-6a3 3 0 1 0 0 6z M18 9a1.5 1.5 0 1 0 0-3a1.5 1.5 0 1 0 0 3z',''],
+      ['linen','פשתן',['#A4937A','#D6C7B3','#F2EBE1'],'M4 6h16v4H4z M4 10c0 3 2 4 4 4h12 M4 14v4h16v-4','']
+    ];
+    var palById = {};
+    var pal = palDefs.map(function(p){ var on = S.palette === p[0]; var o = { id:p[0], name:p[1], colors:p[2].map(function(c){ return { c:c }; }), d:p[3], f:p[4], on:on, pick:function(){ self.setState({ palette:p[0], recipe:'' }); },
+      st:'display:flex;align-items:center;gap:8px;padding:8px;border-radius:12px;min-height:48px;text-align:right;' + (on ? 'background:#163B30;color:#F6F1E7;border:1px solid #163B30;box-shadow:0 12px 24px rgba(22,59,48,.24);transform:translateY(-2px)' : 'background:#FFFFFF;color:#1F2A24;border:1px solid #E7DFCF'),
+      bigSt:'display:flex;flex-direction:column;gap:12px;padding:14px;border-radius:16px;min-height:96px;' + (on ? 'background:#163B30;color:#F6F1E7;border:1px solid #163B30;box-shadow:0 14px 28px rgba(22,59,48,.26);transform:translateY(-3px)' : 'background:#FFFFFF;color:#1F2A24;border:1px solid #E7DFCF') }; palById[p[0]] = o; return o; });
+
+    var prodDefs = [
+      ['jar','נר בכלי זכוכית','M7 8h10v11a1 1 0 0 1-1 1H8a1 1 0 0 1-1-1z M7 12h10 M12 8V6 M12 6c.8-.8 1-1.8 0-3-1 1.2-.8 2.2 0 3z'],
+      ['ceramic','נר בקרמיקה','M5 11h14l-1.5 7a2 2 0 0 1-2 1.5h-7a2 2 0 0 1-2-1.5z M12 11V9 M12 9c.8-.8 1-1.8 0-3-1 1.2-.8 2.2 0 3z M8 15h8'],
+      ['pillar','נר עמוד / מפוסל','M8 9h8v11H8z M12 9V7 M12 7c.8-.8 1-1.8 0-3-1 1.2-.8 2.2 0 3z M8 13c1.5 1 3 1 4 0s2.5-1 4 0'],
+      ['melts','נמסים ריחניים','M3 14h5v5H3z M9.5 14h5v5h-5z M16 14h5v5h-5z M6.5 8h5v5h-5z'],
+      ['bar','סבון חתוך','M3 11l5-4h13v7l-5 4H3z M3 11h13v7 M16 11l5-4'],
+      ['molded','סבון בתבנית','M12 20a8 8 0 1 0 0-16a8 8 0 1 0 0 16z M12 14a2 2 0 1 0 0-4a2 2 0 1 0 0 4z M12 6.5V10 M12 14v3.5 M6.5 12H10 M14 12h3.5'],
+      ['bomb','פצצת אמבט','M12 20a8 8 0 1 0 0-16a8 8 0 1 0 0 16z M9 9h.01 M14 8h.01 M15 13h.01 M9.5 14h.01 M12 11.5h.01'],
+      ['gift','מארז מתנה','M4 10h16v4H4z M5 14h14v6H5z M12 10v10 M12 10c-2-4-6-4-6-1.5S10 10 12 10c2 0 6 1 6-1.5S14 6 12 10z']
+    ];
+    var products = prodDefs.map(function(s){ var on = S.product === s[0]; return { name:s[1], d:s[2], on:on, pick:set('product', s[0]), st:tileRow(on).replace('min-height:64px','min-height:56px'), ic:iconBox(on).replace('42px','36px').replace('42px','36px') }; });
+    var candleDefs = [['off','כבוי','M8 10h8v10H8z M12 10V7'],['lit','דולק','M8 12h8v8H8z M12 12v-2 M12 10c1.4-1.2 1.8-2.8 0-5.5-1.8 2.7-1.4 4.3 0 5.5z M5 6l1.5 1 M19 6l-1.5 1'],['asis','כמו בצילום','M4 8h3l2-3h6l2 3h3v11H4z M12 16a3 3 0 1 0 0-6a3 3 0 1 0 0 6z']];
+    var candleStates = candleDefs.map(function(s){ var on = S.candle === s[0]; return { name:s[1], d:s[2], on:on, pick:set('candle', s[0]), st:tileCol(on) }; });
+    var angleDefs = [['eye','גובה עיניים','M2 12s4-6 10-6 10 6 10 6-4 6-10 6S2 12 2 12z M12 14.5a2.5 2.5 0 1 0 0-5a2.5 2.5 0 1 0 0 5z'],['45','45°','M4 20L20 4 M4 20h7 M4 20v-7'],['top','מלמעלה','M12 3v9 M8 8l4 4 4-4 M4 18h16'],['macro','תקריב','M10.5 17a6.5 6.5 0 1 0 0-13a6.5 6.5 0 1 0 0 13z M15.5 15.5L21 21']];
+    var angles = angleDefs.map(function(s){ var on = S.angle === s[0]; return { name:s[1], d:s[2], on:on, pick:set('angle', s[0]), st:tileCol(on) }; });
+    var occasions = [['none','ללא'],['hanukkah','חנוכה'],['rosh','ראש השנה'],['tubshvat','ט"ו בשבט'],['family','יום המשפחה'],['wedding','חתונה'],['love','ולנטיין']].map(function(o){ var on = S.occasion === o[0]; return { name:o[1], on:on, pick:set('occasion', o[0]), st:pillSt(on) }; });
+
+    var fmtDefs = [['ig-square','אינסטגרם · מרובע','1080×1080',1,1],['ig-portrait','אינסטגרם · לאורך','1080×1350',4,5],['ig-story','סטורי','1080×1920',9,16],['wa-status','סטטוס וואטסאפ','1080×1920',9,16],['fb-post','פייסבוק · לרוחב','1200×630',1.91,1],['fb-cover','תמונת נושא','1640×624',2.63,1],['pin','פינטרסט','1000×1500',2,3],['yt','יוטיוב','1280×720',16,9]];
+    var formatsList = fmtDefs.map(function(f){ var on = S.format === f[0]; var r = f[3] / f[4]; var w = r >= 1 ? 38 : Math.round(38 * r); var h = r >= 1 ? Math.round(38 / r) : 38; return { name:f[1], dims:f[2], on:on, pick:set('format', f[0]), st:tileRow(on).replace('min-height:64px','min-height:60px'), frame:'display:block;width:' + w + 'px;height:' + h + 'px;border-radius:4px;border:2px solid currentColor;opacity:.85' }; });
+    var curFmt = fmtDefs.filter(function(f){ return f[0] === S.format; })[0];
+
+    var recDefs = [
+      ['r1','בוטיק שחור-לבן',{ style:'boutique', palette:'mono', surface:'paper', props:'none' }],
+      ['r2','בוטיק מדבר',{ style:'boutique', palette:'desert', surface:'plaster', props:'one' }],
+      ['r3','מינימליסטי שחור-לבן',{ style:'minimal', palette:'mono', surface:'paper', props:'none' }],
+      ['r4','מינימליסטי מדבר',{ style:'minimal', palette:'desert', surface:'linen', props:'none', light:'window' }]
+    ];
+    var recipes = recDefs.map(function(r){ var on = S.recipe === r[0]; return { name:r[1], colors:palById[r[2].palette].colors, on:on, pick:function(){ var o = Object.assign({ recipe:r[0] }, r[2]); self.setState(o); }, st:pillSt(on) + ';height:38px;padding:0 14px 0 12px' }; });
+
+    var viewDefs = [['split','זה לצד זה'],['single','תמונה אחת'],['compare','לפני ואחרי']];
+    var views = viewDefs.map(function(v){ var on = S.view === v[0]; return { name:v[1], on:on, pick:set('view', v[0]), st:'height:36px;padding:0 16px;border:0;border-radius:10px;font-size:14px;font-weight:700;' + (on ? 'background:#FBF8F2;color:#163B30;box-shadow:0 2px 8px rgba(0,0,0,.08)' : 'background:transparent;color:#4F5A52') }; });
+
+    var styleName = styleDefs.filter(function(s){ return s[0] === S.style; })[0][1];
+    var prodName = prodDefs.filter(function(s){ return s[0] === S.product; })[0][1];
+    var isCandle = ['jar','ceramic','pillar'].indexOf(S.product) >= 0;
+    var candleName = candleDefs.filter(function(s){ return s[0] === S.candle; })[0][1];
+
+    var history = [
+      { src:'/_blob/f465ce73cca405b9357a874856670222', label:'תמונה קודמת 1' },
+      { src:'/_blob/1c3737591b91e3e3185e94c23a2f75bb', label:'תמונה קודמת 2' },
+      { src:'/_blob/18622a4c078ff5dae56900f0b90fc7c7', label:'תמונה קודמת 3' },
+      { src:'/_blob/051f37bb649fc0e9af47b212ec5ebe2d', label:'תמונה קודמת 4' },
+      { src:'/_blob/dcee9dd02e4ba50a44cedc38f7d6a0fe', label:'תמונה קודמת 5' }
+    ];
+
+    return {
+      tabs:tabs, styles:styles, propsOpts:propsOpts, surfaces:surfaces, lights:lights, bgs:bgs,
+      favPalettes:pal.slice(0, 2), otherPalettes:pal.slice(2), products:products, candleStates:candleStates, angles:angles, occasions:occasions,
+      formatsList:formatsList, recipes:recipes, views:views, history:history,
+      isStyle:S.tab === 'style', isDetails:S.tab === 'details', isPalette:S.tab === 'palette', isProduct:S.tab === 'product', isBrand:S.tab === 'brand', isFormat:S.tab === 'format',
+      isSplit:S.view === 'split', isSingle:S.view === 'single', isCompare:S.view === 'compare',
+      sumStyle:'סגנון: ' + styleName, sumPalette:'פלטה: ' + palById[S.palette].name, sumProduct:prodName + (isCandle ? ' · ' + candleName : ''),
+      sumFormat:curFmt[1]
+    };
+  }
+}
+</script>
+</body>
+</html>
