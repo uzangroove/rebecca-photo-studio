@@ -52,12 +52,14 @@ export function Stage({studio}: {studio: Studio}) {
         <input className="compare-range" type="range" min={0} max={100} step={1} dir="ltr" value={divider} aria-label="מחיצת לפני ואחרי" onChange={e => setDivider(Number(e.target.value))}/>
       </figure>
       : <figure className="single"><span className="single-box"><img src={result ?? source ?? ""} alt={result ? "תמונה מעוצבת" : "צילום מוצר מקורי"}/>{result && <figcaption className="is-result">תוצאה</figcaption>}</span></figure>}
+    </div>
+    <div className="status-row">
+      <p className={state.status.error ? "status is-error" : "status"} role="status">{state.busy && <span className="spinner"/>}{state.status.text}</p>
       {saved && <div className="rate" role="group" aria-label="דירוג התמונה">
         <button type="button" aria-pressed={saved.rating === "up"} aria-label="תמונה טובה" title="תמונה טובה" onClick={() => rate("up")}><Icon d={icons.thumb} size={22}/></button>
         <button type="button" aria-pressed={saved.rating === "down"} aria-label="תמונה לא טובה" title="תמונה לא טובה" onClick={() => rate("down")}><Icon d={icons.thumb} size={22} flip/></button>
       </div>}
     </div>
-    <p className={state.status.error ? "status is-error" : "status"} role="status">{state.busy && <span className="spinner"/>}{state.status.text}</p>
     <p className="caution">ביצירת תמונה פרטים קטנים במוצר עלולים להשתנות. בדקו צורה, צבעים, כיתוב ותוויות לפני פרסום.</p>
   </section>;
 }

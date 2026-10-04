@@ -98,7 +98,7 @@ export function BrandEditor({studio}: {studio: Studio}) {
       <aside className="editor-side" aria-label="שכבות ומאפיינים">
         <LayerList layout={layout} selected={sel ?? selected} logoSource={state.brand.logoSource} sloganSource={state.brand.sloganSource}
           onSelect={setSelected} onVisible={(id, visible) => {
-            patch(id, id === "text" && visible && !layout.text.text.trim() ? {visible, text: "הטקסט שלי"} : {visible});
+            patch(id, {visible});
             if (visible) setSelected(id);
           }}/>
         {selected && layout[selected].visible
