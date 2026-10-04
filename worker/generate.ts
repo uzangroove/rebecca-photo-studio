@@ -1,25 +1,10 @@
 
 
-const scenes: Record<string,string> = {
-  boutique:"a refined luxury boutique product photograph, premium stone or textured paper, sculptural light",
-  rustic:"a rustic handcrafted setting with natural wood and linen, warm window light",
-  urban:"a contemporary urban studio with concrete and architectural window light",
-  minimal:"a calm minimal studio scene with generous negative space and simple surfaces",
-  botanical:"a botanical scene with real leaves and soft natural daylight",
-  spa:"a peaceful spa setting with stone, folded fabric and diffused light",
-  mediterranean:"a Mediterranean scene with warm plaster, sunlight and an olive branch",
-  japandi:"a warm Japandi interior with pale wood and quiet ceramic details",
-  editorial:"an artistic editorial studio photograph with bold but realistic shadows",
-  gift:"a thoughtful gift and hosting scene with natural fabric and elegant table styling"
-};
-import {paletteById} from "../shared/palettes.ts";
-const props: Record<string,string> = {
-  none:"No styling props. Use only the product and the surface.",
-  subtle:"Use one or two subtle contextual props well away from the product.",
-  rich:"Use a few tasteful contextual props while keeping the product clearly dominant."
-};
+import {parseSelection} from "../shared/selection.ts";
+import {buildPrompt} from "../shared/build-prompt.ts";
+import {readSettings} from "./settings.ts";
 let active = 0;
-export async function generate(request: Request, env: {OPENAI_API_KEY?: string; OPENAI_IMAGE_MODEL?: string}) {
+export async function generate(request: Request, env: {OPENAI_API_KEY?: string; OPENAI_IMAGE_MODEL?: string; STUDIO_KV?: KVNamespace}) {
   const origin=request.headers.get("origin");
   if (origin && origin !== new URL(request.url).origin) return Response.json({error:"בקשה לא מורשית"}, {status:403});
   const key=env.OPENAI_API_KEY;
@@ -28,18 +13,13 @@ export async function generate(request: Request, env: {OPENAI_API_KEY?: string; 
   active++;
   try {
     const form=await request.formData(),photo=form.get("image");
-    const style=String(form.get("style")||""),palette=String(form.get("palette")||"");
-    const density=String(form.get("density")||""),ratio=String(form.get("ratio")||"");
-    const product=String(form.get("product")||"");
+    const ratio=String(form.get("ratio")||"");
+    // השדה "density" נשאר בשם הישן בבקשה; בקטלוג הוא קטגוריית "props".
+    const selection=parseSelection({product:form.get("product"),style:form.get("style"),palette:form.get("palette"),props:form.get("density")});
     if (!(photo instanceof File) || !["image/png","image/jpeg","image/webp"].includes(photo.type) || photo.size<1000 || photo.size>10*1024*1024 ||
-      !scenes[style] || !paletteById[palette] || !props[density] || !["square","portrait","landscape"].includes(ratio) || !["soap","candle"].includes(product))
+      !selection || !["square","portrait","landscape"].includes(ratio))
       return Response.json({error:"הצילום או אפשרויות העיצוב אינם תקינים"},{status:400});
-    const item=product==="soap"?"handmade soaps":"handmade candles";
-    const prompt=`Create a single photorealistic commercial product photograph by editing the supplied photo of ${item}.
-The image itself must become one coherent edge-to-edge scene. No frames, mats, borders, poster layouts, inset source photos, cards, text overlays, typography, additional logos or watermarks.
-Keep the exact number, shape, silhouette, arrangement, scale, material, colors, surface details and existing labels of the actual products in the supplied photo. Do not redesign or invent products. Do not change the words on any existing label. Keep the products central and recognizable.
-Replace and integrate the background and surrounding surface as ${scenes[style]}. Use the '${paletteById[palette].name}' palette in the ENVIRONMENT ONLY, with these exact three colors as guidance: ${paletteById[palette].colors.join(", ")}. Do not recolor the products. ${props[density]}
-Make perspective, natural lighting, contact shadows and reflections consistent so the products feel physically present. Leave generous breathing room on every side because the image may be cropped for social publishing. Keep the full product safely inside the central 60 percent. Output one finished photograph, no graphic layout.`;
+    const prompt=buildPrompt(selection,await readSettings(env.STUDIO_KV));
     const upstream=new FormData();
     upstream.append("model",env.OPENAI_IMAGE_MODEL || "gpt-image-2.5-sunburst");
     upstream.append("prompt",prompt);
