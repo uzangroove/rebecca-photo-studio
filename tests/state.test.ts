@@ -10,7 +10,7 @@ const photo={file:{name:"a.png"} as File,url:"blob:photo"};
 const withResult=():State=>({...initialState,photo,result:"data:image/png;base64,AAAA",composed:{url:"blob:c",blob:{} as Blob,branded:true}});
 
 test("opening state: the minimalist black-and-white recipe on soap, nothing generated",()=>{
-  assert.deepEqual(initialState.selection,{product:"soap",style:"minimal",palette:"mono",props:"none",surface:"paper",background:null,light:null,wish:""});
+  assert.deepEqual(initialState.selection,{product:"cut-soap",style:"minimal",palette:"mono",props:"none",surface:"paper",background:null,light:null,candleState:"asis",giftWrap:"asis",glassTint:null,angle:null,occasion:null,wish:""});
   assert.deepEqual(initialState.neverList,["שיש","עומס"]);
   assert.equal(initialState.recipes.length,4);
   assert.equal(initialState.result,null);

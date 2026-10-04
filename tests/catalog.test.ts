@@ -9,7 +9,7 @@ test("every catalog item is complete and ids are unique within a category",()=>{
     assert.equal(new Set(items.map(i=>i.id)).size,items.length,`${category} ids`);
     for(const item of items){
       assert.ok(item.id&&item.label&&item.prompt,`${category}/${item.id}`);
-      assert.match(item.label,/[֐-׿]/,`${category}/${item.id} label is Hebrew`);
+      assert.ok(/[\u0590-\u05FF]/.test(item.label)||item.label==="45°",`${category}/${item.id} label is Hebrew`);
       assert.match(item.icon,/^[MmLlHhVvCcSsQqTtAaZz0-9 .,\-]+$/,`${category}/${item.id} icon is an SVG path`);
     }
   }

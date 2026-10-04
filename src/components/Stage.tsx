@@ -19,7 +19,7 @@ export function Stage({studio}: {studio: Studio}) {
   const chips = [
     `סגנון: ${findItem("styles", state.selection.style)?.label}`,
     `פלטה: ${findItem("palettes", state.selection.palette)?.label}`,
-    `מוצר: ${findItem("productTypes", state.selection.product)?.label}`,
+    `מוצר: ${findItem("productTypes", state.selection.product)?.label}${findItem("productTypes", state.selection.product)?.family === "candle" ? ` · ${findItem("candleStates", state.selection.candleState)?.label}` : ""}`,
     `פורמט: ${format.group} ${format.name}`
   ];
   return <section className="stage" aria-label="התמונה">

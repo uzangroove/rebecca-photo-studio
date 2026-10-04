@@ -12,7 +12,7 @@ const settings=defaultSettings;
 const base:Selection={...defaultSelection};
 
 test("prompts match the reviewed snapshots",()=>{
-  assert.equal(Object.keys(snapshots).length,6);
+  assert.equal(Object.keys(snapshots).length,9);
   for(const [name,{selection,prompt}] of Object.entries(snapshots))assert.equal(buildPrompt(selection,settings),prompt,name);
 });
 test("every combination carries the never-list, so marble is always avoided",()=>{
@@ -22,7 +22,7 @@ test("every combination carries the never-list, so marble is always avoided",()=
     assert.ok(prompt.includes("\nStrictly avoid: שיש, עומס."),`${style.id}/${palette.id}/${props.id}`);
     count++;
   }
-  assert.equal(count,2*10*20*3);
+  assert.equal(count,8*10*20*3);
 });
 test("palette names never reach the prompt, only HEX codes marked as environment colors",()=>{
   for(const palette of catalog.palettes){

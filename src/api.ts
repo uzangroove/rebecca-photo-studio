@@ -7,7 +7,8 @@ export async function requestImage(file: File, selection: Selection, ratio: stri
   body.append("image", file);
   // השרת מקבל את קטגוריית "props" בשם "density".
   const fields: Record<string, string> = {product: selection.product, style: selection.style, palette: selection.palette, density: selection.props,
-    surface: selection.surface ?? "", background: selection.background ?? "", light: selection.light ?? "", wish: selection.wish, ratio};
+    surface: selection.surface ?? "", background: selection.background ?? "", light: selection.light ?? "",
+    candleState: selection.candleState, giftWrap: selection.giftWrap, glassTint: selection.glassTint ?? "", angle: selection.angle ?? "", occasion: selection.occasion ?? "", wish: selection.wish, ratio};
   for (const [key, value] of Object.entries(fields)) body.append(key, value);
   const response = await fetch("/api/generate", {method: "POST", body});
   const payload = await response.json().catch(() => ({})) as {error?: string; image?: string};

@@ -1,4 +1,4 @@
-import {findItem, hasItem} from "./catalog.ts";
+import {findItem, hasItem, legacyProductIds} from "./catalog.ts";
 
 export const MAX_WISH_CHARS = 200;
 
@@ -6,6 +6,8 @@ export const MAX_WISH_CHARS = 200;
 export type Selection = {
   product: string; style: string; palette: string; props: string;
   surface: string | null; background: string | null; light: string | null;
+  // הנחיות לפי סוג מוצר (שלב 3). מצב נר ועטיפה נשמרים תמיד, אבל נכנסים לפרומפט רק לסוג המוצר המתאים.
+  candleState: string; giftWrap: string; glassTint: string | null; angle: string | null; occasion: string | null;
   wish: string;
 };
 export type SceneKey = "surface" | "background" | "light";
@@ -15,14 +17,15 @@ export type LookSelection = Pick<Selection, "style" | "palette" | "props" | Scen
 
 // פתיחת הסטודיו: מתכון "מינימליסטי שחור-לבן" (ראו shared/recipes.ts).
 export const defaultSelection: Selection = {
-  product: "soap", style: "minimal", palette: "mono", props: "none",
-  surface: "paper", background: null, light: null, wish: ""
+  product: "cut-soap", style: "minimal", palette: "mono", props: "none",
+  surface: "paper", background: null, light: null,
+  candleState: "asis", giftWrap: "asis", glassTint: null, angle: null, occasion: null, wish: ""
 };
 
 const sceneCategory = {surface: "surfaces", background: "backgrounds", light: "lights"} as const;
 
 // אפשרות ריקה (null, undefined או מחרוזת ריקה מטופס) = ברירת מחדל. ערך שאינו בקטלוג = לא תקין.
-function optional(category: "surfaces" | "backgrounds" | "lights", value: unknown): string | null | undefined {
+function optional(category: "surfaces" | "backgrounds" | "lights" | "glassTints" | "angles" | "occasions", value: unknown): string | null | undefined {
   if (value === null || value === undefined || value === "") return null;
   return hasItem(category, value) ? value : undefined;
 }
@@ -41,10 +44,17 @@ export function parseSelection(value: unknown): Selection | null {
   const look = parseLook(value);
   if (!look) return null;
   const v = value as Record<string, unknown>;
-  if (!hasItem("productTypes", v.product)) return null;
+  const product = typeof v.product === "string" ? legacyProductIds[v.product] ?? v.product : v.product;
+  if (!hasItem("productTypes", product)) return null;
+  // שדות שלא נשלחו (בקשות והיסטוריה ישנות) מקבלים את ברירת המחדל.
+  const candleState = v.candleState == null || v.candleState === "" ? defaultSelection.candleState : v.candleState;
+  const giftWrap = v.giftWrap == null || v.giftWrap === "" ? defaultSelection.giftWrap : v.giftWrap;
+  if (!hasItem("candleStates", candleState) || !hasItem("giftWraps", giftWrap)) return null;
+  const glassTint = optional("glassTints", v.glassTint), angle = optional("angles", v.angle), occasion = optional("occasions", v.occasion);
+  if (glassTint === undefined || angle === undefined || occasion === undefined) return null;
   const wish = v.wish === undefined || v.wish === null ? "" : v.wish;
   if (typeof wish !== "string" || wish.length > MAX_WISH_CHARS) return null;
-  return {...look, product: v.product, wish};
+  return {...look, product, candleState, giftWrap, glassTint, angle, occasion, wish};
 }
 
 // הערך בפועל: בחירה מפורשת, ואם אין אז ברירת המחדל של הסגנון.

@@ -11,6 +11,9 @@ export type CatalogItem = {
 export type SceneDefaults = {surface: string; background: string; light: string};
 export type StyleItem = CatalogItem & {defaults: SceneDefaults};
 export type SurfaceItem = CatalogItem & {swatch: string};
+// family קובע אילו הנחיות רלוונטיות (מצב נר לנרות, עטיפה למארז). guidance הוא מקטע הפרומפט של סוג המוצר.
+export type ProductFamily = "candle" | "soap" | "melts" | "bomb" | "gift";
+export type ProductItem = CatalogItem & {family: ProductFamily; guidance: string | null};
 export type PaletteItem = CatalogItem & {colors: readonly [string, string, string]; iconFill?: string};
 
 // הסגנון קובע את האווירה ואת ברירות המחדל של משטח, רקע ותאורה. בחירה מפורשת של רבקה גוברת עליהן.
@@ -92,9 +95,67 @@ export const palettes: readonly PaletteItem[] = [
   palette("linen","פשתן",["#A4937A","#D6C7B3","#F2EBE1"],"M4 6h16v4H4z M4 10c0 3 2 4 4 4h12 M4 14v4h16v-4")
 ];
 
-export const productTypes: readonly CatalogItem[] = [
-  {id:"soap",label:"סבון",icon:"M3 11l5-4h13v7l-5 4H3z M3 11h13v7 M16 11l5-4",prompt:"handmade soaps"},
-  {id:"candle",label:"נר",icon:"M7 8h10v11a1 1 0 0 1-1 1H8a1 1 0 0 1-1-1z M7 12h10 M12 8V6 M12 6c.8-.8 1-1.8 0-3-1 1.2-.8 2.2 0 3z",prompt:"handmade candles"}
+// סוגי המוצר. אין כלי בטון לנרות. ההנחיה (guidance) נכנסת לפרומפט רק לסוג המתאים.
+export const productTypes: readonly ProductItem[] = [
+  {id:"glass-candle",label:"נר בכלי זכוכית",family:"candle",icon:"M7 8h10v11a1 1 0 0 1-1 1H8a1 1 0 0 1-1-1z M7 12h10 M12 8V6 M12 6c.8-.8 1-1.8 0-3-1 1.2-.8 2.2 0 3z",
+    prompt:"handmade candles in glass vessels",guidance:"Render true glass refraction and reflections, with no glare or hot spot covering the label"},
+  {id:"ceramic-candle",label:"נר בקרמיקה",family:"candle",icon:"M5 11h14l-1.5 7a2 2 0 0 1-2 1.5h-7a2 2 0 0 1-2-1.5z M12 11V9 M12 9c.8-.8 1-1.8 0-3-1 1.2-.8 2.2 0 3z M8 15h8",
+    prompt:"handmade candles in ceramic vessels",guidance:"The ceramic vessel keeps a matte texture, with no gloss"},
+  {id:"pillar-candle",label:"נר עמוד / מפוסל",family:"candle",icon:"M8 9h8v11H8z M12 9V7 M12 7c.8-.8 1-1.8 0-3-1 1.2-.8 2.2 0 3z M8 13c1.5 1 3 1 4 0s2.5-1 4 0",
+    prompt:"handmade pillar and sculpted candles",guidance:"Preserve the sculpted shape of the candle exactly, including every carved detail"},
+  {id:"wax-melts",label:"נמסים ריחניים",family:"melts",icon:"M3 14h5v5H3z M9.5 14h5v5h-5z M16 14h5v5h-5z M6.5 8h5v5h-5z",
+    prompt:"handmade scented wax melts",guidance:null},
+  {id:"cut-soap",label:"סבון חתוך",family:"soap",icon:"M3 11l5-4h13v7l-5 4H3z M3 11h13v7 M16 11l5-4",
+    prompt:"handmade cut soaps",guidance:"Show the natural cut texture on the soap, with no plastic or glossy look"},
+  {id:"molded-soap",label:"סבון בתבנית",family:"soap",icon:"M12 20a8 8 0 1 0 0-16a8 8 0 1 0 0 16z M12 14a2 2 0 1 0 0-4a2 2 0 1 0 0 4z M12 6.5V10 M12 14v3.5 M6.5 12H10 M14 12h3.5",
+    prompt:"handmade molded soaps",guidance:null},
+  {id:"bath-bomb",label:"פצצת אמבט",family:"bomb",icon:"M12 20a8 8 0 1 0 0-16a8 8 0 1 0 0 16z M9 9h.01 M14 8h.01 M15 13h.01 M9.5 14h.01 M12 11.5h.01",
+    prompt:"handmade bath bombs",guidance:"Show a powdery, matte texture"},
+  {id:"gift-box",label:"מארז מתנה",family:"gift",icon:"M4 10h16v4H4z M5 14h14v6H5z M12 10v10 M12 10c-2-4-6-4-6-1.5S10 10 12 10c2 0 6 1 6-1.5S14 6 12 10z",
+    prompt:"a handmade gift box set",guidance:null}
+];
+
+// ערכים ישנים (עד שלב 2) שנשמרו בהיסטוריה ובבקשות: סבון ונר.
+export const legacyProductIds: Readonly<Record<string, string>> = {soap: "cut-soap", candle: "glass-candle"};
+
+// מצב הנר: רק לנרות. "כמו בצילום" משאיר את הלהבה כפי שהיא.
+export const candleStates: readonly CatalogItem[] = [
+  {id:"off",label:"כבוי",icon:"M8 10h8v10H8z M12 10V7",prompt:"The candle is unlit, with a clean wick and no flame"},
+  {id:"lit",label:"דולק",icon:"M8 12h8v8H8z M12 12v-2 M12 10c1.4-1.2 1.8-2.8 0-5.5-1.8 2.7-1.4 4.3 0 5.5z M5 6l1.5 1 M19 6l-1.5 1",
+    prompt:"The candle is lit with a true-to-size flame and a soft warm halo, and the scene is slightly dimmed so the glow reads naturally"},
+  {id:"asis",label:"כמו בצילום",icon:"M4 8h3l2-3h6l2 3h3v11H4z M12 16a3 3 0 1 0 0-6a3 3 0 1 0 0 6z",prompt:"Keep the candle flame exactly as it is in the supplied photo, lit or unlit"}
+];
+
+// גוון הזכוכית: רק לנר בכלי זכוכית, ורק אם נבחר.
+export const glassTints: readonly CatalogItem[] = [
+  {id:"clear",label:"שקופה",icon:"M7 8h10v11a1 1 0 0 1-1 1H8a1 1 0 0 1-1-1z",prompt:"The vessel is clear glass"},
+  {id:"milky",label:"חלבית",icon:"M7 8h10v11a1 1 0 0 1-1 1H8a1 1 0 0 1-1-1z M9 12h6",prompt:"The vessel is milky frosted glass"},
+  {id:"amber",label:"ענברית",icon:"M7 8h10v11a1 1 0 0 1-1 1H8a1 1 0 0 1-1-1z M9 12h6 M9 16h6",prompt:"The vessel is amber-tinted glass"}
+];
+
+// מארז מתנה: כמו שהוא, או עטוף.
+export const giftWraps: readonly CatalogItem[] = [
+  {id:"asis",label:"המארז כמו שהוא",icon:"M4 10h16v4H4z M5 14h14v6H5z M12 10v10",prompt:"Keep the gift box exactly as it is, with its own wrapping, closure and labels"},
+  {id:"wrapped",label:"עטוף בשבילי",icon:"M4 10h16v4H4z M5 14h14v6H5z M12 10v10 M12 10c-2-4-6-4-6-1.5S10 10 12 10c2 0 6 1 6-1.5S14 6 12 10z",
+    prompt:"Present the gift box elegantly wrapped in plain natural paper with a simple ribbon, keeping every label on the contents legible"}
+];
+
+// זווית צילום. בלי בחירה אין הנחיה, והזווית נשארת כמו בצילום.
+export const angles: readonly CatalogItem[] = [
+  {id:"eye",label:"גובה עיניים",icon:"M2 12s4-6 10-6 10 6 10 6-4 6-10 6S2 12 2 12z M12 14.5a2.5 2.5 0 1 0 0-5a2.5 2.5 0 1 0 0 5z",prompt:"eye-level camera angle"},
+  {id:"45",label:"45°",icon:"M4 20L20 4 M4 20h7 M4 20v-7",prompt:"a 45-degree camera angle"},
+  {id:"top",label:"מלמעלה",icon:"M12 3v9 M8 8l4 4 4-4 M4 18h16",prompt:"a top-down camera angle"},
+  {id:"macro",label:"תקריב",icon:"M10.5 17a6.5 6.5 0 1 0 0-13a6.5 6.5 0 1 0 0 13z M15.5 15.5L21 21",prompt:"a close-up macro framing"}
+];
+
+// אירוע: משפיע רק על פרטים בסצנה, אף פעם לא על המוצר. בלי בחירה = ללא.
+export const occasions: readonly CatalogItem[] = [
+  {id:"hanukkah",label:"חנוכה",icon:"M12 4v16 M5 8v4a3 3 0 0 0 3 3h8a3 3 0 0 0 3-3V8 M8 20h8 M5 8h.01 M8.5 6h.01 M12 4h.01 M15.5 6h.01 M19 8h.01",prompt:"Hanukkah, with soft blue and silver accents"},
+  {id:"rosh",label:"ראש השנה",icon:"M12 20c-4.5 0-7.5-3-7.5-6.5S7.5 7 12 8c4.5-1 7.5 2 7.5 5.5S16.5 20 12 20z M12 8c1-2.5 3-3.5 5-3-1 2-3 3-5 3z",prompt:"the Jewish New Year, with honey and apple tones"},
+  {id:"tubshvat",label:"ט\"ו בשבט",icon:"M12 21v-7 M12 14c-4 0-7-3-7-7 4 0 7 3 7 7z M12 17c0-4 3-7 7-7 0 4-3 7-7 7z",prompt:"Tu BiShvat, with fresh spring green tones"},
+  {id:"family",label:"יום המשפחה",icon:"M8 10a2.5 2.5 0 1 0 0-5a2.5 2.5 0 1 0 0 5z M16 10a2.5 2.5 0 1 0 0-5a2.5 2.5 0 1 0 0 5z M3 20c0-3 2.5-5 5-5s5 2 5 5 M11 20c0-3 2.5-5 5-5s5 2 5 5",prompt:"a warm family day"},
+  {id:"wedding",label:"חתונה",icon:"M9 19a5 5 0 1 0 0-10a5 5 0 1 0 0 10z M15 19a5 5 0 1 0 0-10a5 5 0 1 0 0 10z M12 5l-1.5-2h3z",prompt:"a wedding, with soft romantic white tones"},
+  {id:"love",label:"ולנטיין",icon:"M12 20s-8-5-8-11a4.5 4.5 0 0 1 8-2.5A4.5 4.5 0 0 1 20 9c0 6-8 11-8 11z",prompt:"Valentine's Day, with soft rose tones"}
 ];
 
 // ה-prompt של אביזרים משלים את ההנחיה הקבועה "uncluttered composition, generous negative space, ...".
@@ -106,10 +167,11 @@ export const props: readonly CatalogItem[] = [
     prompt:"a few tasteful contextual props while keeping the product clearly dominant"}
 ];
 
-export const catalog = {styles, surfaces, lights, backgrounds, palettes, productTypes, props} as const;
+export const catalog = {styles, surfaces, lights, backgrounds, palettes, productTypes, candleStates, glassTints, giftWraps, angles, occasions, props} as const;
 export type CatalogCategory = keyof typeof catalog;
 
 export function findItem(category: "styles", id: string): StyleItem | undefined;
+export function findItem(category: "productTypes", id: string): ProductItem | undefined;
 export function findItem(category: "surfaces", id: string): SurfaceItem | undefined;
 export function findItem(category: "palettes", id: string): PaletteItem | undefined;
 export function findItem(category: CatalogCategory, id: string): CatalogItem | undefined;

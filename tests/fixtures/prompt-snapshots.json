@@ -1,80 +1,164 @@
 {
  "boutique-bw": {
   "selection": {
-   "product": "soap",
+   "product": "cut-soap",
    "style": "boutique",
    "palette": "mono",
    "props": "none",
    "surface": "paper",
    "background": null,
    "light": null,
+   "candleState": "asis",
+   "giftWrap": "asis",
+   "glassTint": null,
+   "angle": null,
+   "occasion": null,
    "wish": ""
   },
-  "prompt": "Create a single photorealistic commercial product photograph by editing the supplied photo of handmade soaps.\nThe image itself must become one coherent edge-to-edge scene. No frames, mats, borders, poster layouts, inset source photos, cards, text overlays, typography, additional logos or watermarks.\nKeep the exact number, shape, silhouette, arrangement, scale, material, colors, surface details and existing labels of the actual products in the supplied photo. Do not redesign or invent products. Do not change the words on any existing label. Keep the products central and recognizable.\nReplace and integrate the background and surrounding surface as a refined luxury boutique product photograph, sculpted directional light, refined and quiet. Surface: a textured fine paper surface. Background: a plain smooth wall. Lighting: soft directional natural window light. Use these exact three HEX colors as guidance, environment colors only: #1A1A1A, #8C8C8C, #F5F5F5. Do not recolor the products. Composition: uncluttered composition, generous negative space, no props at all.\nMake perspective, natural lighting, contact shadows and reflections consistent so the products feel physically present. Leave generous breathing room on every side because the image may be cropped for social publishing. Keep the full product safely inside the central 60 percent. Output one finished photograph, no graphic layout.\nStrictly avoid: שיש, עומס."
+  "prompt": "Create a single photorealistic commercial product photograph by editing the supplied photo of handmade cut soaps.\nThe image itself must become one coherent edge-to-edge scene. No frames, mats, borders, poster layouts, inset source photos, cards, text overlays, typography, additional logos or watermarks.\nKeep the exact number, shape, silhouette, arrangement, scale, material, colors, surface details and existing labels of the actual products in the supplied photo. Do not redesign or invent products. Do not change the words on any existing label. Keep the products central and recognizable.\nReplace and integrate the background and surrounding surface as a refined luxury boutique product photograph, sculpted directional light, refined and quiet. Surface: a textured fine paper surface. Background: a plain smooth wall. Lighting: soft directional natural window light. Use these exact three HEX colors as guidance, environment colors only: #1A1A1A, #8C8C8C, #F5F5F5. Do not recolor the products. Show the natural cut texture on the soap, with no plastic or glossy look. Composition: uncluttered composition, generous negative space, no props at all.\nMake perspective, natural lighting, contact shadows and reflections consistent so the products feel physically present. Leave generous breathing room on every side because the image may be cropped for social publishing. Keep the full product safely inside the central 60 percent. Output one finished photograph, no graphic layout.\nStrictly avoid: שיש, עומס."
  },
  "boutique-desert": {
   "selection": {
-   "product": "soap",
+   "product": "cut-soap",
    "style": "boutique",
    "palette": "desert",
    "props": "subtle",
    "surface": "plaster",
    "background": null,
    "light": null,
+   "candleState": "asis",
+   "giftWrap": "asis",
+   "glassTint": null,
+   "angle": null,
+   "occasion": null,
    "wish": ""
   },
-  "prompt": "Create a single photorealistic commercial product photograph by editing the supplied photo of handmade soaps.\nThe image itself must become one coherent edge-to-edge scene. No frames, mats, borders, poster layouts, inset source photos, cards, text overlays, typography, additional logos or watermarks.\nKeep the exact number, shape, silhouette, arrangement, scale, material, colors, surface details and existing labels of the actual products in the supplied photo. Do not redesign or invent products. Do not change the words on any existing label. Keep the products central and recognizable.\nReplace and integrate the background and surrounding surface as a refined luxury boutique product photograph, sculpted directional light, refined and quiet. Surface: a soft plaster surface. Background: a plain smooth wall. Lighting: soft directional natural window light. Use these exact three HEX colors as guidance, environment colors only: #B07D62, #D8A47F, #F3E1D4. Do not recolor the products. Composition: uncluttered composition, generous negative space, at most one small prop.\nMake perspective, natural lighting, contact shadows and reflections consistent so the products feel physically present. Leave generous breathing room on every side because the image may be cropped for social publishing. Keep the full product safely inside the central 60 percent. Output one finished photograph, no graphic layout.\nStrictly avoid: שיש, עומס."
+  "prompt": "Create a single photorealistic commercial product photograph by editing the supplied photo of handmade cut soaps.\nThe image itself must become one coherent edge-to-edge scene. No frames, mats, borders, poster layouts, inset source photos, cards, text overlays, typography, additional logos or watermarks.\nKeep the exact number, shape, silhouette, arrangement, scale, material, colors, surface details and existing labels of the actual products in the supplied photo. Do not redesign or invent products. Do not change the words on any existing label. Keep the products central and recognizable.\nReplace and integrate the background and surrounding surface as a refined luxury boutique product photograph, sculpted directional light, refined and quiet. Surface: a soft plaster surface. Background: a plain smooth wall. Lighting: soft directional natural window light. Use these exact three HEX colors as guidance, environment colors only: #B07D62, #D8A47F, #F3E1D4. Do not recolor the products. Show the natural cut texture on the soap, with no plastic or glossy look. Composition: uncluttered composition, generous negative space, at most one small prop.\nMake perspective, natural lighting, contact shadows and reflections consistent so the products feel physically present. Leave generous breathing room on every side because the image may be cropped for social publishing. Keep the full product safely inside the central 60 percent. Output one finished photograph, no graphic layout.\nStrictly avoid: שיש, עומס."
  },
  "minimal-bw": {
   "selection": {
-   "product": "soap",
+   "product": "cut-soap",
    "style": "minimal",
    "palette": "mono",
    "props": "none",
    "surface": "paper",
    "background": null,
    "light": null,
+   "candleState": "asis",
+   "giftWrap": "asis",
+   "glassTint": null,
+   "angle": null,
+   "occasion": null,
    "wish": ""
   },
-  "prompt": "Create a single photorealistic commercial product photograph by editing the supplied photo of handmade soaps.\nThe image itself must become one coherent edge-to-edge scene. No frames, mats, borders, poster layouts, inset source photos, cards, text overlays, typography, additional logos or watermarks.\nKeep the exact number, shape, silhouette, arrangement, scale, material, colors, surface details and existing labels of the actual products in the supplied photo. Do not redesign or invent products. Do not change the words on any existing label. Keep the products central and recognizable.\nReplace and integrate the background and surrounding surface as a calm minimal studio scene with generous negative space and simple surfaces. Surface: a textured fine paper surface. Background: a plain smooth wall. Lighting: soft diffused studio light. Use these exact three HEX colors as guidance, environment colors only: #1A1A1A, #8C8C8C, #F5F5F5. Do not recolor the products. Composition: uncluttered composition, generous negative space, no props at all.\nMake perspective, natural lighting, contact shadows and reflections consistent so the products feel physically present. Leave generous breathing room on every side because the image may be cropped for social publishing. Keep the full product safely inside the central 60 percent. Output one finished photograph, no graphic layout.\nStrictly avoid: שיש, עומס."
+  "prompt": "Create a single photorealistic commercial product photograph by editing the supplied photo of handmade cut soaps.\nThe image itself must become one coherent edge-to-edge scene. No frames, mats, borders, poster layouts, inset source photos, cards, text overlays, typography, additional logos or watermarks.\nKeep the exact number, shape, silhouette, arrangement, scale, material, colors, surface details and existing labels of the actual products in the supplied photo. Do not redesign or invent products. Do not change the words on any existing label. Keep the products central and recognizable.\nReplace and integrate the background and surrounding surface as a calm minimal studio scene with generous negative space and simple surfaces. Surface: a textured fine paper surface. Background: a plain smooth wall. Lighting: soft diffused studio light. Use these exact three HEX colors as guidance, environment colors only: #1A1A1A, #8C8C8C, #F5F5F5. Do not recolor the products. Show the natural cut texture on the soap, with no plastic or glossy look. Composition: uncluttered composition, generous negative space, no props at all.\nMake perspective, natural lighting, contact shadows and reflections consistent so the products feel physically present. Leave generous breathing room on every side because the image may be cropped for social publishing. Keep the full product safely inside the central 60 percent. Output one finished photograph, no graphic layout.\nStrictly avoid: שיש, עומס."
  },
  "minimal-desert": {
   "selection": {
-   "product": "soap",
+   "product": "cut-soap",
    "style": "minimal",
    "palette": "desert",
    "props": "none",
    "surface": "linen",
    "background": null,
    "light": "window",
+   "candleState": "asis",
+   "giftWrap": "asis",
+   "glassTint": null,
+   "angle": null,
+   "occasion": null,
    "wish": ""
   },
-  "prompt": "Create a single photorealistic commercial product photograph by editing the supplied photo of handmade soaps.\nThe image itself must become one coherent edge-to-edge scene. No frames, mats, borders, poster layouts, inset source photos, cards, text overlays, typography, additional logos or watermarks.\nKeep the exact number, shape, silhouette, arrangement, scale, material, colors, surface details and existing labels of the actual products in the supplied photo. Do not redesign or invent products. Do not change the words on any existing label. Keep the products central and recognizable.\nReplace and integrate the background and surrounding surface as a calm minimal studio scene with generous negative space and simple surfaces. Surface: a natural linen cloth surface. Background: a plain smooth wall. Lighting: soft directional natural window light. Use these exact three HEX colors as guidance, environment colors only: #B07D62, #D8A47F, #F3E1D4. Do not recolor the products. Composition: uncluttered composition, generous negative space, no props at all.\nMake perspective, natural lighting, contact shadows and reflections consistent so the products feel physically present. Leave generous breathing room on every side because the image may be cropped for social publishing. Keep the full product safely inside the central 60 percent. Output one finished photograph, no graphic layout.\nStrictly avoid: שיש, עומס."
+  "prompt": "Create a single photorealistic commercial product photograph by editing the supplied photo of handmade cut soaps.\nThe image itself must become one coherent edge-to-edge scene. No frames, mats, borders, poster layouts, inset source photos, cards, text overlays, typography, additional logos or watermarks.\nKeep the exact number, shape, silhouette, arrangement, scale, material, colors, surface details and existing labels of the actual products in the supplied photo. Do not redesign or invent products. Do not change the words on any existing label. Keep the products central and recognizable.\nReplace and integrate the background and surrounding surface as a calm minimal studio scene with generous negative space and simple surfaces. Surface: a natural linen cloth surface. Background: a plain smooth wall. Lighting: soft directional natural window light. Use these exact three HEX colors as guidance, environment colors only: #B07D62, #D8A47F, #F3E1D4. Do not recolor the products. Show the natural cut texture on the soap, with no plastic or glossy look. Composition: uncluttered composition, generous negative space, no props at all.\nMake perspective, natural lighting, contact shadows and reflections consistent so the products feel physically present. Leave generous breathing room on every side because the image may be cropped for social publishing. Keep the full product safely inside the central 60 percent. Output one finished photograph, no graphic layout.\nStrictly avoid: שיש, עומס."
  },
  "urban-candle-wish": {
   "selection": {
-   "product": "candle",
+   "product": "glass-candle",
    "style": "urban",
    "palette": "charcoal",
    "props": "subtle",
    "surface": null,
    "background": null,
    "light": null,
+   "candleState": "asis",
+   "giftWrap": "asis",
+   "glassTint": null,
+   "angle": null,
+   "occasion": null,
    "wish": "שירגיש כמו בוקר שבת שקט"
   },
-  "prompt": "Create a single photorealistic commercial product photograph by editing the supplied photo of handmade candles.\nThe image itself must become one coherent edge-to-edge scene. No frames, mats, borders, poster layouts, inset source photos, cards, text overlays, typography, additional logos or watermarks.\nKeep the exact number, shape, silhouette, arrangement, scale, material, colors, surface details and existing labels of the actual products in the supplied photo. Do not redesign or invent products. Do not change the words on any existing label. Keep the products central and recognizable.\nReplace and integrate the background and surrounding surface as a contemporary urban studio with architectural shadows. Surface: a smooth concrete surface. Background: a plain smooth wall. Lighting: soft directional natural window light. Use these exact three HEX colors as guidance, environment colors only: #2B2D42, #8D99AE, #EDF2F4. Do not recolor the products. Composition: uncluttered composition, generous negative space, at most one small prop.\nMake perspective, natural lighting, contact shadows and reflections consistent so the products feel physically present. Leave generous breathing room on every side because the image may be cropped for social publishing. Keep the full product safely inside the central 60 percent. Output one finished photograph, no graphic layout.\nStrictly avoid: שיש, עומס.\nAdditional wish from the maker (Hebrew): שירגיש כמו בוקר שבת שקט"
+  "prompt": "Create a single photorealistic commercial product photograph by editing the supplied photo of handmade candles in glass vessels.\nThe image itself must become one coherent edge-to-edge scene. No frames, mats, borders, poster layouts, inset source photos, cards, text overlays, typography, additional logos or watermarks.\nKeep the exact number, shape, silhouette, arrangement, scale, material, colors, surface details and existing labels of the actual products in the supplied photo. Do not redesign or invent products. Do not change the words on any existing label. Keep the products central and recognizable.\nReplace and integrate the background and surrounding surface as a contemporary urban studio with architectural shadows. Surface: a smooth concrete surface. Background: a plain smooth wall. Lighting: soft directional natural window light. Use these exact three HEX colors as guidance, environment colors only: #2B2D42, #8D99AE, #EDF2F4. Do not recolor the products. Render true glass refraction and reflections, with no glare or hot spot covering the label. Keep the candle flame exactly as it is in the supplied photo, lit or unlit. Composition: uncluttered composition, generous negative space, at most one small prop.\nMake perspective, natural lighting, contact shadows and reflections consistent so the products feel physically present. Leave generous breathing room on every side because the image may be cropped for social publishing. Keep the full product safely inside the central 60 percent. Output one finished photograph, no graphic layout.\nStrictly avoid: שיש, עומס.\nAdditional wish from the maker (Hebrew): שירגיש כמו בוקר שבת שקט"
  },
  "rustic-rich-explicit": {
   "selection": {
-   "product": "soap",
+   "product": "cut-soap",
    "style": "rustic",
    "palette": "forest",
    "props": "rich",
    "surface": "walnut",
    "background": "plants",
    "light": "golden",
+   "candleState": "asis",
+   "giftWrap": "asis",
+   "glassTint": null,
+   "angle": null,
+   "occasion": null,
    "wish": ""
   },
-  "prompt": "Create a single photorealistic commercial product photograph by editing the supplied photo of handmade soaps.\nThe image itself must become one coherent edge-to-edge scene. No frames, mats, borders, poster layouts, inset source photos, cards, text overlays, typography, additional logos or watermarks.\nKeep the exact number, shape, silhouette, arrangement, scale, material, colors, surface details and existing labels of the actual products in the supplied photo. Do not redesign or invent products. Do not change the words on any existing label. Keep the products central and recognizable.\nReplace and integrate the background and surrounding surface as a rustic handcrafted setting, warm and natural. Surface: a dark walnut wood surface. Background: soft out-of-focus greenery. Lighting: warm golden hour light. Use these exact three HEX colors as guidance, environment colors only: #2A4B3C, #6B8E76, #C6D8CB. Do not recolor the products. Composition: uncluttered composition, generous negative space, a few tasteful contextual props while keeping the product clearly dominant.\nMake perspective, natural lighting, contact shadows and reflections consistent so the products feel physically present. Leave generous breathing room on every side because the image may be cropped for social publishing. Keep the full product safely inside the central 60 percent. Output one finished photograph, no graphic layout.\nStrictly avoid: שיש, עומס."
+  "prompt": "Create a single photorealistic commercial product photograph by editing the supplied photo of handmade cut soaps.\nThe image itself must become one coherent edge-to-edge scene. No frames, mats, borders, poster layouts, inset source photos, cards, text overlays, typography, additional logos or watermarks.\nKeep the exact number, shape, silhouette, arrangement, scale, material, colors, surface details and existing labels of the actual products in the supplied photo. Do not redesign or invent products. Do not change the words on any existing label. Keep the products central and recognizable.\nReplace and integrate the background and surrounding surface as a rustic handcrafted setting, warm and natural. Surface: a dark walnut wood surface. Background: soft out-of-focus greenery. Lighting: warm golden hour light. Use these exact three HEX colors as guidance, environment colors only: #2A4B3C, #6B8E76, #C6D8CB. Do not recolor the products. Show the natural cut texture on the soap, with no plastic or glossy look. Composition: uncluttered composition, generous negative space, a few tasteful contextual props while keeping the product clearly dominant.\nMake perspective, natural lighting, contact shadows and reflections consistent so the products feel physically present. Leave generous breathing room on every side because the image may be cropped for social publishing. Keep the full product safely inside the central 60 percent. Output one finished photograph, no graphic layout.\nStrictly avoid: שיש, עומס."
+ },
+ "glass-candle-lit-amber-45-hanukkah": {
+  "selection": {
+   "product": "glass-candle",
+   "style": "minimal",
+   "palette": "mono",
+   "props": "none",
+   "surface": "paper",
+   "background": null,
+   "light": null,
+   "candleState": "lit",
+   "giftWrap": "asis",
+   "glassTint": "amber",
+   "angle": "45",
+   "occasion": "hanukkah",
+   "wish": ""
+  },
+  "prompt": "Create a single photorealistic commercial product photograph by editing the supplied photo of handmade candles in glass vessels.\nThe image itself must become one coherent edge-to-edge scene. No frames, mats, borders, poster layouts, inset source photos, cards, text overlays, typography, additional logos or watermarks.\nKeep the exact number, shape, silhouette, arrangement, scale, material, colors, surface details and existing labels of the actual products in the supplied photo. Do not redesign or invent products. Do not change the words on any existing label. Keep the products central and recognizable.\nReplace and integrate the background and surrounding surface as a calm minimal studio scene with generous negative space and simple surfaces. Surface: a textured fine paper surface. Background: a plain smooth wall. Lighting: soft diffused studio light. Use these exact three HEX colors as guidance, environment colors only: #1A1A1A, #8C8C8C, #F5F5F5. Do not recolor the products. Render true glass refraction and reflections, with no glare or hot spot covering the label. The candle is lit with a true-to-size flame and a soft warm halo, and the scene is slightly dimmed so the glow reads naturally. The vessel is amber-tinted glass. Composition: uncluttered composition, generous negative space, no props at all. Camera: a 45-degree camera angle. Occasion: Hanukkah, with soft blue and silver accents, expressed only through subtle mood and color, with no added objects, never on the products themselves.\nMake perspective, natural lighting, contact shadows and reflections consistent so the products feel physically present. Leave generous breathing room on every side because the image may be cropped for social publishing. Keep the full product safely inside the central 60 percent. Output one finished photograph, no graphic layout.\nStrictly avoid: שיש, עומס."
+ },
+ "gift-box-wrapped-love": {
+  "selection": {
+   "product": "gift-box",
+   "style": "minimal",
+   "palette": "mono",
+   "props": "subtle",
+   "surface": "paper",
+   "background": null,
+   "light": null,
+   "candleState": "asis",
+   "giftWrap": "wrapped",
+   "glassTint": null,
+   "angle": "top",
+   "occasion": "love",
+   "wish": ""
+  },
+  "prompt": "Create a single photorealistic commercial product photograph by editing the supplied photo of a handmade gift box set.\nThe image itself must become one coherent edge-to-edge scene. No frames, mats, borders, poster layouts, inset source photos, cards, text overlays, typography, additional logos or watermarks.\nKeep the exact number, shape, silhouette, arrangement, scale, material, colors, surface details and existing labels of the actual products in the supplied photo. Do not redesign or invent products. Do not change the words on any existing label. Keep the products central and recognizable.\nReplace and integrate the background and surrounding surface as a calm minimal studio scene with generous negative space and simple surfaces. Surface: a textured fine paper surface. Background: a plain smooth wall. Lighting: soft diffused studio light. Use these exact three HEX colors as guidance, environment colors only: #1A1A1A, #8C8C8C, #F5F5F5. Do not recolor the products. Present the gift box elegantly wrapped in plain natural paper with a simple ribbon, keeping every label on the contents legible. Composition: uncluttered composition, generous negative space, at most one small prop. Camera: a top-down camera angle. Occasion: Valentine's Day, with soft rose tones, expressed only through subtle scene details, never on the products themselves.\nMake perspective, natural lighting, contact shadows and reflections consistent so the products feel physically present. Leave generous breathing room on every side because the image may be cropped for social publishing. Keep the full product safely inside the central 60 percent. Output one finished photograph, no graphic layout.\nStrictly avoid: שיש, עומס."
+ },
+ "pillar-candle-off": {
+  "selection": {
+   "product": "pillar-candle",
+   "style": "japandi",
+   "palette": "coffee",
+   "props": "none",
+   "surface": "paper",
+   "background": null,
+   "light": null,
+   "candleState": "off",
+   "giftWrap": "asis",
+   "glassTint": null,
+   "angle": null,
+   "occasion": null,
+   "wish": ""
+  },
+  "prompt": "Create a single photorealistic commercial product photograph by editing the supplied photo of handmade pillar and sculpted candles.\nThe image itself must become one coherent edge-to-edge scene. No frames, mats, borders, poster layouts, inset source photos, cards, text overlays, typography, additional logos or watermarks.\nKeep the exact number, shape, silhouette, arrangement, scale, material, colors, surface details and existing labels of the actual products in the supplied photo. Do not redesign or invent products. Do not change the words on any existing label. Keep the products central and recognizable.\nReplace and integrate the background and surrounding surface as a warm, quiet Japandi interior. Surface: a textured fine paper surface. Background: a plain smooth wall. Lighting: soft directional natural window light. Use these exact three HEX colors as guidance, environment colors only: #4A3B32, #8E735B, #D9CDBF. Do not recolor the products. Preserve the sculpted shape of the candle exactly, including every carved detail. The candle is unlit, with a clean wick and no flame. Composition: uncluttered composition, generous negative space, no props at all.\nMake perspective, natural lighting, contact shadows and reflections consistent so the products feel physically present. Leave generous breathing room on every side because the image may be cropped for social publishing. Keep the full product safely inside the central 60 percent. Output one finished photograph, no graphic layout.\nStrictly avoid: שיש, עומס."
  }
 }

@@ -17,7 +17,8 @@ export async function generate(request: Request, env: {OPENAI_API_KEY?: string; 
     // השדה "density" נשאר בשם הישן בבקשה; בקטלוג הוא קטגוריית "props". שדות המראה הריקים משמעם ברירת המחדל של הסגנון.
     const field=(name:string)=>form.get(name);
     const selection=parseSelection({product:field("product"),style:field("style"),palette:field("palette"),props:field("density"),
-      surface:field("surface"),background:field("background"),light:field("light"),wish:field("wish")});
+      surface:field("surface"),background:field("background"),light:field("light"),
+      candleState:field("candleState"),giftWrap:field("giftWrap"),glassTint:field("glassTint"),angle:field("angle"),occasion:field("occasion"),wish:field("wish")});
     if (!(photo instanceof File) || !["image/png","image/jpeg","image/webp"].includes(photo.type) || photo.size<1000 || photo.size>10*1024*1024 ||
       !selection || !["square","portrait","landscape"].includes(ratio))
       return Response.json({error:"הצילום או אפשרויות העיצוב אינם תקינים"},{status:400});
