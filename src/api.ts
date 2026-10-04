@@ -11,11 +11,13 @@ export async function requestImage(file: File, selection: Selection, ratio: stri
     candleState: selection.candleState, giftWrap: selection.giftWrap, glassTint: selection.glassTint ?? "", angle: selection.angle ?? "", occasion: selection.occasion ?? "", wish: selection.wish, ratio};
   for (const [key, value] of Object.entries(fields)) body.append(key, value);
   const response = await fetch("/api/generate", {method: "POST", body});
-  const payload = await response.json().catch(() => ({})) as {error?: string; image?: string};
+  const payload = await response.json().catch(() => ({})) as {error?: string; image?: string; detail?: string};
+  // הסבר של OpenAI (באנגלית) מצורף להודעה, כדי שיהיה ברור מה לתקן.
+  const withDetail = (text: string) => payload.detail ? `${text} פירוט מ־OpenAI: ${payload.detail}` : text;
   if (!response.ok) {
     if (response.status === 401 || response.status === 403) throw new Error(payload.error || "הגישה לאתר פגה או נחסמה. רעננו את הדף ופתחו אותו שוב מתוך החשבון שלכם");
-    if (response.status === 502 || response.status === 503) throw new Error(payload.error || "שירות יצירת התמונות אינו זמין כרגע. נסו שוב בעוד כמה דקות");
-    throw new Error(payload.error || `לא הצלחנו ליצור תמונה (שגיאה ${response.status})`);
+    if (response.status === 502 || response.status === 503) throw new Error(withDetail(payload.error || "שירות יצירת התמונות אינו זמין כרגע. נסו שוב בעוד כמה דקות"));
+    throw new Error(withDetail(payload.error || `לא הצלחנו ליצור תמונה (שגיאה ${response.status})`));
   }
   if (!payload.image) throw new Error("לא התקבלה תמונה משירות היצירה. נסו שוב");
   return "data:image/png;base64," + payload.image;
