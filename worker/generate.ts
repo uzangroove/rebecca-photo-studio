@@ -30,7 +30,7 @@ export async function generate(request: Request, env: {OPENAI_API_KEY?: string; 
     upstream.append("quality","medium");
     upstream.append("image",photo,photo.name||"product.png");
     const response=await fetch("https://api.openai.com/v1/images/edits",{
-      method:"POST",headers:{Authorization:`Bearer ${key}`},body:upstream,
+      method:"POST",headers:{Authorization:`Bearer ${key.trim()}`},body:upstream,
       signal:AbortSignal.timeout(120000)
     });
     if (!response.ok) {
@@ -51,8 +51,10 @@ export async function generate(request: Request, env: {OPENAI_API_KEY?: string; 
         return Response.json({error:"חשבון OpenAI API הגיע למגבלת שימוש או הוצאה. בדקו את המגבלה של הארגון או הפרויקט.",code,detail},{status:402});
       if (response.status===429)
         return Response.json({error:"שירות התמונות החזיר מגבלת בקשות זמנית. המתינו מעט ונסו שוב. אם זה חוזר, בדקו את מגבלות ה־API.",code,detail},{status:429});
+      // ארבעת התווים האחרונים של המפתח שהשרת שלח, כדי שאפשר יהיה לוודא שהוא המפתח החדש (לא נחשף מפתח שלם).
+      const keyHint=key.trim().slice(-4);
       if (response.status===401)
-        return Response.json({error:"מפתח ה־OpenAI API לא התקבל (401). בדקו שהמפתח הועתק במלואו, בלי רווחים, ושהוא פעיל.",code,detail},{status:502});
+        return Response.json({error:`מפתח ה־OpenAI API לא התקבל (401). המפתח שהשרת השתמש בו מסתיים ב־${keyHint}. בדקו שזה המפתח החדש, שהוא הועתק במלואו בלי רווחים, ושהוא פעיל.`,code,detail,keyHint},{status:502});
       if (response.status===403)
         return Response.json({error:"ל־OpenAI אין הרשאה למודל התמונות בחשבון הזה (403). ייתכן שנדרש אימות ארגון, או שהמפתח מוגבל למודלים אחרים.",code,detail},{status:502});
       if (response.status===404)
