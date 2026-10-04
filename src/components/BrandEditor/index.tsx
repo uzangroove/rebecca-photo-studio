@@ -2,8 +2,7 @@ import {useEffect, useLayoutEffect, useMemo, useRef, useState} from "react";
 import {alignBox, centerFromBox, clamp, distribute, nudgeCenter, productAreaBox, type AlignAction, type Box} from "../../../shared/brand-geometry";
 import {layerIds, type BrandLayout, type LayerId} from "../../../shared/brand-layout";
 import {formatById} from "../../../shared/social-formats";
-import {aspectOf} from "../../brand/assets";
-import {BrandScene, layerBoxes, type EditProps, type LayerPatch, type SceneAssets} from "../../brand/BrandScene";
+import {BrandScene, imageLayerAspect, layerBoxes, type EditProps, type LayerPatch, type SceneAssets} from "../../brand/BrandScene";
 import {loadSceneAssets} from "../../brand/export";
 import type {Studio} from "../../useStudio";
 import {Icon} from "../Icon";
@@ -30,7 +29,8 @@ export function BrandEditor({studio}: {studio: Studio}) {
     const all: BrandLayout = {...layout, logo: {...layout.logo, visible: true}, slogan: {...layout.slogan, visible: true}};
     loadSceneAssets({backdrop, logo: state.brand.logoSource, slogan: state.brand.sloganSource}, all).then(a => { if (!cancelled) setAssets(a); }).catch(() => {});
     return () => { cancelled = true; };
-  }, [backdrop, state.brand.logoSource, state.brand.sloganSource, layout.text.font, layout.text.visible, layout.text.text]);
+  }, [backdrop, state.brand.logoSource, state.brand.sloganSource, layout.text.font, layout.text.visible, layout.text.text,
+    layout.logo.asText, layout.logo.label, layout.logo.font, layout.logo.bold, layout.slogan.asText, layout.slogan.label, layout.slogan.font, layout.slogan.bold]);
 
   // הקנבס ממלא את השטח הפנוי, בלי לעבור את גודל הפורמט.
   useLayoutEffect(() => {
@@ -85,7 +85,7 @@ export function BrandEditor({studio}: {studio: Studio}) {
     scale, selected: sel, cropMode, showProductArea: showProduct, coarse: typeof matchMedia === "function" && matchMedia("(pointer: coarse)").matches,
     onSelect: setSelected, onLayer: patch, onFocal: f => dispatch({type: "crop", formatId: state.formatId, focal: f})
   };
-  const aspectFor = (id: LayerId) => id === "text" ? 1 : (assets[id] ? aspectOf(assets[id]!) : 0.25);
+  const aspectFor = (id: LayerId) => id === "text" ? 1 : (imageLayerAspect(layout[id], assets[id]) ?? 0.25);
 
   return <div className="editor">
     <header className="editor-header">
@@ -102,7 +102,7 @@ export function BrandEditor({studio}: {studio: Studio}) {
             if (visible) setSelected(id);
           }}/>
         {selected && layout[selected].visible
-          ? <Properties id={selected} layout={layout} box={boxes[selected]} canvas={canvas} aspect={aspectFor(selected)} palette={state.selection.palette} autoTextColor={autoTextColor}
+          ? <Properties id={selected} layout={layout} box={boxes[selected]} canvas={canvas} aspect={aspectFor(selected)} autoTextColor={autoTextColor}
             step={step} onStep={() => setStep(s => s === 1 ? 10 : 1)} onPatch={p => patch(selected, p)} onNudge={nudge}/>
           : <p className="panel-sub">{selected ? `${layerLabel[selected]} מוסתר. הציגו אותו כדי לערוך.` : "בחרו שכבה ברשימה או על התמונה."}</p>}
       </aside>

@@ -500,3 +500,24 @@ figcaption.is-result,.compare-tag.is-result{background:var(--green);color:var(--
 .upload.pill{cursor:pointer}
 @media(prefers-reduced-motion:reduce){.cta:hover,.save:hover,.pill:hover{transform:none}}
 @media(prefers-reduced-motion:reduce){*{transition:none!important;animation-duration:.01ms!important}}
+
+/* בחירת צבע מלאה וגופן (עורך המיתוג) */
+.color-row{display:flex;align-items:center;gap:8px}
+.color-pick{position:relative;width:52px;height:44px;flex:none;border-radius:12px;overflow:hidden;border:2px solid #fff;box-shadow:0 0 0 1px var(--line),0 2px 5px rgba(0,0,0,.12);cursor:pointer}
+.color-pick input{position:absolute;inset:-6px;width:calc(100% + 12px);height:calc(100% + 12px);opacity:0;cursor:pointer;padding:0;border:0}
+.color-chip{position:absolute;inset:0;display:block}
+.hex-input{flex:1;min-width:0;font-family:ui-monospace,Consolas,monospace;letter-spacing:.04em;text-transform:uppercase}
+.font-picker{position:relative}
+.font-current{display:flex;align-items:center;gap:8px;min-height:44px;padding:0 10px;border:1px solid color-mix(in srgb,var(--line) 70%,var(--text));border-radius:var(--r-sm);background:#fff;color:var(--text);font-size:15px;width:100%;text-align:start}
+.font-current>span:first-child{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.font-current small{font-size:11px;color:var(--gold);font-weight:700}
+.font-pop{position:absolute;z-index:30;top:calc(100% + 4px);inset-inline:0;min-width:260px;max-height:min(70vh,440px);overflow:auto;padding:8px;border:1px solid var(--line);border-radius:14px;background:var(--surface);box-shadow:0 12px 30px rgba(22,59,48,.25);display:flex;flex-direction:column;gap:4px}
+.font-group{margin-top:6px;font-size:12px;font-weight:700;color:var(--muted)}
+.font-opt{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:44px;padding:4px 10px;border:1px solid transparent;border-radius:10px;background:transparent;color:var(--text);text-align:start}
+.font-opt:hover{background:var(--bg2)}
+.font-opt[aria-selected=true]{background:var(--green);color:var(--cream)}
+.font-sample{font-size:19px;line-height:1.2}
+.font-opt small{font-size:11px;opacity:.75;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:45%}
+.font-note{margin:2px 0;font-size:12px;font-weight:400;color:var(--muted);line-height:1.4}
+.font-search,.font-manual input{min-height:44px;padding:0 10px;border:1px solid color-mix(in srgb,var(--line) 70%,var(--text));border-radius:var(--r-sm);background:#fff;font-weight:400}
+.font-manual{display:flex;gap:6px}.font-manual input{flex:1;min-width:0}

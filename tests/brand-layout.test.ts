@@ -1,6 +1,6 @@
 import {test} from "node:test";
 import assert from "node:assert/strict";
-import {defaultLayout,layoutFor,layoutFromLegacy,layoutsFromLegacy,parseLayout,parseLayouts,LOGO_ASPECT,SLOGAN_ASPECT,MAX_TEXT_CHARS,fonts} from "../shared/brand-layout.ts";
+import {defaultLayout,layoutFor,layoutFromLegacy,layoutsFromLegacy,parseLayout,parseLayouts,LOGO_ASPECT,SLOGAN_ASPECT,MAX_TEXT_CHARS,MAX_LABEL_CHARS,fonts,isFontRef,systemFontRef,systemFontName,fontLabel,parseImageLayer} from "../shared/brand-layout.ts";
 import {imageBox,pctToPx} from "../shared/brand-geometry.ts";
 import {formats} from "../shared/social-formats.ts";
 
@@ -61,4 +61,44 @@ test("old size: 160 percent is larger than 100, and 30 smaller",()=>{
   const f=formats[0],base={logo:true,slogan:true,logoX:10,logoY:0,logoScale:100,sloganX:10,sloganY:20,sloganScale:100};
   assert.ok(layoutFromLegacy({...base,logoScale:60},f).logo.w<layoutFromLegacy(base,f).logo.w);
   assert.ok(layoutFromLegacy({...base,logoScale:60},f).logo.w>layoutFromLegacy({...base,logoScale:30},f).logo.w);
+});
+
+test("a layout saved before colors and fonts existed still loads, with the defaults filled in",()=>{
+  const l=defaultLayout(formats[0]);
+  const {color:_c,asText:_a,label:_l,font:_f,bold:_b,...legacyLogo}=l.logo;
+  const {color:_c2,asText:_a2,label:_l2,font:_f2,bold:_b2,...legacySlogan}=l.slogan;
+  const parsed=parseLayout({...l,logo:legacyLogo,slogan:legacySlogan})!;
+  assert.ok(parsed);
+  assert.deepEqual(parsed.logo,l.logo);assert.deepEqual(parsed.slogan,l.slogan);
+  assert.equal(parsed.logo.color,null);assert.equal(parsed.logo.asText,false);
+  assert.equal(parsed.logo.label,"RÈBECCA");assert.equal(parsed.slogan.label,"HANDMADE NATURAL\nSOAP & CANDLES");
+});
+test("logo and slogan accept any #RRGGBB color and reject anything else",()=>{
+  const l=defaultLayout(formats[0]);
+  for(const color of ["#000000","#a1B2c3","#FFFFFF"])assert.ok(parseLayout({...l,logo:{...l.logo,color}}),color);
+  for(const color of ["red","#fff","#12345","#1234567","rgb(1,2,3)","javascript:1",7])assert.equal(parseLayout({...l,slogan:{...l.slogan,color:color as any}}),null,String(color));
+});
+test("logo and slogan can be drawn as text: up to two lines, bundled or system font",()=>{
+  const l=defaultLayout(formats[0]);
+  const asText={...l.logo,asText:true,label:"Rebecca\nSoaps",font:"sys:Georgia",bold:true};
+  assert.deepEqual(parseImageLayer(asText),asText);
+  assert.equal(parseImageLayer({...asText,label:"a\nb\nc"}),null,"three lines");
+  assert.equal(parseImageLayer({...asText,label:"a\r\nb"}),null,"carriage return");
+  assert.equal(parseImageLayer({...asText,label:"x".repeat(MAX_LABEL_CHARS+1)}),null,"too long");
+  assert.equal(parseImageLayer({...asText,asText:"yes"}),null);
+  assert.ok(parseImageLayer({...asText,label:""}),"an empty label is allowed (nothing is drawn)");
+});
+test("a system font is a safe name, never something that can break out of a CSS font list",()=>{
+  for(const name of ["Arial","Segoe UI","Frank Ruhl Libre","דוד","Noto Sans Hebrew","Comic Sans MS"])assert.ok(isFontRef("sys:"+name),name);
+  for(const bad of ["sys:","sys: Arial","sys:Arial ",'sys:Ar"ial',"sys:Ar'ial","sys:a;b","sys:a,b","sys:a{b}","sys:a\nb","sys:a\\b","sys:<b>","sys:"+"x".repeat(61),"comic-sans","","sys",7,null])assert.equal(isFontRef(bad as any),false,String(bad));
+  assert.equal(systemFontRef("  Arial  "),"sys:Arial");
+  assert.equal(systemFontRef('Ar"ial'),null);assert.equal(systemFontRef("   "),null);
+  assert.equal(systemFontName("sys:Georgia"),"Georgia");assert.equal(systemFontName("heebo"),null);
+  assert.equal(fontLabel("heebo"),"Heebo");assert.equal(fontLabel("sys:Georgia"),"Georgia");
+});
+test("the free text accepts system fonts too, and still rejects unknown ids",()=>{
+  const l=defaultLayout(formats[0]);
+  assert.ok(parseLayout({...l,text:{...l.text,font:"sys:Georgia"}}));
+  assert.equal(parseLayout({...l,text:{...l.text,font:"comic-sans"}}),null);
+  assert.equal(parseLayout({...l,text:{...l.text,font:'sys:x";}'}}),null);
 });

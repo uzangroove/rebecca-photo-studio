@@ -1,4 +1,4 @@
-import {fonts, type FontId} from "../../shared/brand-layout";
+import {fonts, isBundledFont, systemFontName, type FontId, type FontRef} from "../../shared/brand-layout";
 import assistantHebrew400 from "@fontsource/assistant/files/assistant-hebrew-400-normal.woff2?url";
 import assistantHebrew700 from "@fontsource/assistant/files/assistant-hebrew-700-normal.woff2?url";
 import assistantLatin400 from "@fontsource/assistant/files/assistant-latin-400-normal.woff2?url";
@@ -28,16 +28,23 @@ const files: Record<FontId, {hebrew: [string, string]; latin: [string, string]}>
 };
 
 // שם משפחה ייחודי, כדי שלא יתנגש בגופנים שהדף עצמו טוען.
-export const canvasFamily = (id: FontId) => `RB ${fonts.find(f => f.id === id)!.family}`;
+const bundledFamily = (id: FontId) => `RB ${fonts.find(f => f.id === id)!.family}`;
+// גופן מהמחשב מצויר בשמו, ואם הוא לא מותקן במכשיר הזה נופלים ל-Heebo המובנה.
+export const canvasFamily = (ref: FontRef) => {
+  const system = systemFontName(ref);
+  return system !== null ? `${system}, ${bundledFamily("heebo")}` : bundledFamily(isBundledFont(ref) ? ref : "heebo");
+};
+// גופן מובנה נטען מהקובץ. גופן מהמחשב לא צריך טעינה, ורק גופן הגיבוי (Heebo) נטען כדי שהמידות לא יזוזו כשהוא חסר.
+export const loadBrandFont = (ref: FontRef): Promise<void> => loadBundled(isBundledFont(ref) ? ref : "heebo");
 
 const loading = new Map<FontId, Promise<void>>();
-export function loadBrandFont(id: FontId): Promise<void> {
+function loadBundled(id: FontId): Promise<void> {
   let promise = loading.get(id);
   if (!promise) {
     promise = (async () => {
       const faces: FontFace[] = [];
       for (const [subset, range] of [["hebrew", hebrewRange], ["latin", latinRange]] as const)
-        ([400, 700] as const).forEach((weight, i) => faces.push(new FontFace(canvasFamily(id), `url(${files[id][subset][i]}) format("woff2")`, {weight: String(weight), unicodeRange: range})));
+        ([400, 700] as const).forEach((weight, i) => faces.push(new FontFace(bundledFamily(id), `url(${files[id][subset][i]}) format("woff2")`, {weight: String(weight), unicodeRange: range})));
       await Promise.all(faces.map(async face => { await face.load(); document.fonts.add(face); }));
     })();
     loading.set(id, promise);
@@ -45,3 +52,24 @@ export function loadBrandFont(id: FontId): Promise<void> {
   }
   return promise;
 }
+
+// ---- גופנים שמותקנים במחשב (Local Font Access API: Chrome ו-Edge במחשב, אחרי אישור של המשתמשת).
+type LocalFontData = {family: string};
+type QueryLocalFonts = () => Promise<LocalFontData[]>;
+const queryLocalFonts = (): QueryLocalFonts | null => {
+  const q = (globalThis as {queryLocalFonts?: QueryLocalFonts}).queryLocalFonts;
+  return typeof q === "function" ? q.bind(globalThis) : null;
+};
+export const localFontsSupported = () => queryLocalFonts() !== null;
+
+let localFonts: string[] | null = null;
+// שמות המשפחות הייחודיות, בסדר א-ב. חייב לרוץ מתוך לחיצה של המשתמשת (הדפדפן מבקש רשות).
+export async function listLocalFonts(): Promise<string[]> {
+  if (localFonts) return localFonts;
+  const query = queryLocalFonts();
+  if (!query) throw new Error("unsupported");
+  const all = await query();
+  localFonts = [...new Set(all.map(f => f.family))].sort((a, b) => a.localeCompare(b, "en"));
+  return localFonts;
+}
+export const cachedLocalFonts = () => localFonts;
