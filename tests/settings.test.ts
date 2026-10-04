@@ -1,6 +1,7 @@
 import {test} from "node:test";
 import assert from "node:assert/strict";
 import worker from "../worker/index.ts";
+import {defaultLayout} from "../shared/brand-layout.ts";
 import {defaultSettings,defaultNeverList,parseSettings,validSource,MAX_SETTINGS_BYTES,MAX_NEVER_ITEMS,type StudioSettings} from "../shared/settings.ts";
 
 const headers={authorization:`Basic ${Buffer.from("rebecca:test-password").toString("base64")}`};
@@ -9,6 +10,7 @@ const call=(path:string,init:RequestInit={},kv:ReturnType<typeof fakeKv>|null=fa
   worker.fetch(new Request(`https://studio.test${path}`,{headers,...init}),{STUDIO_PASSWORD:"test-password",ASSETS:{fetch:async()=>new Response("asset")},STUDIO_KV:kv??undefined,...extra} as any);
 const put=(body:unknown,kv?:ReturnType<typeof fakeKv>,extraHeaders:Record<string,string>={})=>
   call("/api/settings",{method:"PUT",headers:{...headers,...extraHeaders},body:typeof body==="string"?body:JSON.stringify(body)},kv);
+const customLayout={...defaultLayout({width:1080,height:1350}),logo:{...defaultLayout({width:1080,height:1350}).logo,visible:true,cx:42.5,w:33}};
 const settings=(patch:Partial<StudioSettings>={}):StudioSettings=>({...defaultSettings,...patch});
 
 test("settings require credentials",async()=>{
@@ -18,7 +20,7 @@ test("settings require credentials",async()=>{
 test("empty store returns null settings; saved settings round-trip",async()=>{
   const kv=fakeKv();
   assert.deepEqual(await (await call("/api/settings",{},kv)).json(),{settings:null});
-  const next=settings({neverList:["שיש","עומס"],brand:{...defaultSettings.brand,logo:true,logoX:10,logoScale:80}});
+  const next=settings({neverList:["שיש","עומס"],brand:{...defaultSettings.brand,logoName:"הלוגו שלי"},layouts:{"instagram-portrait":customLayout}});
   assert.equal((await put(next,kv)).status,200);
   assert.deepEqual(await (await call("/api/settings",{},kv)).json(),{settings:next});
 });
@@ -28,15 +30,21 @@ test("settings responses are never cached",async()=>{
 test("invalid settings are rejected and not stored",async()=>{
   const kv=fakeKv();
   const bad:unknown[]=[
-    "not json","[]",{},{...settings(),version:3},
+    "not json","[]",{},{...settings(),version:4},
     settings({neverList:"שיש" as any}),
     settings({neverList:["a\nb"]}),
     settings({neverList:Array.from({length:MAX_NEVER_ITEMS+1},(_,i)=>`x${i}`)}),
     settings({neverList:["x".repeat(41)]}),
-    settings({brand:{...defaultSettings.brand,logoX:21}}),
-    settings({brand:{...defaultSettings.brand,logoScale:10}}),
-    settings({brand:{...defaultSettings.brand,sloganY:Number.NaN}}),
-    settings({brand:{...defaultSettings.brand,logo:"yes" as any}}),
+    settings({brand:{...defaultSettings.brand,logoName:5 as any}}),
+    settings({layouts:{"instagram-portrait":{...customLayout,logo:{...customLayout.logo,cx:101}}}}),
+    settings({layouts:{"instagram-portrait":{...customLayout,logo:{...customLayout.logo,w:0}}}}),
+    settings({layouts:{"instagram-portrait":{...customLayout,slogan:{...customLayout.slogan,cy:Number.NaN}}}}),
+    settings({layouts:{"instagram-portrait":{...customLayout,logo:{...customLayout.logo,lock:"yes" as any}}}}),
+    settings({layouts:{"instagram-portrait":{...customLayout,text:{...customLayout.text,font:"comic-sans" as any}}}}),
+    settings({layouts:{"instagram-portrait":{...customLayout,text:{...customLayout.text,text:"a\nb"}}}}),
+    settings({layouts:{"instagram-portrait":{...customLayout,text:{...customLayout.text,color:"red" as any}}}}),
+    settings({layouts:{"not-a-format":customLayout}}),
+    settings({layouts:[] as any}),
     settings({brand:{...defaultSettings.brand,logoSource:"https://evil.test/logo.png"}}),
     settings({brand:{...defaultSettings.brand,logoSource:"javascript:alert(1)"}})
   ];
@@ -105,7 +113,8 @@ test("generation rejects values outside the catalog",async()=>{
 test("defaults: never-list has marble and clutter, and the four built-in recipes are present",()=>{
   assert.deepEqual(defaultSettings.neverList,["שיש","עומס"]);
   assert.deepEqual(defaultSettings.recipes.map(r=>r.id),["boutique-bw","boutique-desert","minimal-bw","minimal-desert"]);
-  assert.equal(defaultSettings.version,2);
+  assert.equal(defaultSettings.version,3);
+  assert.deepEqual(defaultSettings.layouts,{});
 });
 test("recipes sync with the rest of the settings and invalid ones are refused",async()=>{
   const kv=fakeKv();
@@ -117,11 +126,14 @@ test("recipes sync with the rest of the settings and invalid ones are refused",a
   assert.equal((await put({...settings(),recipes:"x"},kv)).status,400);
 });
 test("settings saved by phase 0 (version 1) are upgraded: empty never-list becomes the default",()=>{
-  const v1={version:1,neverList:[],brand:defaultSettings.brand};
-  assert.deepEqual(parseSettings(v1),{...defaultSettings});
-  const custom=parseSettings({...v1,neverList:["ורוד"]});
+  const legacyBrand={logo:false,slogan:false,logoSource:"/assets/rebecca_studio_logo.png",sloganSource:"/assets/rebecca_studio_slogan.png",logoName:"הלוגו של רבקה",sloganName:"הסלוגן של רבקה",
+    logoX:0,logoY:0,logoScale:100,sloganX:10,sloganY:20,sloganScale:100};
+  const v1=parseSettings({version:1,neverList:[],brand:legacyBrand});
+  assert.deepEqual(v1?.neverList,["שיש","עומס"]);
+  assert.equal(v1?.recipes.length,4);
+  assert.equal(v1?.version,3);
+  const custom=parseSettings({version:1,neverList:["ורוד"],brand:legacyBrand});
   assert.deepEqual(custom?.neverList,["ורוד"]);
-  assert.equal(custom?.version,2);
   assert.deepEqual(defaultNeverList,["שיש","עומס"]);
 });
 test("generation accepts the look fields and the special request, and refuses bad ones",async()=>{
@@ -140,4 +152,24 @@ test("generation accepts the look fields and the special request, and refuses ba
     assert.ok(prompt.includes("Surface: a textured fine paper surface."),"empty field falls back to the style default");
     for(const bad of [{surface:"gold"},{background:"mars"},{light:"neon"},{wish:"א".repeat(201)}])assert.equal((await send(bad)).status,400,JSON.stringify(bad));
   }finally{globalThis.fetch=originalFetch}
+});
+test("settings saved by phase 1 (version 2, one position for all formats) become a layout in every format",()=>{
+  const legacy={logo:true,slogan:true,logoSource:"/assets/rebecca_studio_logo.png",sloganSource:"/assets/rebecca_studio_slogan.png",logoName:"x",sloganName:"y",
+    logoX:10,logoY:0,logoScale:100,sloganX:10,sloganY:20,sloganScale:100};
+  const parsed=parseSettings({version:2,neverList:["שיש"],recipes:defaultSettings.recipes,brand:legacy});
+  assert.equal(Object.keys(parsed!.layouts).length,16);
+  const layout=parsed!.layouts["instagram-portrait"];
+  assert.ok(layout.logo.visible&&layout.slogan.visible&&!layout.text.visible);
+  assert.ok(Math.abs(layout.logo.cx-50)<0.01,"x=10 on the old grid is the center");
+  assert.ok(layout.slogan.cy>85,"y=20 on the old grid is the bottom");
+});
+test("a broken old brand block does not make the whole settings object unreadable",()=>{
+  const parsed=parseSettings({version:2,neverList:["שיש"],recipes:defaultSettings.recipes,brand:{logo:true,slogan:false,logoSource:"/assets/rebecca_studio_logo.png",sloganSource:"/assets/rebecca_studio_slogan.png",logoName:"x",sloganName:"y",logoX:99}});
+  assert.deepEqual(parsed?.layouts,{});
+  assert.equal(parsed?.brand.logoName,"x");
+});
+test("the old combined logo file is replaced by the separate logo and slogan files",()=>{
+  const parsed=parseSettings({...defaultSettings,brand:{...defaultSettings.brand,logoSource:"/assets/logo.png",sloganSource:"/assets/logo.png"}});
+  assert.equal(parsed?.brand.logoSource,"/assets/rebecca_studio_logo.png");
+  assert.equal(parsed?.brand.sloganSource,"/assets/rebecca_studio_slogan.png");
 });

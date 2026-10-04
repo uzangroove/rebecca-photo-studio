@@ -1,3 +1,4 @@
+import {layoutsFromLegacy, parseLayouts, type LegacyBrand, type Layouts} from "./brand-layout.ts";
 import {builtInRecipes, parseRecipes, type Recipe} from "./recipes.ts";
 
 // ההגדרות שמסתנכרנות בין מכשירים (נשמרות ב-KV). ההיסטוריה והתמונות נשארות ב-IndexedDB במכשיר.
@@ -7,24 +8,18 @@ export const MAX_NEVER_ITEMS = 30;
 export const MAX_NEVER_CHARS = 40;
 const MAX_NAME_CHARS = 120;
 
-export type BrandSettings = {
-  logo: boolean; slogan: boolean;
-  logoSource: string; sloganSource: string;
-  logoName: string; sloganName: string;
-  logoX: number; logoY: number; logoScale: number;
-  sloganX: number; sloganY: number; sloganScale: number;
-};
-export type StudioSettings = {version: 2; neverList: string[]; recipes: Recipe[]; brand: BrandSettings};
+// מקורות הלוגו והסלוגן. המיקום, הגודל והמראה שלהם יושבים בפריסה לכל פורמט (layouts).
+export type BrandSettings = {logoSource: string; sloganSource: string; logoName: string; sloganName: string};
+export type StudioSettings = {version: 3; neverList: string[]; recipes: Recipe[]; brand: BrandSettings; layouts: Layouts};
 
 export const defaultBrand: BrandSettings = {
-  logo: false, slogan: false,
   logoSource: "/assets/rebecca_studio_logo.png", sloganSource: "/assets/rebecca_studio_slogan.png",
-  logoName: "הלוגו של רבקה", sloganName: "הסלוגן של רבקה",
-  logoX: 0, logoY: 0, logoScale: 100, sloganX: 10, sloganY: 20, sloganScale: 100
+  logoName: "הלוגו של רבקה", sloganName: "הסלוגן של רבקה"
 };
+
 // ברירת המחדל של רבקה: שיש ועומס.
 export const defaultNeverList: readonly string[] = ["שיש", "עומס"];
-export const defaultSettings: StudioSettings = {version: 2, neverList: [...defaultNeverList], recipes: [...builtInRecipes], brand: defaultBrand};
+export const defaultSettings: StudioSettings = {version: 3, neverList: [...defaultNeverList], recipes: [...builtInRecipes], brand: defaultBrand, layouts: {}};
 
 const builtInSources = new Set(["/assets/rebecca_studio_logo.png", "/assets/rebecca_studio_slogan.png", "/assets/logo.png"]);
 
@@ -48,14 +43,21 @@ const name = (value: unknown): value is string => typeof value === "string" && v
 export function parseBrand(value: unknown): BrandSettings | null {
   if (typeof value !== "object" || value === null) return null;
   const v = value as Record<string, unknown>;
-  if (typeof v.logo !== "boolean" || typeof v.slogan !== "boolean" || !validSource(v.logoSource) || !validSource(v.sloganSource) ||
-    !name(v.logoName) || !name(v.sloganName) ||
-    !number(v.logoX, 0, 20) || !number(v.logoY, 0, 20) || !number(v.sloganX, 0, 20) || !number(v.sloganY, 0, 20) ||
-    !number(v.logoScale, 30, 160) || !number(v.sloganScale, 30, 160)) return null;
-  return {
-    logo: v.logo, slogan: v.slogan, logoSource: v.logoSource, sloganSource: v.sloganSource, logoName: v.logoName, sloganName: v.sloganName,
-    logoX: v.logoX, logoY: v.logoY, logoScale: v.logoScale, sloganX: v.sloganX, sloganY: v.sloganY, sloganScale: v.sloganScale
-  };
+  if (!validSource(v.logoSource) || !validSource(v.sloganSource) || !name(v.logoName) || !name(v.sloganName)) return null;
+  // קובץ הלוגו המשולב הישן הוחלף בשני קבצים נפרדים.
+  const fix = (source: string, fallback: string) => source === "/assets/logo.png" ? fallback : source;
+  return {logoSource: fix(v.logoSource, defaultBrand.logoSource), sloganSource: fix(v.sloganSource, defaultBrand.sloganSource), logoName: v.logoName, sloganName: v.sloganName};
+}
+
+// מיתוג בגרסאות 1 ו-2: בוליאנים והמיקום ברשת 0-20. אם משהו בו שבור לא מפילים את כל ההגדרות, חוזרים לברירות המחדל.
+function parseLegacyBrand(value: unknown): {brand: BrandSettings; layouts: Layouts} | null {
+  const brand = parseBrand(value);
+  if (!brand) return null;
+  const v = value as Record<string, unknown>;
+  if (typeof v.logo !== "boolean" || typeof v.slogan !== "boolean" || !number(v.logoX, 0, 20) || !number(v.logoY, 0, 20) || !number(v.sloganX, 0, 20) || !number(v.sloganY, 0, 20) ||
+    !number(v.logoScale, 30, 160) || !number(v.sloganScale, 30, 160)) return {brand, layouts: {}};
+  const old: LegacyBrand = {logo: v.logo, slogan: v.slogan, logoX: v.logoX, logoY: v.logoY, logoScale: v.logoScale, sloganX: v.sloganX, sloganY: v.sloganY, sloganScale: v.sloganScale};
+  return {brand, layouts: layoutsFromLegacy(old)};
 }
 
 export function parseNeverList(value: unknown): string[] | null {
@@ -70,15 +72,22 @@ export function parseNeverList(value: unknown): string[] | null {
   return items;
 }
 
-// מחזיר הגדרות תקינות (עם שדות נקיים בלבד) או null אם משהו בהן לא תקין.
-// גרסה 1 (שלב 0) לא כללה מתכונים, ורשימת "אף פעם לא" בה הייתה ריקה כברירת מחדל: מעבירים אותה לברירות המחדל של היום.
+// מחזיר הגדרות תקינות (עם שדות נקיים בלבד) או null אם משהו בהן לא תקין. גרסאות ישנות משודרגות:
+// - גרסה 1 (שלב 0) לא כללה מתכונים, ורשימת "אף פעם לא" בה הייתה ריקה כברירת מחדל.
+// - גרסאות 1 ו-2 שמרו מיקום מיתוג אחד לכולם. הוא הופך לפריסה זהה בכל הפורמטים.
 export function parseSettings(value: unknown): StudioSettings | null {
   if (typeof value !== "object" || value === null) return null;
   const v = value as Record<string, unknown>;
-  if (v.version !== 1 && v.version !== 2) return null;
-  const neverList = parseNeverList(v.neverList), brand = parseBrand(v.brand);
-  if (!neverList || !brand) return null;
-  if (v.version === 1) return {version: 2, neverList: neverList.length ? neverList : [...defaultNeverList], recipes: [...builtInRecipes], brand};
-  const recipes = parseRecipes(v.recipes);
-  return recipes ? {version: 2, neverList, recipes, brand} : null;
+  if (v.version !== 1 && v.version !== 2 && v.version !== 3) return null;
+  const neverList = parseNeverList(v.neverList);
+  if (!neverList) return null;
+  if (v.version === 3) {
+    const brand = parseBrand(v.brand), recipes = parseRecipes(v.recipes), layouts = parseLayouts(v.layouts);
+    return brand && recipes && layouts ? {version: 3, neverList, recipes, brand, layouts} : null;
+  }
+  const legacy = parseLegacyBrand(v.brand);
+  if (!legacy) return null;
+  const recipes = v.version === 1 ? [...builtInRecipes] : parseRecipes(v.recipes);
+  if (!recipes) return null;
+  return {version: 3, neverList: v.version === 1 && !neverList.length ? [...defaultNeverList] : neverList, recipes, brand: legacy.brand, layouts: legacy.layouts};
 }

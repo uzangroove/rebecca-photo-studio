@@ -1,4 +1,4 @@
-import {formats} from "../../social-formats";
+import {formats} from "../../../shared/social-formats";
 import type {Studio} from "../../useStudio";
 import {Tile} from "../Tile";
 

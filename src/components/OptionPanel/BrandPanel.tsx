@@ -1,62 +1,32 @@
-import type {BrandSettings} from "../../../shared/settings";
+import {layerIds, type LayerId} from "../../../shared/brand-layout";
+import {formatById} from "../../../shared/social-formats";
 import type {Studio} from "../../useStudio";
+import {Icon} from "../Icon";
 
-const presets = [
-  [0, 0, "ימין למעלה"], [10, 0, "מרכז למעלה"], [20, 0, "שמאל למעלה"],
-  [0, 10, "ימין באמצע"], [10, 10, "מרכז"], [20, 10, "שמאל באמצע"],
-  [0, 20, "ימין למטה"], [10, 20, "מרכז למטה"], [20, 20, "שמאל למטה"]
-] as const;
-const clampPosition = (value: string) => Math.max(0, Math.min(20, Math.round(Number(value) || 0)));
-const clampScale = (n: number) => Math.max(30, Math.min(160, Number.isFinite(n) ? Math.round(n) : 100));
-
-type Part = "logo" | "slogan";
-const parts: readonly {part: Part; title: string; upload: string}[] = [
-  {part: "logo", title: "הלוגו", upload: "העלאת לוגו"}, {part: "slogan", title: "הסלוגן", upload: "העלאת סלוגן"}
+const rows: readonly {id: LayerId; label: string; upload?: string}[] = [
+  {id: "logo", label: "לוגו", upload: "החלפת לוגו"}, {id: "slogan", label: "סלוגן", upload: "החלפת סלוגן"}, {id: "text", label: "טקסט חופשי"}
 ];
+const open = "M4 4h6v6H4z M14 14h6v6h-6z M10 7h7v7 M7 10v7h7";
 
-function PartCard({studio, part, title, upload}: {studio: Studio} & (typeof parts)[number]) {
-  const {brand} = studio.state, {dispatch} = studio;
-  const x = brand[`${part}X`], y = brand[`${part}Y`], scale = brand[`${part}Scale`], on = brand[part], name = brand[`${part}Name`];
-  const patch = (p: Partial<BrandSettings>) => dispatch({type: "brand", patch: p});
-  const position = (nx: number, ny: number) => patch({[`${part}X`]: nx, [`${part}Y`]: ny});
-  const selected = `${x},${y}`, custom = !presets.some(([px, py]) => `${px},${py}` === selected);
-  return <div className="brand-card">
-    <div className="brand-row">
-      <label className="check"><input type="checkbox" checked={on} onChange={e => patch({[part]: e.target.checked})}/> הצגת {title}</label>
-      <label className="pill small">{upload}
-        <input type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml" onChange={e => {studio.chooseBrandFile(e.target.files?.[0], part); e.currentTarget.value = "";}}/>
-      </label>
-      <span className="file-name" title={name}>{name}</span>
-    </div>
-    {on && <div className="brand-controls">
-      <label className="field">מיקום {title}
-        <select value={selected} onChange={e => {const [nx, ny] = e.target.value.split(",").map(Number); position(nx, ny);}}>
-          {presets.map(([px, py, label]) => <option key={`${px},${py}`} value={`${px},${py}`}>{label}</option>)}
-          {custom && <option value={selected}>מיקום מותאם</option>}
-        </select>
-      </label>
-      <label className="axis">אופקי <small>0 ימין · 20 שמאל</small>
-        <input type="range" min="0" max="20" step="1" dir="rtl" value={x} onChange={e => position(Number(e.target.value), y)}/>
-        <input type="number" min="0" max="20" step="1" dir="ltr" aria-label={`מיקום אופקי של ${title}`} value={x} onChange={e => position(clampPosition(e.target.value), y)}/>
-      </label>
-      <label className="axis">אנכי <small>0 למעלה · 20 למטה</small>
-        <input type="range" min="0" max="20" step="1" value={y} onChange={e => position(x, Number(e.target.value))}/>
-        <input type="number" min="0" max="20" step="1" dir="ltr" aria-label={`מיקום אנכי של ${title}`} value={y} onChange={e => position(x, clampPosition(e.target.value))}/>
-      </label>
-      <label className="axis">גודל <small>%</small>
-        <input type="range" min="30" max="160" step="5" value={scale} onChange={e => patch({[`${part}Scale`]: clampScale(Number(e.target.value))})}/>
-        <input type="number" min="30" max="160" step="1" dir="ltr" aria-label={`גודל ${title} באחוזים`} value={scale} onChange={e => patch({[`${part}Scale`]: clampScale(Number(e.target.value))})}/>
-      </label>
-    </div>}
-  </div>;
-}
-
+// לשונית "מיתוג": מה מוצג על התמונה. המיקום והמראה נערכים בעורך המיתוג.
 export function BrandPanel({studio}: {studio: Studio}) {
+  const {state, layout, setLayout} = studio, format = formatById(state.formatId);
+  const toggle = (id: LayerId, visible: boolean) =>
+    setLayout({...layout, [id]: {...layout[id], visible, ...(id === "text" && visible && !layout.text.text.trim() ? {text: "הטקסט שלי"} : {})}});
   return <div className="panel-body">
     <div><h2>מיתוג</h2><p className="panel-sub">הלוגו והסלוגן מורכבים על התמונה בהורדה.</p></div>
-    {parts.map(p => <PartCard key={p.part} studio={studio} {...p}/>)}
-    <label className="field">טקסט על התמונה
-      <input type="text" value={studio.state.caption} maxLength={60} placeholder="טקסט לבחירתכם" onChange={e => studio.dispatch({type: "caption", text: e.target.value})}/>
-    </label>
+    <div className="brand-rows">
+      {rows.map(r => <div key={r.id} className="brand-row2">
+        <label className="check"><input type="checkbox" checked={layout[r.id].visible} onChange={e => toggle(r.id, e.target.checked)}/><span>{r.label}</span></label>
+        {r.id === "text"
+          ? <span className="muted-text">{layout.text.text.trim() ? `${layout.text.text.slice(0, 14)}` : "ללא טקסט"}</span>
+          : <img src={r.id === "logo" ? state.brand.logoSource : state.brand.sloganSource} alt="" className="brand-preview"/>}
+        {r.upload && <label className="pill small">{r.upload}
+          <input type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml" onChange={e => {studio.chooseBrandFile(e.target.files?.[0], r.id as "logo" | "slogan"); e.currentTarget.value = "";}}/>
+        </label>}
+      </div>)}
+    </div>
+    <p className="info-card">הפריסה נשמרת לכל פורמט בנפרד. כרגע: {format.group} · {format.name}.{layerIds.some(id => layout[id].visible) ? "" : " עוד לא נבחרה שכבה להצגה."}</p>
+    <button type="button" className="cta cta-green" onClick={() => studio.dispatch({type: "screen", screen: "editor"})}><Icon d={open} size={22} strokeWidth={1.7}/>פתיחת עורך המיתוג</button>
   </div>;
 }

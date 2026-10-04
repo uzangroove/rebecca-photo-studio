@@ -1,7 +1,7 @@
 import {useState} from "react";
 import {findItem} from "../../shared/catalog";
-import {formatById} from "../social-formats";
-import {imageToShow, type ViewMode} from "../state";
+import {formatById} from "../../shared/social-formats";
+import {currentImage, imageToShow, type ViewMode} from "../state";
 import type {Studio} from "../useStudio";
 import {Icon, icons} from "./Icon";
 import {UploadButton} from "./UploadButton";
@@ -11,7 +11,7 @@ const views: readonly {id: ViewMode; label: string}[] = [
 ];
 
 export function Stage({studio}: {studio: Studio}) {
-  const {state, dispatch, choosePhoto} = studio;
+  const {state, dispatch, choosePhoto, rate} = studio, saved = currentImage(state);
   const [divider, setDivider] = useState(50);
   const result = imageToShow(state), source = state.photo?.url ?? null, format = formatById(state.formatId);
   // השוואה דורשת גם מקור וגם תוצאה; בלי שניהם מציגים תמונה אחת.
@@ -19,7 +19,8 @@ export function Stage({studio}: {studio: Studio}) {
   const chips = [
     `סגנון: ${findItem("styles", state.selection.style)?.label}`,
     `פלטה: ${findItem("palettes", state.selection.palette)?.label}`,
-    `מוצר: ${findItem("productTypes", state.selection.product)?.label}`
+    `מוצר: ${findItem("productTypes", state.selection.product)?.label}`,
+    `פורמט: ${format.group} ${format.name}`
   ];
   return <section className="stage" aria-label="התמונה">
     <div className="stage-bar">
@@ -47,6 +48,10 @@ export function Stage({studio}: {studio: Studio}) {
         <input className="compare-range" type="range" min={0} max={100} step={1} dir="ltr" value={divider} aria-label="מחיצת לפני ואחרי" onChange={e => setDivider(Number(e.target.value))}/>
       </figure>
       : <figure className="single"><img src={result ?? source ?? ""} alt={result ? "תמונה מעוצבת" : "צילום מוצר מקורי"}/>{result && <figcaption className="is-result">תוצאה</figcaption>}</figure>}
+      {saved && <div className="rate" role="group" aria-label="דירוג התמונה">
+        <button type="button" aria-pressed={saved.rating === "up"} aria-label="תמונה טובה" title="תמונה טובה" onClick={() => rate("up")}><Icon d={icons.thumb} size={22}/></button>
+        <button type="button" aria-pressed={saved.rating === "down"} aria-label="תמונה לא טובה" title="תמונה לא טובה" onClick={() => rate("down")}><Icon d={icons.thumb} size={22} flip/></button>
+      </div>}
     </div>
     <p className={state.status.error ? "status is-error" : "status"} role="status">{state.busy && <span className="spinner"/>}{state.status.text}</p>
     <p className="caution">ביצירת תמונה פרטים קטנים במוצר עלולים להשתנות. בדקו צורה, צבעים, כיתוב ותוויות לפני פרסום.</p>

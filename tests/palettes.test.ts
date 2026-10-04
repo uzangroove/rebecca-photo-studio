@@ -1,7 +1,7 @@
 import {test} from "node:test";
 import assert from "node:assert/strict";
 import {palettes,findItem} from "../shared/catalog.ts";
-import {formats} from "../src/social-formats.ts";
+import {formats} from "../shared/social-formats.ts";
 
 test("twenty unique named palettes include three exact HEX colors",()=>{
   assert.equal(palettes.length,20);

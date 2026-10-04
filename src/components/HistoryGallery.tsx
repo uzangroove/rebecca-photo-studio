@@ -1,6 +1,6 @@
 import {useEffect, useRef} from "react";
 import {findItem} from "../../shared/catalog";
-import {formatById} from "../social-formats";
+import {formatById} from "../../shared/social-formats";
 import type {Studio} from "../useStudio";
 import {Icon, icons} from "./Icon";
 import {RatingBadge} from "./RatingBadge";

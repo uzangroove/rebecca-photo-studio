@@ -1,9 +1,10 @@
 import {test} from "node:test";
 import assert from "node:assert/strict";
-import {initialState,reducer,imageToShow,currentImage,type State} from "../src/state.ts";
+import {initialState,reducer,imageToShow,currentImage,currentLayout,type State} from "../src/state.ts";
+import {defaultLayout} from "../shared/brand-layout.ts";
 import {builtInRecipes} from "../shared/recipes.ts";
 import {defaultSettings} from "../shared/settings.ts";
-import {formatById,ratioOf} from "../src/social-formats.ts";
+import {formatById,ratioOf} from "../shared/social-formats.ts";
 
 const photo={file:{name:"a.png"} as File,url:"blob:photo"};
 const withResult=():State=>({...initialState,photo,result:"data:image/png;base64,AAAA",composed:{url:"blob:c",blob:{} as Blob,branded:true}});
@@ -25,11 +26,10 @@ test("a new selection clears the previous result and says so",()=>{
 test("format, brand, caption and view changes keep the result",()=>{
   let s=withResult();
   s=reducer(s,{type:"format",id:"instagram-story"});
-  s=reducer(s,{type:"brand",patch:{logo:true,logoX:7}});
-  s=reducer(s,{type:"caption",text:"שלום"});
+  s=reducer(s,{type:"brand",patch:{logoName:"חדש"}});
   s=reducer(s,{type:"view",view:"compare"});
   assert.equal(s.result,"data:image/png;base64,AAAA");
-  assert.deepEqual([s.formatId,s.brand.logo,s.brand.logoX,s.brand.slogan,s.caption,s.view],["instagram-story",true,7,false,"שלום","compare"]);
+  assert.deepEqual([s.formatId,s.brand.logoName,s.view],["instagram-story","חדש","compare"]);
 });
 test("choosing a photo starts a fresh scene",()=>{
   const next=reducer(withResult(),{type:"photo",photo:{file:{name:"b.png"} as File,url:"blob:b"}});
@@ -50,8 +50,9 @@ test("opening a saved image restores every setting that created it",()=>{
   assert.deepEqual(next.selection,selection);
 });
 test("saved settings replace brand, never-list and recipes",()=>{
-  const next=reducer(initialState,{type:"settings",settings:{...defaultSettings,neverList:["ורוד"],recipes:[],brand:{...defaultSettings.brand,logo:true}}});
-  assert.deepEqual([next.neverList,next.recipes,next.brand.logo],[["ורוד"],[],true]);
+  const layouts={"instagram-story":defaultLayout({width:1080,height:1920})};
+  const next=reducer(initialState,{type:"settings",settings:{...defaultSettings,neverList:["ורוד"],recipes:[],brand:{...defaultSettings.brand,logoName:"x"},layouts}});
+  assert.deepEqual([next.neverList,next.recipes,next.brand.logoName,next.layouts],[["ורוד"],[],"x",layouts]);
 });
 test("branded composite is shown; if branding failed the plain result is shown",()=>{
   assert.equal(imageToShow(withResult()),"blob:c");
@@ -114,4 +115,38 @@ test("a rating lands on the image it belongs to",()=>{
   assert.equal(currentImage(initialState),null);
   const generated=reducer(s,{type:"generated",image:"data:x"});
   assert.equal(generated.currentKey,null,"a new image is not yet saved, so it has no rating");
+});
+
+test("the brand layout is kept per format, and a format without one gets its own default",()=>{
+  let s=reducer(initialState,{type:"format",id:"instagram-portrait"});
+  const portrait=currentLayout(s);
+  assert.deepEqual(portrait,defaultLayout({width:1080,height:1350}));
+  s=reducer(s,{type:"layout",layout:{...portrait,logo:{...portrait.logo,visible:true,cx:30}}});
+  assert.equal(currentLayout(s).logo.cx,30);
+  s=reducer(s,{type:"format",id:"instagram-story"});
+  assert.equal(currentLayout(s).logo.cx,50,"story is untouched");
+  assert.deepEqual(currentLayout(s),defaultLayout({width:1080,height:1920}));
+  s=reducer(s,{type:"format",id:"instagram-portrait"});
+  assert.equal(currentLayout(s).logo.cx,30,"portrait kept its layout");
+});
+test("apply to all formats copies the current layout to all sixteen, and reset returns one format to default",()=>{
+  let s=reducer(initialState,{type:"format",id:"instagram-portrait"});
+  const layout=currentLayout(s);
+  s=reducer(s,{type:"layout",layout:{...layout,slogan:{...layout.slogan,visible:true,opacity:77}}});
+  s=reducer(s,{type:"layoutAll"});
+  assert.equal(Object.keys(s.layouts).length,16);
+  for(const l of Object.values(s.layouts))assert.equal(l.slogan.opacity,77);
+  s=reducer(s,{type:"layoutReset"});
+  assert.equal(Object.keys(s.layouts).length,15);
+  assert.equal(currentLayout(s).slogan.opacity,100);
+});
+test("a manual crop is kept per format and dropped with the picture",()=>{
+  let s=reducer(withResult(),{type:"crop",formatId:"instagram-story",focal:{x:0.2,y:0.5}});
+  assert.deepEqual(s.crops["instagram-story"],{x:0.2,y:0.5});
+  s=reducer(s,{type:"generated",image:"data:new"});
+  assert.deepEqual(s.crops,{},"a new image starts centered");
+});
+test("the editor is a separate screen",()=>{
+  assert.equal(initialState.screen,"studio");
+  assert.equal(reducer(initialState,{type:"screen",screen:"editor"}).screen,"editor");
 });

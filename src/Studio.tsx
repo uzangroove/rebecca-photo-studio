@@ -1,4 +1,5 @@
 import {ActionBar} from "./components/ActionBar";
+import {BrandEditor} from "./components/BrandEditor";
 import {Header} from "./components/Header";
 import {HistoryStrip} from "./components/HistoryStrip";
 import {OptionPanel} from "./components/OptionPanel";
@@ -9,6 +10,7 @@ import {useStudio} from "./useStudio";
 export default function Studio() {
   const studio = useStudio();
   const {state, dispatch} = studio;
+  if (state.screen === "editor") return <BrandEditor studio={studio}/>;
   return <div className="app">
     <Header studio={studio}/>
     <div className="body">

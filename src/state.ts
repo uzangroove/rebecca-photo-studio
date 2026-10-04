@@ -1,10 +1,14 @@
+import type {Focal} from "../shared/brand-geometry.ts";
+import {layoutFor, type BrandLayout, type Layouts} from "../shared/brand-layout.ts";
 import {findItem, isBlocked} from "../shared/catalog.ts";
 import {builtInRecipes, applyRecipe, MAX_RECIPES, type Recipe} from "../shared/recipes.ts";
 import {defaultSelection, MAX_WISH_CHARS, type SceneKey, type Selection} from "../shared/selection.ts";
 import {defaultBrand, defaultNeverList, MAX_NEVER_CHARS, MAX_NEVER_ITEMS, type BrandSettings, type StudioSettings} from "../shared/settings.ts";
+import {formatById, formats} from "../shared/social-formats.ts";
 import type {Rating, SavedImage} from "./studio-storage.ts";
 
 export type TabId = "style" | "details" | "palette" | "product" | "brand" | "format";
+export type Screen = "studio" | "editor";
 export type ViewMode = "split" | "single" | "compare";
 export type SyncState = "checking" | "synced" | "saving" | "offline";
 export type HistoryItem = SavedImage & {url: string};
@@ -18,7 +22,10 @@ export type State = {
   selection: Selection;
   formatId: string;
   brand: BrandSettings;
-  caption: string;
+  layouts: Layouts;
+  screen: Screen;
+  // חיתוך ידני לכל פורמט, לתמונה שעל המסך. לא נשמר ולא מסתנכרן.
+  crops: Record<string, Focal>;
   neverList: string[];
   recipes: Recipe[];
   photo: Photo | null;
@@ -36,7 +43,7 @@ export type State = {
 export const initialState: State = {
   tab: "style", view: "split",
   selection: defaultSelection, formatId: "instagram-square",
-  brand: defaultBrand, caption: "", neverList: [...defaultNeverList], recipes: [...builtInRecipes],
+  brand: defaultBrand, layouts: {}, screen: "studio", crops: {}, neverList: [...defaultNeverList], recipes: [...builtInRecipes],
   photo: null, result: null, composed: null, downloadFallback: false, busy: false,
   status: {text: "העלו צילום של סבון או נר כדי להתחיל", error: false},
   history: [], currentKey: null, ready: false, sync: "checking"
@@ -56,7 +63,12 @@ export type Action =
   | {type: "rated"; key: string; rating: Rating}
   | {type: "format"; id: string}
   | {type: "brand"; patch: Partial<BrandSettings>}
-  | {type: "caption"; text: string}
+  | {type: "screen"; screen: Screen}
+  | {type: "branding"; brand: BrandSettings; layouts: Layouts}
+  | {type: "layout"; layout: BrandLayout}
+  | {type: "layoutAll"}
+  | {type: "layoutReset"}
+  | {type: "crop"; formatId: string; focal: Focal}
   | {type: "settings"; settings: StudioSettings}
   | {type: "ready"}
   | {type: "sync"; sync: SyncState}
@@ -73,7 +85,7 @@ export type Action =
   | {type: "downloadFallback"; text: string};
 
 // בחירה חדשה (סגנון, פלטה, מוצר או אביזרים) מבטלת את התוצאה הקודמת, כמו שהיה עד היום.
-const cleared = {result: null, composed: null, currentKey: null, busy: false, downloadFallback: false} as const;
+const cleared = {result: null, composed: null, currentKey: null, busy: false, downloadFallback: false, crops: {}} as const;
 const ready = {text: "הבחירות מוכנות. צרו תמונה חדשה", error: false};
 const sceneKeys: readonly SceneKey[] = ["surface", "background", "light"];
 const sceneCategory = {surface: "surfaces", background: "backgrounds", light: "lights"} as const;
@@ -106,8 +118,20 @@ export function reducer(state: State, action: Action): State {
     case "rated": return {...state, history: state.history.map(h => h.key === action.key ? {...h, rating: action.rating} : h)};
     case "format": return {...state, formatId: action.id};
     case "brand": return {...state, brand: {...state.brand, ...action.patch}};
-    case "caption": return {...state, caption: action.text};
-    case "settings": return {...state, brand: action.settings.brand, neverList: action.settings.neverList, recipes: action.settings.recipes};
+    case "branding": return {...state, brand: action.brand, layouts: action.layouts};
+    case "screen": return {...state, screen: action.screen};
+    // הפריסה נשמרת לכל פורמט בנפרד. "החלה על כל הפורמטים" מעתיקה את הפריסה של הפורמט הנוכחי לכולם.
+    case "layout": return {...state, layouts: {...state.layouts, [state.formatId]: action.layout}};
+    case "layoutAll": {
+      const layout = currentLayout(state);
+      return {...state, layouts: Object.fromEntries(formats.map(f => [f.id, layout]))};
+    }
+    case "layoutReset": {
+      const {[state.formatId]: _removed, ...rest} = state.layouts;
+      return {...state, layouts: rest};
+    }
+    case "crop": return {...state, crops: {...state.crops, [action.formatId]: action.focal}};
+    case "settings": return {...state, brand: action.settings.brand, layouts: action.settings.layouts, neverList: action.settings.neverList, recipes: action.settings.recipes};
     case "ready": return {...state, ready: true};
     case "sync": return {...state, sync: action.sync};
     case "history": return {...state, history: action.items, currentKey: action.currentKey ?? state.currentKey};
@@ -121,7 +145,7 @@ export function reducer(state: State, action: Action): State {
     case "generating":
       return {...state, busy: true, status: {text: "יוצרים סצנה חדשה בתוך התמונה…", error: false}};
     case "generated":
-      return {...state, busy: false, result: action.image, composed: null, currentKey: null, downloadFallback: false,
+      return {...state, busy: false, result: action.image, composed: null, currentKey: null, downloadFallback: false, crops: {},
         status: {text: "התמונה מוכנה. בדקו את המוצר והתווית לפני שימוש", error: false}};
     case "failed": return {...state, busy: false, status: {text: action.text, error: true}};
     case "say": return {...state, status: {text: action.text, error: action.error ?? false}};
@@ -133,5 +157,6 @@ export function reducer(state: State, action: Action): State {
   }
 }
 
+export const currentLayout = (s: Pick<State, "layouts" | "formatId">): BrandLayout => layoutFor(s.layouts, formatById(s.formatId));
 export const currentImage = (s: State): HistoryItem | null => s.history.find(h => h.key === s.currentKey) ?? null;
 export const imageToShow = (s: State): string | null => (s.composed?.branded ? s.composed.url : s.result);

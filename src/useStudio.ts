@@ -3,20 +3,16 @@ import type {MouseEvent} from "react";
 import type {Recipe} from "../shared/recipes";
 import {lookOf} from "../shared/recipes";
 import type {Selection} from "../shared/selection";
-import {defaultBrand, type BrandSettings, type StudioSettings} from "../shared/settings";
+import type {StudioSettings} from "../shared/settings";
+import type {BrandLayout} from "../shared/brand-layout";
 import {fetchSettings, putSettings, requestImage} from "./api";
-import {composeImage, readBrandFile} from "./brand";
-import {formatById, ratioOf} from "./social-formats";
-import {currentImage, initialState, reducer} from "./state";
-import {loadStudio, rateImage, saveBranding, saveImage, type Rating, type SavedBranding, type SavedImage} from "./studio-storage";
-
-// גרסאות ישנות שמרו את הלוגו והסלוגן כקובץ אחד.
-const migrateSource = (source: string, fallback: string) => source === "/assets/logo.png" ? fallback : source;
-function brandFromSaved(saved: SavedBranding): BrandSettings {
-  return {...defaultBrand, ...saved,
-    logoSource: migrateSource(saved.logoSource, defaultBrand.logoSource), sloganSource: migrateSource(saved.sloganSource, defaultBrand.sloganSource),
-    logoScale: saved.logoScale ?? 100, sloganScale: saved.sloganScale ?? 100};
-}
+import {renderBranded} from "./brand/export";
+import {readBrandFile} from "./brand/upload";
+import {findItem} from "../shared/catalog";
+import {formatById, ratioOf} from "../shared/social-formats";
+import {currentImage, currentLayout, initialState, reducer} from "./state";
+import {centerFocal} from "../shared/brand-geometry";
+import {loadStudio, rateImage, saveBranding, saveImage, type Rating, type SavedImage} from "./studio-storage";
 
 export function useStudio() {
   const [state, dispatch] = useReducer(reducer, initialState);
@@ -39,7 +35,7 @@ export function useStudio() {
       try {
         const {branding, images} = await loadStudio();
         if (cancelled) return;
-        if (branding) dispatch({type: "brand", patch: brandFromSaved(branding)});
+        if (branding) dispatch({type: "branding", brand: branding.brand, layouts: branding.layouts});
         showHistory(images);
       } catch {
         if (!cancelled) dispatch({type: "say", text: "השמירה המקומית אינה זמינה בדפדפן הזה. אפשר להמשיך ליצור תמונות"});
@@ -64,11 +60,11 @@ export function useStudio() {
     };
   }, []);
 
-  const settings = useMemo<StudioSettings>(() => ({version: 2, neverList: state.neverList, recipes: state.recipes, brand: state.brand}), [state.neverList, state.recipes, state.brand]);
+  const settings = useMemo<StudioSettings>(() => ({version: 3, neverList: state.neverList, recipes: state.recipes, brand: state.brand, layouts: state.layouts}), [state.neverList, state.recipes, state.brand, state.layouts]);
   useEffect(() => {
     if (!state.ready) return;
     const timer = setTimeout(async () => {
-      saveBranding(settings.brand).catch(() => dispatch({type: "say", text: "המיתוג לא נשמר בדפדפן. בדקו שאחסון האתר מאופשר", error: true}));
+      saveBranding({brand: settings.brand, layouts: settings.layouts}).catch(() => dispatch({type: "say", text: "המיתוג לא נשמר בדפדפן. בדקו שאחסון האתר מאופשר", error: true}));
       const json = JSON.stringify(settings);
       if (!remoteReadable.current || json === lastSynced.current) return;
       dispatch({type: "sync", sync: "saving"});
@@ -84,17 +80,20 @@ export function useStudio() {
     return () => clearTimeout(timer);
   }, [state.ready, settings]);
 
-  // מרכיבים את התוצאה: חיתוך לפורמט, טקסט ומיתוג. אותו קובץ משמש לתצוגה ולהורדה.
+  const layout = useMemo(() => currentLayout(state), [state.layouts, state.formatId]);
+  const autoTextColor = findItem("palettes", state.selection.palette)?.colors[2] ?? "#FFFFFF";
+  const focal = state.crops[state.formatId] ?? centerFocal;
+
+  // מרכיבים את התוצאה: חיתוך לפורמט ומיתוג, באותה סצנה שמוצגת בעורך. אותו קובץ משמש לתצוגה ולהורדה.
+  // בזמן שהעורך פתוח לא מרכיבים: התוצאה תוכן מחדש כשחוזרים אליה.
   useEffect(() => {
     dispatch({type: "composeReset"});
-    if (!state.result) return;
+    if (!state.result || state.screen === "editor") return;
     let cancelled = false, url: string | null = null;
-    const result = state.result, branding = {...state.brand, caption: state.caption}, format = formatById(state.formatId);
+    const result = state.result, format = formatById(state.formatId);
     const timer = setTimeout(async () => {
       try {
-        const canvas = await composeImage(result, branding, format);
-        const blob = await new Promise<Blob | null>((resolve, reject) => { try { canvas.toBlob(resolve, "image/png"); } catch (e) { reject(e); } });
-        if (!blob) throw new Error("לא הצלחנו להכין את קובץ התמונה");
+        const blob = await renderBranded({w: format.width, h: format.height}, {backdrop: result, logo: state.brand.logoSource, slogan: state.brand.sloganSource}, focal, layout, autoTextColor);
         if (cancelled) return;
         url = URL.createObjectURL(blob);
         dispatch({type: "composed", composed: {url, blob, branded: true}});
@@ -111,7 +110,7 @@ export function useStudio() {
       }
     }, 120);
     return () => { cancelled = true; clearTimeout(timer); if (url) URL.revokeObjectURL(url); };
-  }, [state.result, state.brand, state.caption, state.formatId]);
+  }, [state.result, state.screen, state.brand, layout, focal, autoTextColor, state.formatId]);
 
   // כל שינוי בחירה מבטל יצירה שעדיין רצה, כדי שתוצאה ישנה לא תחליף את המסך.
   function select(key: Exclude<keyof Selection, "wish">, id: string | null) {
@@ -150,11 +149,14 @@ export function useStudio() {
     dispatch({type: "photo", photo: {file, url: photoUrl.current}});
   }
 
+  function setLayout(next: BrandLayout) { dispatch({type: "layout", layout: next}); }
+
   async function chooseBrandFile(file: File | undefined, part: "logo" | "slogan") {
     if (!file) return;
     try {
       const data = await readBrandFile(file);
-      dispatch({type: "brand", patch: part === "logo" ? {logoSource: data, logoName: file.name, logo: true} : {sloganSource: data, sloganName: file.name, slogan: true}});
+      dispatch({type: "brand", patch: part === "logo" ? {logoSource: data, logoName: file.name} : {sloganSource: data, sloganName: file.name}});
+      dispatch({type: "layout", layout: {...layout, [part]: {...layout[part], visible: true}}});
     } catch (e) {
       dispatch({type: "say", text: e instanceof Error ? e.message : "לא הצלחנו להעלות את הקובץ", error: true});
     }
@@ -210,7 +212,7 @@ export function useStudio() {
     }
   }
 
-  return {state, dispatch, select, chooseRecipe, resetScene, saveRecipe, rate, choosePhoto, chooseBrandFile, openRecent, generate, download};
+  return {state, dispatch, layout, setLayout, autoTextColor, focal, select, chooseRecipe, resetScene, saveRecipe, rate, choosePhoto, chooseBrandFile, openRecent, generate, download};
 }
 
 export const downloadName = (s: Selection) => `rebecca-${s.style}-${s.palette}.png`;
