@@ -13,7 +13,7 @@ export function LayerList({layout, selected, logoSource, sloganSource, onSelect,
       const layer = layout[id], on = selected === id;
       return <div key={id} role="listitem" className={`layer-row${on ? " is-selected" : ""}${layer.visible ? "" : " is-hidden"}`}>
         <button type="button" className="layer-main" aria-pressed={on} onClick={() => onSelect(id)}>
-          {id === "text" ? <span className="layer-sample">אבג</span> : <img src={id === "logo" ? logoSource : sloganSource} alt=""/>}
+          {id === "text" ? <span className="layer-sample">אבג</span> : layout[id].asText ? <span className="layer-sample">Aa</span> : <img src={id === "logo" ? logoSource : sloganSource} alt=""/>}
           <strong>{id === "text" ? "טקסט" : id === "logo" ? "לוגו" : "סלוגן"}</strong>
           <small>{!layer.visible ? "מוסתר" : on ? "נבחר" : ""}</small>
         </button>

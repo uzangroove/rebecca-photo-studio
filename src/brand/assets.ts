@@ -1,5 +1,5 @@
 import Konva from "konva";
-import type {FontId} from "../../shared/brand-layout";
+import type {FontRef} from "../../shared/brand-layout";
 import {canvasFamily} from "./fonts";
 
 const images = new Map<string, Promise<HTMLImageElement>>();
@@ -45,7 +45,7 @@ export function tinted(image: HTMLImageElement, color: string): HTMLCanvasElemen
 export const LIGHT_TONE = "#FBF8F2", DARK_TONE = "#1F2A24";
 
 // גודל טקסט בפיקסלים, בדיוק כפי ש-Konva יצייר אותו.
-export function measureText(text: string, font: FontId, bold: boolean, sizePx: number): {w: number; h: number} {
+export function measureText(text: string, font: FontRef, bold: boolean, sizePx: number): {w: number; h: number} {
   const node = new Konva.Text({text, fontFamily: canvasFamily(font), fontStyle: bold ? "bold" : "normal", fontSize: sizePx, direction: "rtl"});
   return {w: node.width(), h: node.height()};
 }

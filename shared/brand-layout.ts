@@ -15,19 +15,48 @@ export const fonts = [
 ] as const;
 export type FontId = typeof fonts[number]["id"];
 
+// הפניה לגופן: מזהה של גופן מובנה ("heebo"), או "sys:" ואחריו שם גופן שמותקן במחשב ("sys:Arial").
+// גופן מהמחשב נראה רק במכשיר שמותקן בו. במכשיר אחר נופלים לגופן המובנה.
+export type FontRef = string;
+export const SYSTEM_FONT_PREFIX = "sys:";
+export const MAX_FONT_NAME = 60;
+export const isBundledFont = (ref: string): ref is FontId => fonts.some(f => f.id === ref);
+export const systemFontName = (ref: string): string | null => ref.startsWith(SYSTEM_FONT_PREFIX) ? ref.slice(SYSTEM_FONT_PREFIX.length) : null;
+// שם גופן תקין: בלי תווי בקרה, מרכאות, נקודה-פסיק, פסיק וסוגריים. כך אי אפשר להזריק CSS דרך שם הגופן.
+const FONT_NAME_RE = /^[^\u0000-\u001f"'`\\;,{}()<>]+$/;
+export const isFontRef = (ref: unknown): ref is FontRef => {
+  if (typeof ref !== "string") return false;
+  if (isBundledFont(ref)) return true;
+  const name = systemFontName(ref);
+  return name !== null && name.trim() === name && name.length >= 1 && name.length <= MAX_FONT_NAME && FONT_NAME_RE.test(name);
+};
+export const systemFontRef = (name: string): FontRef | null => {
+  const ref = SYSTEM_FONT_PREFIX + name.trim();
+  return isFontRef(ref) ? ref : null;
+};
+export const fontLabel = (ref: FontRef): string => fonts.find(f => f.id === ref)?.label ?? systemFontName(ref) ?? ref;
+
 type BaseLayer = {visible: boolean; cx: number; cy: number; opacity: number; legibility: Legibility};
 // w: אחוז מרוחב הקנבס. cx: אחוז מהרוחב, cy: אחוז מהגובה (מרכז השכבה). lock: שמירה על פרופורציות.
-export type ImageLayer = BaseLayer & {w: number; stretch: number; lock: boolean; tone: Tone};
+// color: צבע חופשי (#RRGGBB) שצובע את הצורה כולה, ועדיף על tone. ריק = הצבע המקורי (או "כהה"/"בהיר").
+// asText: במקום התמונה המובנית מציירים טקסט (label) בגופן שנבחר. הרוחב w קובע אז את רוחב הטקסט, והפרופורציות תמיד נשמרות.
+export type ImageLayer = BaseLayer & {w: number; stretch: number; lock: boolean; tone: Tone; color: string | null; asText: boolean; label: string; font: FontRef; bold: boolean};
 // size: גודל הגופן באחוזי רוחב הקנבס. color ריק = אוטומטי (הצבע הבהיר של הפלטה).
-export type TextLayer = BaseLayer & {text: string; font: FontId; bold: boolean; size: number; color: string | null};
+export type TextLayer = BaseLayer & {text: string; font: FontRef; bold: boolean; size: number; color: string | null};
 export type BrandLayout = {logo: ImageLayer; slogan: ImageLayer; text: TextLayer};
 
 export const MAX_TEXT_CHARS = 60;
+// בלוגו ובסלוגן במצב טקסט מותרות עד שתי שורות.
+export const MAX_LABEL_CHARS = 60;
+export const defaultLabels: Record<"logo" | "slogan", string> = {logo: "RÈBECCA", slogan: "HANDMADE NATURAL\nSOAP & CANDLES"};
+// גודל הייחוס שבו מודדים טקסט כדי לגזור יחס גובה/רוחב. הגודל בפועל נגזר מהרוחב שנבחר.
+export const TEXT_REF_PX = 100;
 // יחסי הגובה/רוחב של הלוגו והסלוגן המובנים, לחישוב ברירות המחדל.
 export const LOGO_ASPECT = 161 / 799;
 export const SLOGAN_ASPECT = 310 / 2006;
 
 const base = {opacity: 100, legibility: "shadow" as Legibility};
+const textMode = (part: "logo" | "slogan") => ({color: null, asText: false, label: defaultLabels[part], font: part === "logo" ? "frank-ruhl-libre" : "assistant", bold: false});
 
 // ברירת מחדל לפורמט: לוגו למעלה במרכז, סלוגן מתחתיו וטקסט למטה. הגדלים נגזרים מהפורמט כדי לא לחרוג ממנו.
 export function defaultLayout(format: Pick<SocialFormat, "width" | "height">): BrandLayout {
@@ -38,8 +67,8 @@ export function defaultLayout(format: Pick<SocialFormat, "width" | "height">): B
   const sloganH = pctToPx(sloganPct, canvas.w) * SLOGAN_ASPECT, sloganTop = logoTop + logoH + 0.012 * canvas.h;
   const cy = (top: number, h: number) => roundStored(pxToPct(top + h / 2, canvas.h));
   return {
-    logo: {...base, visible: false, cx: 50, cy: cy(logoTop, logoH), w: roundStored(logoPct), stretch: 1, lock: true, tone: "original"},
-    slogan: {...base, visible: false, cx: 50, cy: cy(sloganTop, sloganH), w: roundStored(sloganPct), stretch: 1, lock: true, tone: "original"},
+    logo: {...base, visible: false, cx: 50, cy: cy(logoTop, logoH), w: roundStored(logoPct), stretch: 1, lock: true, tone: "original", ...textMode("logo")},
+    slogan: {...base, visible: false, cx: 50, cy: cy(sloganTop, sloganH), w: roundStored(sloganPct), stretch: 1, lock: true, tone: "original", ...textMode("slogan")},
     text: {...base, visible: false, cx: 50, cy: 93, text: "", font: "heebo", bold: true, size: roundStored(Math.min(4.8, pxToPct(0.06 * canvas.h, canvas.w))), color: null}
   };
 }
@@ -50,6 +79,7 @@ export const layoutFor = (layouts: Layouts, format: Pick<SocialFormat, "id" | "w
 
 // ---- אימות (השרת והלקוח משתמשים באותו קוד)
 const num = (v: unknown, min: number, max: number): v is number => typeof v === "number" && Number.isFinite(v) && v >= min && v <= max;
+const hexColor = (v: unknown): v is string => typeof v === "string" && /^#[0-9A-Fa-f]{6}$/.test(v);
 const legibilities: readonly string[] = ["none", "shadow", "outline"], tones: readonly string[] = ["original", "light", "dark"];
 
 function parseBase(v: Record<string, unknown>): BaseLayer | null {
@@ -57,24 +87,30 @@ function parseBase(v: Record<string, unknown>): BaseLayer | null {
   if (typeof v.legibility !== "string" || !legibilities.includes(v.legibility)) return null;
   return {visible: v.visible, cx: v.cx, cy: v.cy, opacity: v.opacity, legibility: v.legibility as Legibility};
 }
-export function parseImageLayer(value: unknown): ImageLayer | null {
+// תווית של לוגו/סלוגן במצב טקסט: עד שתי שורות. אפשר להשאיר ריק (אז לא מציירים כלום).
+const labelOk = (v: unknown): v is string => typeof v === "string" && v.length <= MAX_LABEL_CHARS && !/\r/.test(v) && v.split("\n").length <= 2;
+// שדות שנוספו אחרי שהפריסות כבר נשמרו אצל המשתמשת: חסר אצלן = ברירת המחדל, ולא שגיאה.
+export function parseImageLayer(value: unknown, part: "logo" | "slogan" = "logo"): ImageLayer | null {
   if (typeof value !== "object" || value === null) return null;
-  const v = value as Record<string, unknown>, b = parseBase(v);
+  const v = value as Record<string, unknown>, b = parseBase(v), d = textMode(part);
   if (!b || !num(v.w, 1, 100) || !num(v.stretch, 0.2, 5) || typeof v.lock !== "boolean" || typeof v.tone !== "string" || !tones.includes(v.tone)) return null;
-  return {...b, w: v.w, stretch: v.stretch, lock: v.lock, tone: v.tone as Tone};
+  const color = v.color === undefined ? null : v.color, asText = v.asText === undefined ? false : v.asText;
+  const label = v.label === undefined ? d.label : v.label, font = v.font === undefined ? d.font : v.font, bold = v.bold === undefined ? false : v.bold;
+  if ((color !== null && !hexColor(color)) || typeof asText !== "boolean" || !labelOk(label) || !isFontRef(font) || typeof bold !== "boolean") return null;
+  return {...b, w: v.w, stretch: v.stretch, lock: v.lock, tone: v.tone as Tone, color, asText, label, font, bold};
 }
 export function parseTextLayer(value: unknown): TextLayer | null {
   if (typeof value !== "object" || value === null) return null;
   const v = value as Record<string, unknown>, b = parseBase(v);
   if (!b || typeof v.text !== "string" || v.text.length > MAX_TEXT_CHARS || /[\r\n]/.test(v.text)) return null;
-  if (!fonts.some(f => f.id === v.font) || typeof v.bold !== "boolean" || !num(v.size, 1, 30)) return null;
-  if (v.color !== null && !(typeof v.color === "string" && /^#[0-9A-Fa-f]{6}$/.test(v.color))) return null;
-  return {...b, text: v.text, font: v.font as FontId, bold: v.bold, size: v.size, color: v.color as string | null};
+  if (!isFontRef(v.font) || typeof v.bold !== "boolean" || !num(v.size, 1, 30)) return null;
+  if (v.color !== null && !hexColor(v.color)) return null;
+  return {...b, text: v.text, font: v.font, bold: v.bold, size: v.size, color: v.color};
 }
 export function parseLayout(value: unknown): BrandLayout | null {
   if (typeof value !== "object" || value === null) return null;
   const v = value as Record<string, unknown>;
-  const logo = parseImageLayer(v.logo), slogan = parseImageLayer(v.slogan), text = parseTextLayer(v.text);
+  const logo = parseImageLayer(v.logo, "logo"), slogan = parseImageLayer(v.slogan, "slogan"), text = parseTextLayer(v.text);
   return logo && slogan && text ? {logo, slogan, text} : null;
 }
 const formatIds: ReadonlySet<string> = new Set(formats.map(f => f.id));

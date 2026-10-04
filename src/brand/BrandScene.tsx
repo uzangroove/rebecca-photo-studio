@@ -5,7 +5,7 @@ import {
   boxFromCenter, centerFromBox, clamp, coverBox, focalFromBox, imageBox, imageGeometryFromBox, productAreaBox, pctToPx, pxToPct, roundStored, snapBox, snapTargets,
   type Box, type Focal, type SnapTargets, type Size
 } from "../../shared/brand-geometry";
-import type {BrandLayout, ImageLayer, LayerId, TextLayer} from "../../shared/brand-layout";
+import {TEXT_REF_PX, type BrandLayout, type ImageLayer, type LayerId, type TextLayer} from "../../shared/brand-layout";
 import {aspectOf, DARK_TONE, isLightColor, LIGHT_TONE, measureText, tinted} from "./assets";
 import {canvasFamily} from "./fonts";
 
@@ -24,12 +24,28 @@ const safeAspect = (image: HTMLImageElement) => { const a = aspectOf(image); ret
 
 export function textColor(layer: TextLayer, auto: string) { return layer.color ?? auto; }
 
+// לוגו או סלוגן במצב טקסט: היחס גובה/רוחב נמדד בגודל ייחוס, והגודל בפועל נגזר מהרוחב שנבחר (כמו בתמונה).
+const hasLabel = (layer: ImageLayer) => layer.asText && layer.label.trim() !== "";
+function labelAspect(layer: ImageLayer): number {
+  const ref = measureText(layer.label, layer.font, layer.bold, TEXT_REF_PX);
+  return ref.w > 0 && ref.h > 0 ? ref.h / ref.w : 0.25;
+}
+// היחס של השכבה הנראית: של הטקסט במצב טקסט, ושל התמונה אחרת. null = אין מה לצייר.
+export function imageLayerAspect(layer: ImageLayer, image: HTMLImageElement | null): number | null {
+  if (layer.asText) return hasLabel(layer) ? labelAspect(layer) : null;
+  return image ? safeAspect(image) : null;
+}
+// הצבע שבו נצבעת השכבה: צבע חופשי, אחרת "בהיר"/"כהה", אחרת null (הצבע המקורי של התמונה).
+export function imageLayerColor(layer: ImageLayer): string | null {
+  return layer.color ?? (layer.tone === "light" ? LIGHT_TONE : layer.tone === "dark" ? DARK_TONE : null);
+}
+
 // התיבות של השכבות הנראות, בפיקסלים של הפורמט.
 export function layerBoxes(layout: BrandLayout, assets: SceneAssets, canvas: Size): Partial<Record<LayerId, Box>> {
   const boxes: Partial<Record<LayerId, Box>> = {};
   for (const id of ["logo", "slogan"] as const) {
-    const image = assets[id], layer = layout[id];
-    if (layer.visible && image) boxes[id] = imageBox(layer, safeAspect(image), canvas);
+    const layer = layout[id], aspect = layer.visible ? imageLayerAspect(layer, assets[id]) : null;
+    if (aspect !== null) boxes[id] = imageBox(layer.asText ? {...layer, stretch: 1} : layer, aspect, canvas);
   }
   const t = layout.text;
   if (t.visible && t.text.trim()) {
@@ -76,11 +92,12 @@ export function BrandScene({canvas, assets, focal, layout, autoTextColor, edit, 
     edit?.onLayer(id, {cx: clamp(c.cx, 0, 100), cy: clamp(c.cy, 0, 100)});
   }
   function transformImage(id: "logo" | "slogan", e: Konva.KonvaEventObject<Event>) {
-    const node = e.target, b = boxes[id]!, layer = layout[id], aspect = safeAspect(assets[id]!);
-    const w = b.w * node.scaleX(), h = layer.lock ? w * aspect : b.h * node.scaleY();
+    const node = e.target, b = boxes[id]!, layer = layout[id], aspect = imageLayerAspect(layer, assets[id])!;
+    const locked = layer.lock || layer.asText;
+    const w = b.w * node.scaleX(), h = locked ? w * aspect : b.h * node.scaleY();
     node.scaleX(1); node.scaleY(1);
     const g = imageGeometryFromBox({x: node.x() - w / 2, y: node.y() - h / 2, w, h}, aspect, canvas);
-    edit?.onLayer(id, {cx: clamp(g.cx, 0, 100), cy: clamp(g.cy, 0, 100), w: clamp(g.w, 1, 100), stretch: layer.lock ? 1 : clamp(g.stretch, 0.2, 5)});
+    edit?.onLayer(id, {cx: clamp(g.cx, 0, 100), cy: clamp(g.cy, 0, 100), w: clamp(g.w, 1, 100), ...(layer.asText ? {} : {stretch: locked ? 1 : clamp(g.stretch, 0.2, 5)})});
   }
   function transformText(e: Konva.KonvaEventObject<Event>) {
     const node = e.target, t = layout.text, b = boxes.text!;
@@ -102,11 +119,23 @@ export function BrandScene({canvas, assets, focal, layout, autoTextColor, edit, 
   const back = assets.backdrop ? coverBox({w: assets.backdrop.naturalWidth, h: assets.backdrop.naturalHeight}, canvas, focal) : null;
   const imageNode = (id: "logo" | "slogan") => {
     const layer = layout[id], image = assets[id], b = boxes[id];
-    if (!layer.visible || !image || !b) return null;
-    const color = layer.tone === "light" ? LIGHT_TONE : layer.tone === "dark" ? DARK_TONE : null;
-    const source = color ? tinted(image, color) : image;
+    if (!layer.visible || !b) return null;
+    const color = imageLayerColor(layer);
     const cx = b.x + b.w / 2, cy = b.y + b.h / 2;
-    const outlineColor = layer.tone === "light" ? DARK_TONE : LIGHT_TONE;
+    const outlineColor = color && isLightColor(color) ? DARK_TONE : LIGHT_TONE;
+    if (layer.asText) {
+      // טקסט במקום תמונה: גודל הגופן נגזר מהרוחב שנבחר, ומרכז התיבה נשאר במקום.
+      const ref = measureText(layer.label, layer.font, layer.bold, TEXT_REF_PX), fontPx = ref.w > 0 ? TEXT_REF_PX * b.w / ref.w : TEXT_REF_PX;
+      const fill = color ?? DARK_TONE;
+      return <Group key={id} x={cx} y={cy} {...common(id)} onTransformEnd={(e: Konva.KonvaEventObject<Event>) => transformImage(id, e)}>
+        <KText x={0} y={0} offsetX={b.w / 2} offsetY={b.h / 2} width={b.w} height={b.h} align="center" verticalAlign="middle" text={layer.label} fontFamily={canvasFamily(layer.font)}
+          fontStyle={layer.bold ? "bold" : "normal"} fontSize={fontPx} direction="rtl" fill={fill} opacity={layer.opacity / 100} perfectDrawEnabled={false}
+          {...(layer.legibility === "outline" ? {stroke: isLightColor(fill) ? DARK_TONE : LIGHT_TONE, strokeWidth: fontPx * 0.12, fillAfterStrokeEnabled: true, lineJoin: "round" as const} : {})}
+          {...shadowFor(layer.legibility, fontPx)}/>
+      </Group>;
+    }
+    if (!image) return null;
+    const source = color ? tinted(image, color) : image;
     const r = Math.max(1, b.w * 0.006);
     const shared = {width: b.w, height: b.h, offsetX: b.w / 2, offsetY: b.h / 2, opacity: layer.opacity / 100, perfectDrawEnabled: false};
     return <Group key={id} x={cx} y={cy} {...common(id)} onTransformEnd={(e: Konva.KonvaEventObject<Event>) => transformImage(id, e)}>
@@ -131,7 +160,7 @@ export function BrandScene({canvas, assets, focal, layout, autoTextColor, edit, 
   const p = productAreaBox(canvas);
   // ידיות הטרנספורמר מוגדרות בפיקסלים של המסך (Konva מתקן אותן לפי קנה המידה של הבמה).
   const handle = (coarse: boolean) => (coarse ? 26 : 12);
-  const lockedRatio = selected === "text" || (selected !== null && (layout[selected] as ImageLayer).lock);
+  const lockedRatio = selected === "text" || (selected !== null && ((layout[selected] as ImageLayer).lock || (layout[selected] as ImageLayer).asText));
   return <Stage ref={stageRef} width={canvas.w * scale} height={canvas.h * scale} scaleX={scale} scaleY={scale}
     onMouseDown={e => { if (edit && !edit.cropMode && e.target === e.target.getStage()) edit.onSelect(null); }}
     onTouchStart={e => { if (edit && !edit.cropMode && e.target === e.target.getStage()) edit.onSelect(null); }}>

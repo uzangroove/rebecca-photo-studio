@@ -9,14 +9,17 @@ import {BrandScene, type SceneAssets} from "./BrandScene";
 
 export type SceneSources = {backdrop: string | null; logo: string; slogan: string};
 
-// טוען את כל מה שהסצנה צריכה לפני הציור: תמונות, וגופן הטקסט אם יש טקסט.
+// טוען את כל מה שהסצנה צריכה לפני הציור: תמונות, והגופנים של כל טקסט שמצויר (גם לוגו וסלוגן במצב טקסט).
 export async function loadSceneAssets(sources: SceneSources, layout: BrandLayout): Promise<SceneAssets> {
   const wantsText = layout.text.visible && layout.text.text.trim() !== "";
+  const wantsImage = (part: "logo" | "slogan") => layout[part].visible && !layout[part].asText;
+  const labelFonts = (["logo", "slogan"] as const).filter(p => layout[p].visible && layout[p].asText).map(p => layout[p].font);
   const [backdrop, logo, slogan] = await Promise.all([
     sources.backdrop ? loadImage(sources.backdrop) : null,
-    layout.logo.visible ? loadImage(sources.logo) : null,
-    layout.slogan.visible ? loadImage(sources.slogan) : null,
-    wantsText ? loadBrandFont(layout.text.font) : null
+    wantsImage("logo") ? loadImage(sources.logo) : null,
+    wantsImage("slogan") ? loadImage(sources.slogan) : null,
+    wantsText ? loadBrandFont(layout.text.font) : null,
+    ...labelFonts.map(loadBrandFont)
   ]);
   return {backdrop, logo, slogan};
 }
