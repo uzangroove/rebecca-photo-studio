@@ -1,6 +1,6 @@
 import {createRoot} from "react-dom/client";
-import Studio from "./Studio";
+import AuthGate from "./AuthGate";
 import "./styles.css";
 import {applyTheme, readLocalTheme} from "./theme";
 applyTheme(readLocalTheme());
-createRoot(document.getElementById("root")!).render(<Studio/>);
+createRoot(document.getElementById("root")!).render(<AuthGate/>);

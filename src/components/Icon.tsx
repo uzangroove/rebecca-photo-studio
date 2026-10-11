@@ -18,5 +18,6 @@ export const icons = {
   thumb: "M3 10h4v10H3z M7 10l3.5-6.5a2 2 0 0 1 3.5 1.5L13 9h5.5a2 2 0 0 1 2 2.4l-1.2 6A3 3 0 0 1 16.4 20H7",
   grid: "M4 4h6v6H4z M14 4h6v6h-6z M4 14h6v6H4z M14 14h6v6h-6z",
   reset: "M4 12a8 8 0 1 0 3-6.2 M4 4v4h4",
-  recipe: "M5 4h10l4 4v12H5z M15 4v4h4 M8 12h8 M8 16h5"
+  recipe: "M5 4h10l4 4v12H5z M15 4v4h4 M8 12h8 M8 16h5",
+  send: "M21 3L10 14 M21 3l-7 18-4-7-7-4z"
 };
