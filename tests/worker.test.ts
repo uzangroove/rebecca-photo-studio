@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import worker from "../worker/index.ts";
 const headers={authorization:`Basic ${Buffer.from("rebecca:test-password").toString("base64")}`};
 const env={STUDIO_PASSWORD:"test-password",ASSETS:{fetch:async()=>new Response("asset")}};
-test("unconfigured server fails closed for the API",async()=>{assert.equal((await worker.fetch(new Request("https://studio.test/api/settings"),{...env,STUDIO_PASSWORD:""} as any)).status,503)});
+test("without the old password the API still requires a site sign-in",async()=>{assert.equal((await worker.fetch(new Request("https://studio.test/api/settings"),{...env,STUDIO_PASSWORD:""} as any)).status,401)});
 test("the interface loads without credentials (it holds the sign-in screen)",async()=>{const result=await worker.fetch(new Request("https://studio.test/"),env as any);assert.equal(result.status,200);assert.equal(await result.text(),"asset");assert.equal(result.headers.get("cache-control"),"private, no-store")});
 test("API requires credentials and never triggers a browser password prompt",async()=>{for(const path of ["/api/generate","/api/settings"]){const r=await worker.fetch(new Request(`https://studio.test${path}`),env as any);assert.equal(r.status,401);assert.equal(r.headers.get("www-authenticate"),null)}});
 test("wrong password is rejected",async()=>{assert.equal((await worker.fetch(new Request("https://studio.test/api/settings",{headers:{authorization:"Basic cmViZWNjYTpiYWQ="}}),env as any)).status,401)});
