@@ -3,6 +3,7 @@ import type {Studio} from "../useStudio";
 import {Icon, icons} from "./Icon";
 import {RecipeBar} from "./RecipeBar";
 import {ThemeMenu} from "./ThemeMenu";
+import {SITE_URL, signOut} from "../site";
 
 const syncLabel: Record<SyncState, string> = {
   checking: "בודקים סנכרון…", synced: "מסונכרן בכל המכשירים", saving: "מסנכרנים…", offline: "לא מסונכרן. ההגדרות נשמרות במכשיר הזה"
@@ -22,6 +23,8 @@ export function Header({studio}: {studio: Studio}) {
       <ThemeMenu studio={studio}/>
       <button type="button" className="icon-btn" aria-label="רשימת אף פעם לא" title="רשימת אף פעם לא" onClick={() => studio.dispatch({type: "tab", tab: "style"})}><Icon d={icons.shield} size={20} strokeWidth={1.7}/></button>
       <a className="header-link" href="/" target="_blank" rel="noopener noreferrer">פתיחה בחלון מלא</a>
+      <a className="header-link" href={`${SITE_URL}/admin/`} target="_blank" rel="noopener noreferrer">ניהול האתר</a>
+      <button type="button" className="header-link link-btn" onClick={() => { void signOut(); }}>יציאה</button>
     </div>
   </header>;
 }

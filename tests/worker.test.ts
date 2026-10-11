@@ -3,10 +3,25 @@ import assert from "node:assert/strict";
 import worker from "../worker/index.ts";
 const headers={authorization:`Basic ${Buffer.from("rebecca:test-password").toString("base64")}`};
 const env={STUDIO_PASSWORD:"test-password",ASSETS:{fetch:async()=>new Response("asset")}};
-test("unconfigured server fails closed",async()=>{assert.equal((await worker.fetch(new Request("https://studio.test/"),{...env,STUDIO_PASSWORD:""} as any)).status,503)});
-test("assets and generation both require credentials",async()=>{for(const path of ["/","/assets/logo.png","/api/generate"]){assert.equal((await worker.fetch(new Request(`https://studio.test${path}`),env as any)).status,401)}});
-test("wrong password is rejected",async()=>{assert.equal((await worker.fetch(new Request("https://studio.test/",{headers:{authorization:"Basic cmViZWNjYTpiYWQ="}}),env as any)).status,401)});
-test("authenticated assets are private",async()=>{const result=await worker.fetch(new Request("https://studio.test/",{headers}),env as any);assert.equal(await result.text(),"asset");assert.equal(result.headers.get("cache-control"),"private, no-store")});
+test("unconfigured server fails closed for the API",async()=>{assert.equal((await worker.fetch(new Request("https://studio.test/api/settings"),{...env,STUDIO_PASSWORD:""} as any)).status,503)});
+test("the interface loads without credentials (it holds the sign-in screen)",async()=>{const result=await worker.fetch(new Request("https://studio.test/"),env as any);assert.equal(result.status,200);assert.equal(await result.text(),"asset");assert.equal(result.headers.get("cache-control"),"private, no-store")});
+test("API requires credentials and never triggers a browser password prompt",async()=>{for(const path of ["/api/generate","/api/settings"]){const r=await worker.fetch(new Request(`https://studio.test${path}`),env as any);assert.equal(r.status,401);assert.equal(r.headers.get("www-authenticate"),null)}});
+test("wrong password is rejected",async()=>{assert.equal((await worker.fetch(new Request("https://studio.test/api/settings",{headers:{authorization:"Basic cmViZWNjYTpiYWQ="}}),env as any)).status,401)});
+test("site account session is accepted only for admins",async()=>{
+ const originalFetch=globalThis.fetch;const sbEnv={ASSETS:env.ASSETS,SUPABASE_URL:"https://sb.test",SUPABASE_ANON_KEY:"anon",STUDIO_KV:undefined};
+ let admin=true;
+ globalThis.fetch=async (input:any)=>{const u=String(input);
+  if(u.endsWith("/auth/v1/user"))return Response.json({id:"u1"});
+  if(u.endsWith("/rest/v1/rpc/is_admin"))return Response.json(admin);
+  throw new Error("unexpected "+u)};
+ try{
+  const ok=await worker.fetch(new Request("https://studio.test/api/settings",{headers:{authorization:"Bearer token-admin"}}),sbEnv as any);
+  assert.notEqual(ok.status,401);
+  admin=false;
+  const no=await worker.fetch(new Request("https://studio.test/api/settings",{headers:{authorization:"Bearer token-not-admin"}}),sbEnv as any);
+  assert.equal(no.status,401);
+ }finally{globalThis.fetch=originalFetch}
+});
 test("generation requires POST",async()=>{assert.equal((await worker.fetch(new Request("https://studio.test/api/generate",{headers}),env as any)).status,405)});
 test("foreign origin generation is rejected",async()=>{assert.equal((await worker.fetch(new Request("https://studio.test/api/generate",{method:"POST",headers:{...headers,origin:"https://other.test"}}),env as any)).status,403)});
 test("missing API key has actionable response",async()=>{assert.equal((await worker.fetch(new Request("https://studio.test/api/generate",{method:"POST",headers}),env as any)).status,503)});
