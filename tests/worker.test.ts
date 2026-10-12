@@ -42,3 +42,34 @@ test("selected palette reaches prompt and landscape uses a matching source size"
   assert.equal(response.status,200);assert.equal((await response.json()).image,"dGVzdA==");assert.ok(checked);
  }finally{globalThis.fetch=originalFetch}
 });
+test("suggest: the site admin may call it cross-origin, other sites may not",async()=>{
+ const pre=await worker.fetch(new Request("https://studio.test/api/suggest",{method:"OPTIONS",headers:{origin:"https://rebecca-studio.netlify.app"}}),env as any);
+ assert.equal(pre.status,204);assert.equal(pre.headers.get("access-control-allow-origin"),"https://rebecca-studio.netlify.app");
+ assert.match(String(pre.headers.get("access-control-allow-headers")),/Authorization/);
+ const preview=await worker.fetch(new Request("https://studio.test/api/suggest",{method:"OPTIONS",headers:{origin:"https://deploy-preview-3--rebecca-studio.netlify.app"}}),env as any);
+ assert.equal(preview.status,204);
+ const bad=await worker.fetch(new Request("https://studio.test/api/suggest",{method:"OPTIONS",headers:{origin:"https://evil.test"}}),env as any);
+ assert.equal(bad.status,403);assert.equal(bad.headers.get("access-control-allow-origin"),null);
+ const noAuth=await worker.fetch(new Request("https://studio.test/api/suggest",{method:"POST",headers:{origin:"https://rebecca-studio.netlify.app"}}),{...env,STUDIO_PASSWORD:""} as any);
+ assert.equal(noAuth.status,401);assert.equal(noAuth.headers.get("access-control-allow-origin"),"https://rebecca-studio.netlify.app","the admin can read the sign-in error");
+ const foreign=await worker.fetch(new Request("https://studio.test/api/suggest",{method:"POST",headers:{...headers,origin:"https://evil.test","content-type":"application/json"},body:"{}"}),env as any);
+ assert.equal(foreign.status,403);
+});
+test("suggest: names go to OpenAI as JSON and come back cleaned, with CORS for the site",async()=>{
+ const originalFetch=globalThis.fetch;let sent:any=null;
+ globalThis.fetch=async (input:any,init:any)=>{assert.equal(String(input),"https://api.openai.com/v1/chat/completions");sent=JSON.parse(init.body);
+  return Response.json({choices:[{message:{content:JSON.stringify({names:Array.from({length:6},(_,i)=>({style:"פיוטי",name:"שם "+i,short:"ש",en:"N",why:"כי"}))})}}]})};
+ try{
+  const r=await worker.fetch(new Request("https://studio.test/api/suggest",{method:"POST",headers:{...headers,origin:"https://rebecca-studio.netlify.app","content-type":"application/json"},
+   body:JSON.stringify({task:"names",context:"סוג המוצר: סבון"})}),{...env,OPENAI_API_KEY:"test-only"} as any);
+  assert.equal(r.status,200);assert.equal(r.headers.get("access-control-allow-origin"),"https://rebecca-studio.netlify.app");
+  const out=await r.json() as {names:unknown[]};assert.equal(out.names.length,5);
+  assert.equal(sent.response_format.type,"json_object");assert.equal(sent.model,"gpt-4o-mini");
+ }finally{globalThis.fetch=originalFetch}
+});
+test("suggest: missing key and bad input have clear answers",async()=>{
+ const h={...headers,"content-type":"application/json"};
+ assert.equal((await worker.fetch(new Request("https://studio.test/api/suggest",{method:"POST",headers:h,body:JSON.stringify({task:"names",context:"x"})}),env as any)).status,503);
+ assert.equal((await worker.fetch(new Request("https://studio.test/api/suggest",{method:"POST",headers:h,body:JSON.stringify({task:"names"})}),{...env,OPENAI_API_KEY:"k"} as any)).status,400);
+ assert.equal((await worker.fetch(new Request("https://studio.test/api/suggest",{headers}),env as any)).status,405);
+});
