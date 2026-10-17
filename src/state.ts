@@ -12,7 +12,8 @@ export type Screen = "studio" | "editor";
 export type Zoom = "fit" | "full";
 export type ViewMode = "split" | "single" | "compare";
 export type SyncState = "checking" | "synced" | "saving" | "offline";
-export type HistoryItem = SavedImage & {url: string};
+// תמונה בהיסטוריה: מהמכשיר (יש blob) או מהארכיון בענן (יש fullUrl זמני). inCloud = שמורה בענן ונראית בכל המכשירים.
+export type HistoryItem = Omit<SavedImage, "blob"> & {blob?: Blob; url: string; fullUrl?: string; inCloud?: boolean; sent?: boolean};
 // התוצאה אחרי חיתוך לפורמט והוספת מיתוג. branded=false: ההרכבה נכשלה והקובץ להורדה הוא המקור.
 export type Composed = {url: string; blob: Blob; branded: boolean};
 export type Photo = {file: File; url: string};
@@ -149,7 +150,7 @@ export function reducer(state: State, action: Action): State {
     case "openRecent":
       return {...state, ...cleared, photo: null, result: action.url, view: "single", currentKey: action.key,
         selection: action.selection, formatId: action.formatId,
-        status: {text: "תמונה שנשמרה במכשיר הזה. אפשר לערוך מיתוג ולהוריד אותה", error: false}};
+        status: {text: "תמונה מההיסטוריה. אפשר לערוך מיתוג ולהוריד אותה", error: false}};
     case "generating":
       return {...state, busy: true, status: {text: "יוצרים סצנה חדשה בתוך התמונה…", error: false}};
     case "generated":
