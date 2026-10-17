@@ -16,6 +16,7 @@ export function SendToSite({studio}: {studio: Studio}) {
     try {
       const blob = variant === "branded" && branded ? branded : await fetch(clean!).then(r => r.blob());
       await sendToSite(blob, variant, meta);
+      if (state.currentKey) await studio.markSent([state.currentKey]);
       dispatch({type: "say", text: "נשלח לאתר ✓ התמונה ממתינה ב״תמונות חדשות״ בממשק הניהול"});
     } catch (e) {
       dispatch({type: "say", text: e instanceof Error ? e.message : "השליחה לאתר נכשלה", error: true});

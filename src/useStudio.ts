@@ -14,6 +14,10 @@ import {formatById, ratioOf} from "../shared/social-formats";
 import {currentImage, currentLayout, initialState, reducer} from "./state";
 import {centerFocal} from "../shared/brand-geometry";
 import {loadStudio, rateImage, saveBranding, saveImage, type Rating, type SavedImage} from "./studio-storage";
+import type {HistoryItem} from "./state";
+import {mergeHistory, needsUpload, type CloudImage} from "./history-merge";
+import {listCloud, markSentCloud, rateCloud, signedUrls, uploadToCloud} from "./cloud-history";
+import {markSent as markSentLocal, sentKeys} from "./site";
 
 export function useStudio() {
   const [state, dispatch] = useReducer(reducer, initialState, s => ({...s, theme: readLocalTheme()}));
@@ -22,12 +26,57 @@ export function useStudio() {
   // סנכרון: כותבים לשרת רק אחרי שקראנו ממנו בהצלחה, כדי לא לדרוס הגדרות ממכשיר אחר.
   const remoteReadable = useRef(false), lastSynced = useRef("");
 
-  function showHistory(images: SavedImage[], currentKey?: string) {
-    const urls = images.map(image => URL.createObjectURL(image.blob));
+  // ההיסטוריה = מה שבמכשיר (עד 30, לעבודה מהירה) + הארכיון בענן (כל התמונות, מכל המכשירים).
+  const localImages = useRef<SavedImage[]>([]), cloudImages = useRef<CloudImage[]>([]), signed = useRef(new Map<string, string>());
+  async function refreshHistory(currentKey?: string) {
+    const merged = mergeHistory(localImages.current, cloudImages.current, sentKeys());
+    const need = [...new Set(merged.filter(m => !m.local && m.cloud).flatMap(m => [m.cloud!.thumbPath ?? m.cloud!.path, m.cloud!.path]))].filter(p => !signed.current.has(p));
+    if (need.length) { try { (await signedUrls(need)).forEach((url, path) => signed.current.set(path, url)); } catch { /* נציג את מה שיש */ } }
+    const urls: string[] = [];
+    const items: HistoryItem[] = [];
+    for (const m of merged) {
+      const base = {key: m.key, createdAt: m.createdAt, selection: m.selection, formatId: m.formatId, rating: m.rating, sent: m.sent, inCloud: Boolean(m.cloud)};
+      if (m.local) { const url = URL.createObjectURL(m.local.blob); urls.push(url); items.push({...base, blob: m.local.blob, url}); continue; }
+      const c = m.cloud!, url = signed.current.get(c.thumbPath ?? c.path);
+      if (url) items.push({...base, url, fullUrl: signed.current.get(c.path)});
+    }
     const previous = historyUrls.current;
     historyUrls.current = urls;
-    dispatch({type: "history", items: images.map((image, i) => ({...image, url: urls[i]})), currentKey});
+    dispatch({type: "history", items, currentKey});
     previous.forEach(url => URL.revokeObjectURL(url));
+  }
+  function showHistory(images: SavedImage[], currentKey?: string) {
+    localImages.current = images;
+    return refreshHistory(currentKey);
+  }
+
+  // פעם בפתיחה: קוראים את הארכיון מהענן, ומעלים אליו תמונות שנמצאות רק במכשיר הזה (גם כאלה שנוצרו לפני שהיה ארכיון).
+  async function syncCloud(cancelled: () => boolean) {
+    try { cloudImages.current = await listCloud(); } catch { return; }
+    if (cancelled()) return;
+    await refreshHistory();
+    const keys = new Set(cloudImages.current.map(c => c.key));
+    const todo = needsUpload(localImages.current, keys);
+    let uploaded = 0;
+    for (const image of todo) {
+      if (cancelled()) return;
+      try { cloudImages.current = [await uploadToCloud(image), ...cloudImages.current]; uploaded++; } catch { break; }
+    }
+    // תמונות שסומנו "נשלחה לאתר" במכשיר הזה לפני שהיה ארכיון
+    const local = sentKeys(), mark = cloudImages.current.filter(c => local.has(c.key) && !c.sent).map(c => c.key);
+    if (mark.length) { try { await markSentCloud(mark); cloudImages.current = cloudImages.current.map(c => mark.includes(c.key) ? {...c, sent: true} : c); } catch { /* ננסה בפעם הבאה */ } }
+    if (cancelled()) return;
+    if (uploaded || mark.length) await refreshHistory();
+    if (uploaded) dispatch({type: "say", text: `${uploaded} תמונות מהמכשיר הזה נשמרו בארכיון בענן ✓ עכשיו רואים אותן מכל מכשיר`});
+    if (uploaded < todo.length) dispatch({type: "say", text: "חלק מהתמונות עוד לא הועלו לענן. ננסה שוב בפתיחה הבאה של הסטודיו"});
+  }
+
+  /** סימון "נשלחה לאתר" גם במכשיר וגם בענן. */
+  async function markSent(keys: string[]) {
+    markSentLocal(keys);
+    cloudImages.current = cloudImages.current.map(c => keys.includes(c.key) ? {...c, sent: true} : c);
+    try { await markSentCloud(keys.filter(k => cloudImages.current.some(c => c.key === k))); } catch { /* נשמר במכשיר */ }
+    await refreshHistory();
   }
 
   // צבעי הממשק: מוחלים מיד, ונשמרים גם במכשיר כדי שלא יהבהבו בטעינה הבאה.
@@ -41,7 +90,7 @@ export function useStudio() {
         const {branding, images} = await loadStudio();
         if (cancelled) return;
         if (branding) dispatch({type: "branding", brand: branding.brand, layouts: branding.layouts});
-        showHistory(images);
+        await showHistory(images);
       } catch {
         if (!cancelled) dispatch({type: "say", text: "השמירה המקומית אינה זמינה בדפדפן הזה. אפשר להמשיך ליצור תמונות"});
       }
@@ -58,6 +107,7 @@ export function useStudio() {
         if (!cancelled) dispatch({type: "sync", sync: "offline"});
       }
       if (!cancelled) dispatch({type: "ready"});
+      if (!cancelled) await syncCloud(() => cancelled);
     })();
     return () => {
       cancelled = true;
@@ -138,8 +188,11 @@ export function useStudio() {
     if (!image) return;
     const next = image.rating === rating ? null : rating;
     dispatch({type: "rated", key: image.key, rating: next});
+    localImages.current = localImages.current.map(l => l.key === image.key ? {...l, rating: next} : l);
+    cloudImages.current = cloudImages.current.map(c => c.key === image.key ? {...c, rating: next} : c);
     try { await rateImage(image.key, next); }
     catch { dispatch({type: "say", text: "הדירוג לא נשמר בדפדפן", error: true}); }
+    if (image.inCloud) { try { await rateCloud(image.key, next); } catch { dispatch({type: "say", text: "הדירוג נשמר במכשיר אבל לא בענן", error: true}); } }
   }
 
   function choosePhoto(file?: File) {
@@ -167,9 +220,16 @@ export function useStudio() {
     }
   }
 
-  function openRecent(image: SavedImage) {
+  async function openRecent(image: HistoryItem) {
+    let blob = image.blob;
+    if (!blob) {
+      if (!image.fullUrl) { dispatch({type: "say", text: "התמונה הזו לא זמינה כרגע", error: true}); return; }
+      dispatch({type: "say", text: "טוענים את התמונה מהארכיון…"});
+      try { const r = await fetch(image.fullUrl); if (!r.ok) throw new Error(String(r.status)); blob = await r.blob(); }
+      catch { dispatch({type: "say", text: "לא הצלחנו לטעון את התמונה מהענן. בדקו את החיבור ונסו שוב", error: true}); return; }
+    }
     if (recentUrl.current) URL.revokeObjectURL(recentUrl.current);
-    recentUrl.current = URL.createObjectURL(image.blob);
+    recentUrl.current = URL.createObjectURL(blob);
     if (photoUrl.current) { URL.revokeObjectURL(photoUrl.current); photoUrl.current = null; }
     request.current++;
     dispatch({type: "openRecent", url: recentUrl.current, key: image.key, selection: image.selection, formatId: image.formatId});
@@ -186,7 +246,11 @@ export function useStudio() {
       try {
         const blob = await fetch(image).then(r => r.blob());
         const saved = await saveImage(blob, selection, state.formatId);
-        showHistory(saved.images, saved.key);
+        await showHistory(saved.images, saved.key);
+        const fresh = saved.images.find(i => i.key === saved.key);
+        if (fresh) uploadToCloud(fresh)
+          .then(c => { cloudImages.current = [c, ...cloudImages.current.filter(x => x.key !== c.key)]; return refreshHistory(); })
+          .catch(() => dispatch({type: "say", text: "התמונה נשמרה במכשיר. העלאה לארכיון בענן תנוסה שוב בפתיחה הבאה"}));
       } catch {
         dispatch({type: "say", text: "התמונה נוצרה, אך לא נשמרה בהיסטוריה. אפשר להוריד אותה כעת"});
       }
@@ -217,7 +281,7 @@ export function useStudio() {
     }
   }
 
-  return {state, dispatch, layout, setLayout, autoTextColor, focal, select, chooseRecipe, resetScene, saveRecipe, rate, choosePhoto, chooseBrandFile, openRecent, generate, download};
+  return {state, dispatch, layout, setLayout, autoTextColor, focal, select, chooseRecipe, resetScene, saveRecipe, rate, choosePhoto, chooseBrandFile, openRecent, generate, download, markSent};
 }
 
 export const downloadName = (s: Selection) => `rebecca-${s.style}-${s.palette}.png`;
