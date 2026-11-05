@@ -1,4 +1,5 @@
 import {useEffect, useRef, useState} from "react";
+import {paletteLabel} from "../../shared/palette-custom";
 import {findItem} from "../../shared/catalog";
 import {formatById} from "../../shared/social-formats";
 import type {Studio} from "../useStudio";
@@ -55,7 +56,7 @@ export function HistoryGallery({studio, onClose}: {studio: Studio; onClose: () =
             {image.sent && <span className="sent-badge">נשלחה לאתר</span>}
             {selecting && <span className="pick-check" aria-hidden="true">{on ? "✓" : ""}</span>}
           </span>
-          <strong>{findItem("styles", image.selection.style)?.label} · {findItem("palettes", image.selection.palette)?.label}</strong>
+          <strong>{findItem("styles", image.selection.style)?.label} · {paletteLabel(image.selection.palette, studio.state.customPalettes)}</strong>
           <small>{formatById(image.formatId).group} {formatById(image.formatId).name} · {new Date(image.createdAt).toLocaleDateString("he-IL")}</small>
         </button>;
       })}

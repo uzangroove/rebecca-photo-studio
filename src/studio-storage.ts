@@ -1,4 +1,5 @@
 import {layoutsFromLegacy, parseLayouts, type Layouts} from "../shared/brand-layout.ts";
+import {isPaletteValue} from "../shared/palette-custom.ts";
 import {hasItem} from "../shared/catalog.ts";
 import {defaultSelection, parseSelection, type Selection} from "../shared/selection.ts";
 import {defaultBrand, type BrandSettings} from "../shared/settings.ts";
@@ -37,7 +38,7 @@ export function normalizeImage(stored: StoredImage): SavedImage {
   const parsed = parseSelection(stored.selection);
   const selection = parsed ?? {...defaultSelection,
     style: hasItem("styles", stored.style) ? stored.style! : defaultSelection.style,
-    palette: hasItem("palettes", stored.palette) ? stored.palette! : defaultSelection.palette};
+    palette: isPaletteValue(stored.palette) ? stored.palette! : defaultSelection.palette};
   return {key: stored.key, createdAt: stored.createdAt, blob: stored.blob, selection,
     formatId: typeof stored.formatId === "string" ? stored.formatId : "instagram-square",
     rating: stored.rating === "up" || stored.rating === "down" ? stored.rating : null};

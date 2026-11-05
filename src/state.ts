@@ -4,6 +4,7 @@ import {findItem, isBlocked} from "../shared/catalog.ts";
 import {builtInRecipes, applyRecipe, MAX_RECIPES, type Recipe} from "../shared/recipes.ts";
 import {defaultSelection, MAX_WISH_CHARS, type SceneKey, type Selection} from "../shared/selection.ts";
 import {defaultBrand, defaultNeverList, MAX_NEVER_CHARS, MAX_NEVER_ITEMS, type BrandSettings, type StudioSettings} from "../shared/settings.ts";
+import {customToken, MAX_CUSTOM_PALETTES, type CustomPalette} from "../shared/palette-custom.ts";
 import {formatById, formats} from "../shared/social-formats.ts";
 import type {Rating, SavedImage} from "./studio-storage.ts";
 
@@ -33,6 +34,9 @@ export type State = {
   crops: Record<string, Focal>;
   neverList: string[];
   recipes: Recipe[];
+  // פלטות שרבקה יצרה, ופלטות קבועות שהיא הסתירה. מסתנכרנות בין המכשירים.
+  customPalettes: CustomPalette[];
+  hiddenPalettes: string[];
   photo: Photo | null;
   result: string | null;
   composed: Composed | null;
@@ -49,6 +53,7 @@ export const initialState: State = {
   tab: "style", view: "split", zoom: "fit",
   selection: defaultSelection, formatId: "instagram-square",
   brand: defaultBrand, layouts: {}, theme: null, screen: "studio", crops: {}, neverList: [...defaultNeverList], recipes: [...builtInRecipes],
+  customPalettes: [], hiddenPalettes: [],
   photo: null, result: null, composed: null, downloadFallback: false, busy: false,
   status: {text: "העלו צילום של סבון או נר כדי להתחיל", error: false},
   history: [], currentKey: null, ready: false, sync: "checking"
@@ -70,6 +75,10 @@ export type Action =
   | {type: "format"; id: string}
   | {type: "brand"; patch: Partial<BrandSettings>}
   | {type: "theme"; id: string | null}
+  | {type: "paletteSave"; palette: CustomPalette}
+  | {type: "paletteDelete"; id: string}
+  | {type: "paletteHide"; id: string}
+  | {type: "paletteShow"; id: string | null}
   | {type: "screen"; screen: Screen}
   | {type: "branding"; brand: BrandSettings; layouts: Layouts}
   | {type: "layout"; layout: BrandLayout}
@@ -128,6 +137,20 @@ export function reducer(state: State, action: Action): State {
     case "brand": return {...state, brand: {...state.brand, ...action.patch}};
     case "branding": return {...state, brand: action.brand, layouts: action.layouts};
     case "theme": return {...state, theme: action.id};
+    // פלטה חדשה נוספת בראש "הפלטות שלי" ונבחרת מיד. אותו מזהה = עדכון.
+    case "paletteSave": {
+      const others = state.customPalettes.filter(p => p.id !== action.palette.id);
+      if (others.length >= MAX_CUSTOM_PALETTES) return {...state, status: {text: `אפשר לשמור עד ${MAX_CUSTOM_PALETTES} פלטות. מחקו פלטה כדי להוסיף חדשה`, error: true}};
+      return {...state, ...cleared, customPalettes: [action.palette, ...others], selection: {...state.selection, palette: customToken(action.palette.colors)}, status: ready};
+    }
+    // מחיקה לא פוגעת בבחירה הנוכחית, במתכונים או בהיסטוריה: הצבעים שמורים בהם.
+    case "paletteDelete": return {...state, customPalettes: state.customPalettes.filter(p => p.id !== action.id)};
+    case "paletteHide": {
+      const item = findItem("palettes", action.id);
+      if (!item || item.favorite || state.hiddenPalettes.includes(action.id)) return state;
+      return {...state, hiddenPalettes: [...state.hiddenPalettes, action.id]};
+    }
+    case "paletteShow": return {...state, hiddenPalettes: action.id === null ? [] : state.hiddenPalettes.filter(id => id !== action.id)};
     case "screen": return {...state, screen: action.screen};
     // הפריסה נשמרת לכל פורמט בנפרד. "החלה על כל הפורמטים" מעתיקה את הפריסה של הפורמט הנוכחי לכולם.
     case "layout": return {...state, layouts: {...state.layouts, [state.formatId]: action.layout}};
@@ -140,7 +163,8 @@ export function reducer(state: State, action: Action): State {
       return {...state, layouts: rest};
     }
     case "crop": return {...state, crops: {...state.crops, [action.formatId]: action.focal}};
-    case "settings": return {...state, brand: action.settings.brand, layouts: action.settings.layouts, theme: action.settings.theme, neverList: action.settings.neverList, recipes: action.settings.recipes};
+    case "settings": return {...state, brand: action.settings.brand, layouts: action.settings.layouts, theme: action.settings.theme, neverList: action.settings.neverList, recipes: action.settings.recipes,
+      customPalettes: action.settings.customPalettes, hiddenPalettes: action.settings.hiddenPalettes};
     case "ready": return {...state, ready: true};
     case "sync": return {...state, sync: action.sync};
     case "history": return {...state, history: action.items, currentKey: action.currentKey ?? state.currentKey};

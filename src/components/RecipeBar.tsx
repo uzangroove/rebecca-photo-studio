@@ -1,4 +1,5 @@
 import {useState} from "react";
+import {paletteColors, paletteLabel} from "../../shared/palette-custom";
 import {findItem} from "../../shared/catalog";
 import {MAX_RECIPES, MAX_RECIPE_NAME, recipeMatches} from "../../shared/recipes";
 import type {Studio} from "../useStudio";
@@ -9,7 +10,7 @@ export function RecipeBar({studio}: {studio: Studio}) {
   const {state, dispatch, chooseRecipe, saveRecipe} = studio;
   const [naming, setNaming] = useState(false), [name, setName] = useState(""), [menu, setMenu] = useState(false);
   const active = state.recipes.find(r => recipeMatches(state.selection, r));
-  const suggestion = `${findItem("styles", state.selection.style)?.label} ${findItem("palettes", state.selection.palette)?.label}`;
+  const suggestion = `${findItem("styles", state.selection.style)?.label} ${paletteLabel(state.selection.palette, state.customPalettes)}`;
   const full = state.recipes.length >= MAX_RECIPES;
   function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -26,7 +27,7 @@ export function RecipeBar({studio}: {studio: Studio}) {
         const on = active?.id === r.id;
         return <span key={r.id} className="recipe">
           <button type="button" className={`recipe-btn${on ? " is-active" : ""}`} aria-pressed={on} onClick={() => {chooseRecipe(r); setMenu(false);}}>
-            <span className="dots">{(findItem("palettes", r.look.palette)?.colors ?? []).map(c => <i key={c} style={{background: c}}/>)}</span>{r.name}
+            <span className="dots">{(paletteColors(r.look.palette) ?? []).map((c, i) => <i key={i} style={{background: c}}/>)}</span>{r.name}
           </button>
           {on && <button type="button" className="recipe-del" aria-label={`מחיקת המתכון ${r.name}`}
             onClick={() => {if (window.confirm(`למחוק את המתכון "${r.name}"?`)) dispatch({type: "deleteRecipe", id: r.id});}}><Icon d={icons.trash} size={18}/></button>}

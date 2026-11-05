@@ -1,11 +1,12 @@
 import {useEffect, useMemo, useReducer, useRef} from "react";
+import {paletteColors} from "../shared/palette-custom";
 import type {MouseEvent} from "react";
 import type {Recipe} from "../shared/recipes";
 import {lookOf} from "../shared/recipes";
 import type {Selection} from "../shared/selection";
 import type {StudioSettings} from "../shared/settings";
 import type {BrandLayout} from "../shared/brand-layout";
-import {fetchSettings, putSettings, requestImage} from "./api";
+import {fetchSettings, putSettings, requestImage, uploadReady} from "./api";
 import {applyTheme, readLocalTheme, saveLocalTheme} from "./theme";
 import {renderBranded} from "./brand/export";
 import {readBrandFile} from "./brand/upload";
@@ -115,7 +116,9 @@ export function useStudio() {
     };
   }, []);
 
-  const settings = useMemo<StudioSettings>(() => ({version: 3, neverList: state.neverList, recipes: state.recipes, brand: state.brand, layouts: state.layouts, theme: state.theme}), [state.neverList, state.recipes, state.brand, state.layouts, state.theme]);
+  const settings = useMemo<StudioSettings>(() => ({version: 3, neverList: state.neverList, recipes: state.recipes, brand: state.brand, layouts: state.layouts, theme: state.theme,
+    customPalettes: state.customPalettes, hiddenPalettes: state.hiddenPalettes}),
+    [state.neverList, state.recipes, state.brand, state.layouts, state.theme, state.customPalettes, state.hiddenPalettes]);
   useEffect(() => {
     if (!state.ready) return;
     const timer = setTimeout(async () => {
@@ -136,7 +139,7 @@ export function useStudio() {
   }, [state.ready, settings]);
 
   const layout = useMemo(() => currentLayout(state), [state.layouts, state.formatId]);
-  const autoTextColor = findItem("palettes", state.selection.palette)?.colors[2] ?? "#FFFFFF";
+  const autoTextColor = paletteColors(state.selection.palette)?.[2] ?? "#FFFFFF";
   const focal = state.crops[state.formatId] ?? centerFocal;
 
   // מרכיבים את התוצאה: חיתוך לפורמט ומיתוג, באותה סצנה שמוצגת בעורך. אותו קובץ משמש לתצוגה ולהורדה.
@@ -197,8 +200,9 @@ export function useStudio() {
 
   function choosePhoto(file?: File) {
     if (!file) return;
-    if (!/^image\/(jpeg|png|webp)$/.test(file.type) || file.size > 10 * 1024 * 1024) {
-      dispatch({type: "say", text: "אפשר להעלות JPG, PNG או WebP עד 10 מגה־בייט", error: true});
+    // הצילום מוקטן לפני השליחה (uploadReady), ולכן אפשר לקבל גם צילומים גדולים מהטלפון.
+    if (!/^image\/(jpeg|png|webp)$/.test(file.type) || file.size > 30 * 1024 * 1024) {
+      dispatch({type: "say", text: "אפשר להעלות JPG, PNG או WebP עד 30 מגה־בייט", error: true});
       return;
     }
     if (photoUrl.current) URL.revokeObjectURL(photoUrl.current);
@@ -240,7 +244,7 @@ export function useStudio() {
     const id = ++request.current, {selection} = state;
     dispatch({type: "generating"});
     try {
-      const image = await requestImage(state.photo.file, selection, ratioOf(formatById(state.formatId)));
+      const image = await requestImage(await uploadReady(state.photo.file), selection, ratioOf(formatById(state.formatId)));
       if (id !== request.current) return;
       dispatch({type: "generated", image});
       try {
@@ -284,6 +288,6 @@ export function useStudio() {
   return {state, dispatch, layout, setLayout, autoTextColor, focal, select, chooseRecipe, resetScene, saveRecipe, rate, choosePhoto, chooseBrandFile, openRecent, generate, download, markSent};
 }
 
-export const downloadName = (s: Selection) => `rebecca-${s.style}-${s.palette}.png`;
+export const downloadName = (s: Selection) => `rebecca-${s.style}-${s.palette.startsWith("custom:") ? "custom" : s.palette}.png`;
 
 export type Studio = ReturnType<typeof useStudio>;

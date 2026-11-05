@@ -1,5 +1,5 @@
 import {formatById} from "../../shared/social-formats";
-import type {Studio} from "../useStudio";
+import {downloadName, type Studio} from "../useStudio";
 import {Icon, icons} from "./Icon";
 import {UploadButton} from "./UploadButton";
 import {SendToSite} from "./SendToSite";
@@ -7,7 +7,7 @@ import {SendToSite} from "./SendToSite";
 export function ActionBar({studio}: {studio: Studio}) {
   const {state, generate, download, choosePhoto} = studio;
   const format = formatById(state.formatId), url = state.composed?.url;
-  const name = `rebecca-${state.selection.style}-${state.selection.palette}.png`;
+  const name = downloadName(state.selection);
   return <div className="actions">
     <button type="button" className="cta" disabled={state.busy} onClick={generate}>
       <Icon d={icons.sparkle}/>{state.busy ? "יוצרים…" : state.result ? "יצירת גרסה נוספת" : "יצירת תמונה"}
