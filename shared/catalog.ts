@@ -10,7 +10,12 @@ export type CatalogItem = {
 };
 export type SceneDefaults = {surface: string; background: string; light: string};
 export type StyleItem = CatalogItem & {defaults: SceneDefaults};
-export type SurfaceItem = CatalogItem & {swatch: string};
+// group מסדר את המשטחים בלשונית "משטח" לקבוצות: בדים, נייר וטיח, עץ וטבע, משטחים קשים.
+export type SurfaceGroup = "fabric" | "paper" | "wood" | "hard";
+export type SurfaceItem = CatalogItem & {swatch: string; group: SurfaceGroup};
+export const surfaceGroups: readonly {id: SurfaceGroup; label: string}[] = [
+  {id: "fabric", label: "בדים"}, {id: "paper", label: "נייר וטיח"}, {id: "wood", label: "עץ וטבע"}, {id: "hard", label: "משטחים קשים"}
+];
 // family קובע אילו הנחיות רלוונטיות (מצב נר לנרות, עטיפה למארז). guidance הוא מקטע הפרומפט של סוג המוצר.
 export type ProductFamily = "candle" | "soap" | "melts" | "bomb" | "gift";
 export type ProductItem = CatalogItem & {family: ProductFamily; guidance: string | null};
@@ -42,15 +47,33 @@ export const styles: readonly StyleItem[] = [
 ];
 
 export const surfaces: readonly SurfaceItem[] = [
-  {id:"paper",label:"נייר מרקם",swatch:"#EFE9DE",icon:"M6 3h9l3 3v15H6z M15 3v3h3 M9 11h6 M9 15h6",prompt:"a textured fine paper surface"},
-  {id:"plaster",label:"טיח",swatch:"#E6DACB",icon:"M4 8c3-2 5 2 8 0s5 2 8 0 M4 14c3-2 5 2 8 0s5 2 8 0 M4 20h16",prompt:"a soft plaster surface"},
-  {id:"linen",label:"פשתן",swatch:"#DCD0BC",icon:"M4 8h16 M4 12h16 M4 16h16 M8 4v16 M12 4v16 M16 4v16",prompt:"a natural linen cloth surface"},
-  {id:"oak",label:"עץ בהיר",swatch:"#D2B48C",icon:"M3 8h18 M3 12c4-2 6 2 10 0s6 0 8 0 M3 16h18",prompt:"a pale oak wood surface"},
-  {id:"walnut",label:"עץ כהה",swatch:"#6B4A36",icon:"M3 7h18 M3 17h18 M3 12h6 M15 12h6 M12 14a3 2 0 1 0 0-4a3 2 0 1 0 0 4z",prompt:"a dark walnut wood surface"},
-  {id:"ceramic",label:"קרמיקה",swatch:"#EDE6DA",icon:"M4 6h16v12H4z M4 12h16 M12 6v12",prompt:"a matte ceramic tile surface"},
-  {id:"terrazzo",label:"טרצו",swatch:"#E2DDD3",icon:"M6 7h.01 M11 6l2 1 M17 8h.01 M8 12l2 1 M15 12h.01 M18 15l-2 1 M6 16h.01 M11 17h.01",prompt:"a fine terrazzo surface"},
-  {id:"concrete",label:"בטון",swatch:"#A9A6A0",icon:"M4 5h16v14H4z M8 9h.01 M14 8h.01 M10 14h.01 M16 15h.01 M6 16h.01",prompt:"a smooth concrete surface"},
-  {id:"marble",label:"שיש",swatch:"#F2F1EE",icon:"M4 5h16v14H4z M6 9c4 0 4 4 8 4s3 3 4 5 M10 5c0 3 3 4 3 7",prompt:"a marble surface"}
+  // בדים
+  {id:"linen",group:"fabric",label:"פשתן",swatch:"#DCD0BC",icon:"M4 8h16 M4 12h16 M4 16h16 M8 4v16 M12 4v16 M16 4v16",prompt:"a natural linen cloth surface"},
+  {id:"muslin",group:"fabric",label:"מוסלין כותנה",swatch:"#F1ECE2",icon:"M3 6h18 M5 6c0 5 2 9 4 13 M12 6c0 5-1 9 0 13 M19 6c0 5-2 9-4 13",prompt:"a soft unbleached cotton muslin cloth surface"},
+  {id:"gauze",group:"fabric",label:"גזה מקומטת",swatch:"#EEE8DC",icon:"M4 7l3 2 3-2 3 2 3-2 3 2 M4 12l3 2 3-2 3 2 3-2 3 2 M4 17l3 2 3-2 3 2 3-2 3 2",prompt:"a crinkled natural cotton gauze surface with soft wrinkles"},
+  {id:"velvet",group:"fabric",label:"קטיפה",swatch:"#B08A8E",icon:"M4 5h16v14H4z M7 15c3-6 7-6 10-8",prompt:"a soft matte velvet fabric surface"},
+  {id:"satin",group:"fabric",label:"סאטן",swatch:"#E9DCCF",icon:"M3 8c4-3 7 3 11 0s5-2 7-1 M3 14c4-3 7 3 11 0s5-2 7-1 M3 20h18",prompt:"a smooth satin fabric surface with gentle soft folds"},
+  {id:"jute",group:"fabric",label:"יוטה",swatch:"#B9976B",icon:"M4 4h16v16H4z M4 9h16 M4 14h16 M9 4v16 M14 4v16",prompt:"a coarse natural jute burlap surface"},
+  {id:"felt",group:"fabric",label:"לבד צמר",swatch:"#C9C2B8",icon:"M5 6h14a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1z M8 10h.01 M12 12h.01 M16 10h.01 M10 15h.01 M15 15h.01",prompt:"a soft wool felt surface"},
+  // נייר וטיח
+  {id:"paper",group:"paper",label:"נייר מרקם",swatch:"#EFE9DE",icon:"M6 3h9l3 3v15H6z M15 3v3h3 M9 11h6 M9 15h6",prompt:"a textured fine paper surface"},
+  {id:"plaster",group:"paper",label:"טיח",swatch:"#E6DACB",icon:"M4 8c3-2 5 2 8 0s5 2 8 0 M4 14c3-2 5 2 8 0s5 2 8 0 M4 20h16",prompt:"a soft plaster surface"},
+  {id:"kraft",group:"paper",label:"נייר קראפט",swatch:"#C8A57A",icon:"M6 4h12v13a3 3 0 0 1-3 3H6z M6 4a2 2 0 0 0 0 4h2 M10 10h5 M10 14h5",prompt:"a natural brown kraft paper surface"},
+  {id:"washi",group:"paper",label:"נייר וואשי",swatch:"#F3EEE3",icon:"M5 4h14v16H5z M8 9c2 1 4-1 6 0 M9 13c2-1 3 1 6 0 M8 17c1-1 3 0 4-1",prompt:"a handmade Japanese washi paper surface with visible fibers"},
+  // עץ וטבע
+  {id:"oak",group:"wood",label:"עץ בהיר",swatch:"#D2B48C",icon:"M3 8h18 M3 12c4-2 6 2 10 0s6 0 8 0 M3 16h18",prompt:"a pale oak wood surface"},
+  {id:"walnut",group:"wood",label:"עץ כהה",swatch:"#6B4A36",icon:"M3 7h18 M3 17h18 M3 12h6 M15 12h6 M12 14a3 2 0 1 0 0-4a3 2 0 1 0 0 4z",prompt:"a dark walnut wood surface"},
+  {id:"olivewood",group:"wood",label:"עץ זית",swatch:"#B89A6C",icon:"M3 7h18v10H3z M7 12c0-2 3-3 5-1s4 1 4-1 M9 15c2 0 4-1 6 0",prompt:"an olive wood board surface with its distinctive swirling grain"},
+  {id:"reclaimed",group:"wood",label:"עץ ממוחזר",swatch:"#8C735A",icon:"M3 6h18 M3 12h18 M3 18h18 M8 6v6 M15 12v6 M11 9h.01 M6 15h.01",prompt:"a weathered reclaimed wood plank surface"},
+  {id:"rattan",group:"wood",label:"קש קלוע",swatch:"#D4B483",icon:"M12 20a8 8 0 1 0 0-16a8 8 0 1 0 0 16z M12 16a4 4 0 1 0 0-8a4 4 0 1 0 0 8z M12 4v4 M12 16v4 M4 12h4 M16 12h4",prompt:"a woven rattan or straw placemat surface"},
+  {id:"cork",group:"wood",label:"שעם",swatch:"#B88B5A",icon:"M4 6h16v12H4z M7 9h.01 M11 10h.01 M16 9h.01 M9 13h.01 M14 14h.01 M17 13h.01 M7 15.5h.01",prompt:"a natural cork board surface"},
+  {id:"sand",group:"wood",label:"חול",swatch:"#E3C9A0",icon:"M3 15c3-3 6-3 9 0s6 3 9 0 M3 19c3-2 6-2 9 0s6 2 9 0 M6 9h.01 M11 7h.01 M16 9h.01",prompt:"a fine natural sand surface with soft ripples"},
+  // משטחים קשים
+  {id:"ceramic",group:"hard",label:"קרמיקה",swatch:"#EDE6DA",icon:"M4 6h16v12H4z M4 12h16 M12 6v12",prompt:"a matte ceramic tile surface"},
+  {id:"terracotta",group:"hard",label:"טרקוטה",swatch:"#C06C4B",icon:"M5 4h14l-2 16H7z M6 9h12",prompt:"an unglazed terracotta clay surface"},
+  {id:"terrazzo",group:"hard",label:"טרצו",swatch:"#E2DDD3",icon:"M6 7h.01 M11 6l2 1 M17 8h.01 M8 12l2 1 M15 12h.01 M18 15l-2 1 M6 16h.01 M11 17h.01",prompt:"a fine terrazzo surface"},
+  {id:"concrete",group:"hard",label:"בטון",swatch:"#A9A6A0",icon:"M4 5h16v14H4z M8 9h.01 M14 8h.01 M10 14h.01 M16 15h.01 M6 16h.01",prompt:"a smooth concrete surface"},
+  {id:"marble",group:"hard",label:"שיש",swatch:"#F2F1EE",icon:"M4 5h16v14H4z M6 9c4 0 4 4 8 4s3 3 4 5 M10 5c0 3 3 4 3 7",prompt:"a marble surface"}
 ];
 
 export const lights: readonly CatalogItem[] = [
@@ -62,9 +85,19 @@ export const lights: readonly CatalogItem[] = [
 
 export const backgrounds: readonly CatalogItem[] = [
   {id:"wall",label:"קיר חלק",icon:"M4 4h16v16H4z",prompt:"a plain smooth wall"},
-  {id:"blur",label:"פנים מטושטש",icon:"M8 10a3 3 0 1 0 0-6a3 3 0 1 0 0 6z M16 14a4 4 0 1 0 0-8a4 4 0 1 0 0 8z M9 20a3 3 0 1 0 0-6a3 3 0 1 0 0 6z",prompt:"a softly blurred interior"},
+  {id:"limewash",label:"טיח סיד",icon:"M4 4h16v16H4z M7 9c2-1 4 1 6 0 M9 14c2-1 5 1 8 0",prompt:"a textured limewash plaster wall with soft tonal variation"},
+  {id:"brick",label:"לבנים מסוידות",icon:"M3 5h18v14H3z M3 9.7h18 M3 14.3h18 M9 5v4.7 M15 5v4.7 M6 9.7v4.6 M12 9.7v4.6 M18 9.7v4.6 M9 14.3V19 M15 14.3V19",prompt:"a whitewashed brick wall"},
+  {id:"slats",label:"חיפוי עץ",icon:"M4 4h16v16H4z M8 4v16 M12 4v16 M16 4v16",prompt:"a wall of vertical wooden slats"},
+  {id:"zellige",label:"אריחי זליג׳",icon:"M4 4h16v16H4z M4 9.3h16 M4 14.7h16 M9.3 4v16 M14.7 4v16",prompt:"a wall of handmade glazed zellige tiles"},
+  {id:"arch",label:"נישה מקושתת",icon:"M4 20V4h16v16z M8 20v-8a4 4 0 0 1 8 0v8",prompt:"an arched plaster niche in the wall"},
+  {id:"curtain",label:"וילון פשתן",icon:"M3 4h18 M6 4c0 6-2 11-2 16 M10 4c0 6 1 11 0 16 M14 4c0 6-1 11 0 16 M18 4c0 6 2 11 2 16",prompt:"a softly draped natural linen curtain backdrop"},
+  {id:"seamless",label:"רקע נייר חלק",icon:"M5 3v11a6 6 0 0 0 6 6h10 M9 3v10a3 3 0 0 0 3 3h9",prompt:"a seamless paper backdrop sweep in one of the palette colors"},
+  {id:"leafshadow",label:"צל עלים",icon:"M4 4h16v16H4z M9 15c-2-3 0-6 4-7 0 4-1 6-4 7z M9 15l3-4",prompt:"a plain wall with soft dappled shadows of leaves"},
   {id:"window",label:"חלון",icon:"M5 21V9a7 7 0 0 1 14 0v12z M12 2v19 M5 13h14",prompt:"a quiet window"},
-  {id:"plants",label:"צמחייה",icon:"M12 21v-8 M12 13C8 13 5 10 5 6c4 0 7 3 7 7z M12 16c0-4 3-7 7-7 0 4-3 7-7 7z",prompt:"soft out-of-focus greenery"}
+  {id:"plants",label:"צמחייה",icon:"M12 21v-8 M12 13C8 13 5 10 5 6c4 0 7 3 7 7z M12 16c0-4 3-7 7-7 0 4-3 7-7 7z",prompt:"soft out-of-focus greenery"},
+  {id:"blur",label:"פנים מטושטש",icon:"M8 10a3 3 0 1 0 0-6a3 3 0 1 0 0 6z M16 14a4 4 0 1 0 0-8a4 4 0 1 0 0 8z M9 20a3 3 0 1 0 0-6a3 3 0 1 0 0 6z",prompt:"a softly blurred interior"},
+  {id:"shelves",label:"מדפי סטודיו",icon:"M4 4v16 M20 4v16 M4 9h16 M4 15h16 M7 9V6.5h3V9 M13 15v-3h2v3 M16 15v-2h2v2",prompt:"softly out-of-focus handmade studio shelves in the background"},
+  {id:"bathroom",label:"חדר רחצה",icon:"M3 12h18v2a5 5 0 0 1-5 5H8a5 5 0 0 1-5-5z M6 12V6a2 2 0 0 1 4 0 M7 19l-1 2 M17 19l1 2",prompt:"a softly blurred calm bathroom interior"}
 ];
 
 // ה-prompt של פלטה הוא קודי ה-HEX בלבד, בסדר שבו הם מוצגים.
