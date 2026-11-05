@@ -1,4 +1,5 @@
 import {useState} from "react";
+import {paletteLabel} from "../../shared/palette-custom";
 import {findItem} from "../../shared/catalog";
 import {formatById} from "../../shared/social-formats";
 import {currentImage, imageToShow, type ViewMode} from "../state";
@@ -18,7 +19,7 @@ export function Stage({studio}: {studio: Studio}) {
   const view = state.zoom === "full" ? "single" : state.view === "compare" && !(result && source) ? "single" : state.view;
   const chips = [
     `סגנון: ${findItem("styles", state.selection.style)?.label}`,
-    `פלטה: ${findItem("palettes", state.selection.palette)?.label}`,
+    `פלטה: ${paletteLabel(state.selection.palette, state.customPalettes)}`,
     `מוצר: ${findItem("productTypes", state.selection.product)?.label}${findItem("productTypes", state.selection.product)?.family === "candle" ? ` · ${findItem("candleStates", state.selection.candleState)?.label}` : ""}`,
     `פורמט: ${format.group} ${format.name}`
   ];

@@ -1,4 +1,5 @@
 import {useEffect, useMemo, useReducer, useRef} from "react";
+import {paletteColors} from "../shared/palette-custom";
 import type {MouseEvent} from "react";
 import type {Recipe} from "../shared/recipes";
 import {lookOf} from "../shared/recipes";
@@ -115,7 +116,9 @@ export function useStudio() {
     };
   }, []);
 
-  const settings = useMemo<StudioSettings>(() => ({version: 3, neverList: state.neverList, recipes: state.recipes, brand: state.brand, layouts: state.layouts, theme: state.theme}), [state.neverList, state.recipes, state.brand, state.layouts, state.theme]);
+  const settings = useMemo<StudioSettings>(() => ({version: 3, neverList: state.neverList, recipes: state.recipes, brand: state.brand, layouts: state.layouts, theme: state.theme,
+    customPalettes: state.customPalettes, hiddenPalettes: state.hiddenPalettes}),
+    [state.neverList, state.recipes, state.brand, state.layouts, state.theme, state.customPalettes, state.hiddenPalettes]);
   useEffect(() => {
     if (!state.ready) return;
     const timer = setTimeout(async () => {
@@ -136,7 +139,7 @@ export function useStudio() {
   }, [state.ready, settings]);
 
   const layout = useMemo(() => currentLayout(state), [state.layouts, state.formatId]);
-  const autoTextColor = findItem("palettes", state.selection.palette)?.colors[2] ?? "#FFFFFF";
+  const autoTextColor = paletteColors(state.selection.palette)?.[2] ?? "#FFFFFF";
   const focal = state.crops[state.formatId] ?? centerFocal;
 
   // מרכיבים את התוצאה: חיתוך לפורמט ומיתוג, באותה סצנה שמוצגת בעורך. אותו קובץ משמש לתצוגה ולהורדה.
@@ -284,6 +287,6 @@ export function useStudio() {
   return {state, dispatch, layout, setLayout, autoTextColor, focal, select, chooseRecipe, resetScene, saveRecipe, rate, choosePhoto, chooseBrandFile, openRecent, generate, download, markSent};
 }
 
-export const downloadName = (s: Selection) => `rebecca-${s.style}-${s.palette}.png`;
+export const downloadName = (s: Selection) => `rebecca-${s.style}-${s.palette.startsWith("custom:") ? "custom" : s.palette}.png`;
 
 export type Studio = ReturnType<typeof useStudio>;

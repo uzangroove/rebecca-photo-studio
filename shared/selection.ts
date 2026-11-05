@@ -1,4 +1,5 @@
 import {findItem, hasItem, legacyProductIds} from "./catalog.ts";
+import {isPaletteValue} from "./palette-custom.ts";
 
 export const MAX_WISH_CHARS = 200;
 
@@ -33,7 +34,7 @@ function optional(category: "surfaces" | "backgrounds" | "lights" | "glassTints"
 export function parseLook(value: unknown): LookSelection | null {
   if (typeof value !== "object" || value === null) return null;
   const v = value as Record<string, unknown>;
-  if (!hasItem("styles", v.style) || !hasItem("palettes", v.palette) || !hasItem("props", v.props)) return null;
+  if (!hasItem("styles", v.style) || !isPaletteValue(v.palette) || !hasItem("props", v.props)) return null;
   const surface = optional("surfaces", v.surface), background = optional("backgrounds", v.background), light = optional("lights", v.light);
   if (surface === undefined || background === undefined || light === undefined) return null;
   return {style: v.style, palette: v.palette, props: v.props, surface, background, light};
