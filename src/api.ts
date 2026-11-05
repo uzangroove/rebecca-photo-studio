@@ -1,8 +1,23 @@
 import type {Selection} from "../shared/selection.ts";
 import type {StudioSettings} from "../shared/settings.ts";
-import {authFetch} from "./site.ts";
+import {authFetch, toJpeg} from "./site.ts";
 
 // יצירת תמונה. הודעות השגיאה בעברית מגיעות מהשרת; כאן רק ברירות מחדל לפי קוד המצב.
+export const CONNECTION_LOST = "החיבור נקטע לפני שהתמונה הגיעה. השאירו את המסך פתוח עד שהתמונה מוכנה ונסו שוב.";
+
+/**
+ * הצילום נשלח מוקטן: עד 2048 פיקסלים בצלע הארוכה, JPEG. צילום מהטלפון יכול להיות 5–10 מגה,
+ * וברשת סלולרית ההעלאה לבדה לוקחת זמן רב ומגדילה את הסיכוי לניתוק. OpenAI מחזיר ממילא 1024–1536.
+ * קובץ קטן מספיק (JPEG עד 1.5 מגה) נשלח כמו שהוא.
+ */
+export async function uploadReady(file: File): Promise<File> {
+  if (file.type === "image/jpeg" && file.size <= 1.5 * 1024 * 1024) return file;
+  try {
+    const jpeg = await toJpeg(file, 2048, 0.9);
+    return jpeg.size < file.size || file.type !== "image/jpeg" ? new File([jpeg], "photo.jpg", {type: "image/jpeg"}) : file;
+  } catch { return file; }
+}
+
 export async function requestImage(file: File, selection: Selection, ratio: string): Promise<string> {
   const body = new FormData();
   body.append("image", file);
@@ -11,7 +26,10 @@ export async function requestImage(file: File, selection: Selection, ratio: stri
     surface: selection.surface ?? "", background: selection.background ?? "", light: selection.light ?? "",
     candleState: selection.candleState, giftWrap: selection.giftWrap, glassTint: selection.glassTint ?? "", angle: selection.angle ?? "", occasion: selection.occasion ?? "", wish: selection.wish, ratio};
   for (const [key, value] of Object.entries(fields)) body.append(key, value);
-  const response = await authFetch("/api/generate", {method: "POST", body});
+  // "Failed to fetch" של הדפדפן = החיבור נקטע לפני שהגיעה תשובה (רשת סלולרית, או יציאה מהדפדפן באמצע). מסבירים בעברית.
+  let response: Response;
+  try { response = await authFetch("/api/generate", {method: "POST", body}); }
+  catch { throw new Error(CONNECTION_LOST); }
   const payload = await response.json().catch(() => ({})) as {error?: string; image?: string; detail?: string};
   // הסבר של OpenAI (באנגלית) מצורף להודעה, כדי שיהיה ברור מה לתקן.
   const withDetail = (text: string) => payload.detail ? `${text} פירוט מ־OpenAI: ${payload.detail}` : text;

@@ -6,7 +6,7 @@ import {lookOf} from "../shared/recipes";
 import type {Selection} from "../shared/selection";
 import type {StudioSettings} from "../shared/settings";
 import type {BrandLayout} from "../shared/brand-layout";
-import {fetchSettings, putSettings, requestImage} from "./api";
+import {fetchSettings, putSettings, requestImage, uploadReady} from "./api";
 import {applyTheme, readLocalTheme, saveLocalTheme} from "./theme";
 import {renderBranded} from "./brand/export";
 import {readBrandFile} from "./brand/upload";
@@ -200,8 +200,9 @@ export function useStudio() {
 
   function choosePhoto(file?: File) {
     if (!file) return;
-    if (!/^image\/(jpeg|png|webp)$/.test(file.type) || file.size > 10 * 1024 * 1024) {
-      dispatch({type: "say", text: "אפשר להעלות JPG, PNG או WebP עד 10 מגה־בייט", error: true});
+    // הצילום מוקטן לפני השליחה (uploadReady), ולכן אפשר לקבל גם צילומים גדולים מהטלפון.
+    if (!/^image\/(jpeg|png|webp)$/.test(file.type) || file.size > 30 * 1024 * 1024) {
+      dispatch({type: "say", text: "אפשר להעלות JPG, PNG או WebP עד 30 מגה־בייט", error: true});
       return;
     }
     if (photoUrl.current) URL.revokeObjectURL(photoUrl.current);
@@ -243,7 +244,7 @@ export function useStudio() {
     const id = ++request.current, {selection} = state;
     dispatch({type: "generating"});
     try {
-      const image = await requestImage(state.photo.file, selection, ratioOf(formatById(state.formatId)));
+      const image = await requestImage(await uploadReady(state.photo.file), selection, ratioOf(formatById(state.formatId)));
       if (id !== request.current) return;
       dispatch({type: "generated", image});
       try {
