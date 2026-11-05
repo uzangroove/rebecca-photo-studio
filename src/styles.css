@@ -212,6 +212,10 @@ figcaption.is-result,.compare-tag.is-result{background:var(--green);color:var(--
 .tile:disabled:hover{transform:none;box-shadow:none}
 .tile:disabled strong{text-decoration:line-through}
 .grid-4{grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.grid-5{grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}
+.surface-groups{display:flex;flex-direction:column;gap:inherit}
+.walls .tile-col{min-height:64px;padding:6px 2px}
+.walls .tile-col .tile-text strong{font-size:11.5px;line-height:1.15}
 .swatch{width:100%;height:30px;border-radius:8px;display:grid;place-items:center;color:rgba(31,42,36,.55);box-shadow:inset 0 0 0 1px rgba(0,0,0,.08)}
 .swatch svg{width:18px;height:18px}
 .tile-col:has(.swatch){padding:5px;min-height:62px;gap:4px}
@@ -280,6 +284,10 @@ figcaption.is-result,.compare-tag.is-result{background:var(--green);color:var(--
   .never{padding:8px 10px}
   .chip{min-height:44px}
   .grid.phone-5.surfaces{grid-template-columns:repeat(5,minmax(0,1fr))}
+  /* בטלפון כל המשטחים ברשת אחת רציפה, בלי כותרות קבוצה — כדי שהלשונית תהיה קצרה */
+  .surface-groups{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}
+  .surface-groups .group,.surface-groups .grid{display:contents}
+  .surface-groups .group-title{display:none}
 }
 
 /* שלב 2: לשונית מיתוג ועורך המיתוג */

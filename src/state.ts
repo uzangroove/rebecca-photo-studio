@@ -7,7 +7,7 @@ import {defaultBrand, defaultNeverList, MAX_NEVER_CHARS, MAX_NEVER_ITEMS, type B
 import {formatById, formats} from "../shared/social-formats.ts";
 import type {Rating, SavedImage} from "./studio-storage.ts";
 
-export type TabId = "style" | "details" | "palette" | "product" | "brand" | "format";
+export type TabId = "style" | "surface" | "scene" | "palette" | "product" | "brand" | "format";
 export type Screen = "studio" | "editor";
 export type Zoom = "fit" | "full";
 export type ViewMode = "split" | "single" | "compare";
