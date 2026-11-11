@@ -1,4 +1,4 @@
-import {isBlocked, surfaceGroups, surfaces} from "../../../shared/catalog";
+import {isBlocked, shown, surfaceGroups, surfaces} from "../../../shared/catalog";
 import {effectiveScene} from "../../../shared/selection";
 import type {Studio} from "../../useStudio";
 import {Icon, icons} from "../Icon";
@@ -8,14 +8,15 @@ import {Tile} from "../Tile";
 export function SurfacePanel({studio}: {studio: Studio}) {
   const {selection, neverList} = studio.state;
   const current = effectiveScene(selection, "surface");
+  const visible = shown("surfaces", surfaces, selection.surface);
   return <div className="panel-body">
     <div className="heading-row"><h2>משטח</h2>
       {selection.surface !== null && <button type="button" className="link-btn" onClick={() => studio.select("surface", null)}><Icon d={icons.reset} size={16}/>לפי הסגנון</button>}
     </div>
     <div className="surface-groups">
-    {surfaceGroups.map(g => <div className="group" key={g.id}><span className="group-title">{g.label}</span>
+    {surfaceGroups.filter(g => visible.some(s => s.group === g.id)).map(g => <div className="group" key={g.id}><span className="group-title">{g.label}</span>
       <div className="grid grid-4 surfaces phone-5">
-        {surfaces.filter(s => s.group === g.id).map(s => {
+        {visible.filter(s => s.group === g.id).map(s => {
           const blocked = isBlocked(s, neverList);
           return <Tile key={s.id} layout="col" disabled={blocked} title={blocked ? `${s.label} ברשימת "אף פעם לא"` : undefined}
             selected={!blocked && current === s.id} onClick={() => studio.select("surface", s.id)}

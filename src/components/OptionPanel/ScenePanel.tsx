@@ -1,4 +1,4 @@
-import {backgrounds, isBlocked, lights, type CatalogItem} from "../../../shared/catalog";
+import {backgrounds, isBlocked, lights, shown, type CatalogItem} from "../../../shared/catalog";
 import {effectiveScene, MAX_WISH_CHARS, type SceneKey} from "../../../shared/selection";
 import type {Studio} from "../../useStudio";
 import {Icon, icons} from "../Icon";
@@ -21,7 +21,7 @@ export function ScenePanel({studio}: {studio: Studio}) {
     <div className="heading-row"><h2>קיר ותאורה</h2>
       {explicit && <button type="button" className="link-btn" onClick={() => { studio.select("background", null); studio.select("light", null); }}><Icon d={icons.reset} size={16}/>לפי הסגנון</button>}
     </div>
-    <div className="group"><span className="group-title">קיר ורקע</span>{grid("background", backgrounds, "grid-5 walls phone-5")}</div>
+    <div className="group"><span className="group-title">קיר ורקע</span>{grid("background", shown("backgrounds", backgrounds, selection.background), "grid-5 walls phone-5")}</div>
     <div className="group"><span className="group-title">תאורה</span>{grid("light", lights, "grid-4 phone-4")}</div>
     <label className="field">בקשה מיוחדת <small className="counter">{selection.wish.length}/{MAX_WISH_CHARS}</small>
       <textarea rows={2} maxLength={MAX_WISH_CHARS} value={selection.wish} placeholder="למשל: שירגיש כמו בוקר שבת שקט" onChange={e => studio.dispatch({type: "wish", text: e.target.value})}/>

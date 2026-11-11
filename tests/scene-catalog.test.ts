@@ -40,3 +40,13 @@ test("a chosen surface and wall reach the prompt, and the server accepts them",(
   assert.ok(prompt.includes("a plain wall with soft dappled shadows of leaves"));
   assert.ok(!prompt.includes("Strictly avoid"));
 });
+
+test("hidden items stay valid in the catalog and come back when currently selected",async()=>{
+  const {hiddenIds,shown,surfaces,backgrounds,styles,hasItem}=await import("../shared/catalog.ts");
+  for(const [cat,ids] of Object.entries(hiddenIds))for(const id of ids)assert.ok(hasItem(cat as "styles",id),`${cat}/${id}`);
+  assert.ok(!shown("surfaces",surfaces).some(s=>s.id==="velvet"));
+  assert.ok(shown("surfaces",surfaces,"velvet").some(s=>s.id==="velvet"));
+  assert.ok(!shown("backgrounds",backgrounds).some(b=>b.id==="arch"));
+  assert.ok(!shown("styles",styles).some(s=>s.id==="mediterranean"));
+  assert.equal(shown("surfaces",surfaces).length,surfaces.length-hiddenIds.surfaces.length);
+});
