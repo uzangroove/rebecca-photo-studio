@@ -211,6 +211,18 @@ export function hasItem(category: CatalogCategory, id: unknown): id is string {
   return typeof id === "string" && catalog[category].some(item => item.id === id);
 }
 
+// פריטים שלא נבחרו אף פעם ב-110 התמונות הראשונות של רבקה (אוקטובר-נובמבר 2026) מוסתרים מהממשק.
+// ההסתרה היא בתצוגה בלבד: הפריטים נשארים בקטלוג, נקראים מהיסטוריה, ועובדים בפרומפט. מחזירים פריט בהסרת ה-id מכאן.
+// אירועים (חנוכה, ראש השנה...) נשארים כי הם עונתיים. פלטות מוסתרות אצל רבקה בכפתור משלהן.
+export const hiddenIds: Readonly<Record<"styles" | "surfaces" | "backgrounds", readonly string[]>> = {
+  styles: ["mediterranean"],
+  surfaces: ["muslin", "velvet", "satin", "felt", "walnut", "olivewood", "reclaimed", "rattan", "cork", "terracotta"],
+  backgrounds: ["slats", "arch", "curtain", "leafshadow"]
+};
+// הפריטים שמוצגים: כל מה שלא מוסתר, ובנוסף הפריט הנבחר כרגע (למשל כשנפתחת תמונה ישנה שהשתמשה בו).
+export function shown<T extends CatalogItem>(category: keyof typeof hiddenIds, items: readonly T[], selectedId?: string | null): T[] {
+  return items.filter(i => !hiddenIds[category].includes(i.id) || i.id === selectedId);
+}
 // מועדפים ראשונים, ובתוך כל קבוצה הסדר המקורי של הקטלוג.
 export function favoritesFirst<T extends CatalogItem>(items: readonly T[]): T[] {
   return [...items.filter(i => i.favorite), ...items.filter(i => !i.favorite)];

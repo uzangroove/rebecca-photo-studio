@@ -1,4 +1,4 @@
-import {favoritesFirst, props, styles} from "../../../shared/catalog";
+import {favoritesFirst, props, shown, styles} from "../../../shared/catalog";
 import type {Studio} from "../../useStudio";
 import {Icon} from "../Icon";
 import {Tile} from "../Tile";
@@ -10,7 +10,7 @@ export function StylePanel({studio}: {studio: Studio}) {
   return <div className="panel-body">
     <div><h2>סגנון הסצנה</h2><p className="panel-sub">נקודת התחלה. כל פרט אפשר לשנות בלשונית "פרטים".</p></div>
     <div className="grid grid-2 phone-5">
-      {favoritesFirst(styles).map(s => <Tile key={s.id} selected={selection.style === s.id} onClick={() => studio.select("style", s.id)}
+      {favoritesFirst(shown("styles", styles, selection.style)).map(s => <Tile key={s.id} selected={selection.style === s.id} onClick={() => studio.select("style", s.id)}
         visual={<Icon d={s.icon}/>} label={s.label} detail={s.detail}/>)}
     </div>
     <div className="group"><span className="group-title">אביזרים</span>
