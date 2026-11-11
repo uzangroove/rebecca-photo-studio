@@ -2,7 +2,7 @@ import {test} from "node:test";
 import assert from "node:assert/strict";
 import worker from "../worker/index.ts";
 import {defaultLayout} from "../shared/brand-layout.ts";
-import {defaultSettings,defaultNeverList,parseSettings,validSource,MAX_SETTINGS_BYTES,MAX_NEVER_ITEMS,type StudioSettings} from "../shared/settings.ts";
+import {defaultSettings,defaultNeverList,parseSettings,removeLegacyNever,validSource,MAX_SETTINGS_BYTES,MAX_NEVER_ITEMS,type StudioSettings} from "../shared/settings.ts";
 
 const headers={authorization:`Basic ${Buffer.from("rebecca:test-password").toString("base64")}`};
 const fakeKv=()=>{const data=new Map<string,string>();return {data,get:async(key:string)=>data.get(key)??null,put:async(key:string,value:string)=>{data.set(key,value)}}};
@@ -20,7 +20,7 @@ test("settings require credentials",async()=>{
 test("empty store returns null settings; saved settings round-trip",async()=>{
   const kv=fakeKv();
   assert.deepEqual(await (await call("/api/settings",{},kv)).json(),{settings:null});
-  const next=settings({neverList:["שיש","עומס"],brand:{...defaultSettings.brand,logoName:"הלוגו שלי"},layouts:{"instagram-portrait":customLayout}});
+  const next=settings({neverList:["ורוד"],brand:{...defaultSettings.brand,logoName:"הלוגו שלי"},layouts:{"instagram-portrait":customLayout}});
   assert.equal((await put(next,kv)).status,200);
   assert.deepEqual(await (await call("/api/settings",{},kv)).json(),{settings:next});
 });
@@ -49,13 +49,13 @@ test("invalid settings are rejected and not stored",async()=>{
     settings({brand:{...defaultSettings.brand,logoSource:"javascript:alert(1)"}})
   ];
   for(const body of bad)assert.equal((await put(body as any,kv)).status,400,JSON.stringify(body)?.slice(0,80));
-  assert.equal(kv.data.size,0);
+  assert.equal(kv.data.has("settings"),false);
 });
 test("oversized settings are refused with 413",async()=>{
   const kv=fakeKv();
   const huge=settings({brand:{...defaultSettings.brand,logoName:"x".repeat(MAX_SETTINGS_BYTES)}});
   assert.equal((await put(huge,kv)).status,413);
-  assert.equal(kv.data.size,0);
+  assert.equal(kv.data.has("settings"),false);
 });
 test("logo and slogan sources: built-in files and raster or clean SVG data URIs only",()=>{
   assert.ok(validSource("/assets/rebecca_studio_logo.png"));
@@ -70,8 +70,8 @@ test("logo and slogan sources: built-in files and raster or clean SVG data URIs 
   assert.ok(!validSource(42));
 });
 test("parseSettings drops unknown fields and de-duplicates the never-list",()=>{
-  const parsed=parseSettings({...settings({neverList:["שיש"," שיש ","עומס"]}),secret:"x",brand:{...defaultSettings.brand,extra:1}});
-  assert.deepEqual(parsed,settings({neverList:["שיש","עומס"]}));
+  const parsed=parseSettings({...settings({neverList:["ורוד"," ורוד ","עץ"]}),secret:"x",brand:{...defaultSettings.brand,extra:1}});
+  assert.deepEqual(parsed,settings({neverList:["ורוד","עץ"]}));
 });
 test("only same-origin pages may write settings",async()=>{
   assert.equal((await put(settings(),fakeKv(),{origin:"https://other.test"})).status,403);
@@ -87,7 +87,7 @@ test("corrupt stored settings are reported, not served",async()=>{
   assert.equal((await call("/api/settings",{},kv)).status,500);
 });
 test("the saved never-list reaches the generation prompt",async()=>{
-  const kv=fakeKv();await put(settings({neverList:["שיש","עומס"]}),kv);
+  const kv=fakeKv();await put(settings({neverList:["ורוד","עץ"]}),kv);
   const originalFetch=globalThis.fetch;let prompt="";
   globalThis.fetch=async(_input,init)=>{prompt=String((init?.body as FormData).get("prompt"));return Response.json({data:[{b64_json:"dGVzdA=="}]})};
   try{
@@ -95,7 +95,7 @@ test("the saved never-list reaches the generation prompt",async()=>{
     for(const [key,value] of Object.entries({style:"boutique",palette:"forest",density:"none",ratio:"square",product:"soap"}))body.set(key,value);
     const response=await call("/api/generate",{method:"POST",body},kv,{OPENAI_API_KEY:"test-only"});
     assert.equal(response.status,200);
-    assert.ok(prompt.endsWith("\nStrictly avoid: שיש, עומס."));
+    assert.ok(prompt.endsWith("\nStrictly avoid: ורוד, עץ."));
   }finally{globalThis.fetch=originalFetch}
 });
 test("generation rejects values outside the catalog",async()=>{
@@ -110,8 +110,8 @@ test("generation rejects values outside the catalog",async()=>{
     assert.ok(!called);
   }finally{globalThis.fetch=originalFetch}
 });
-test("defaults: never-list has marble and clutter, and the four built-in recipes are present",()=>{
-  assert.deepEqual(defaultSettings.neverList,["שיש","עומס"]);
+test("defaults: the never-list is empty, and the four built-in recipes are present",()=>{
+  assert.deepEqual(defaultSettings.neverList,[]);
   assert.deepEqual(defaultSettings.recipes.map(r=>r.id),["boutique-bw","boutique-desert","minimal-bw","minimal-desert"]);
   assert.equal(defaultSettings.version,3);
   assert.deepEqual(defaultSettings.layouts,{});
@@ -125,16 +125,16 @@ test("recipes sync with the rest of the settings and invalid ones are refused",a
   assert.equal((await put(settings({recipes:[{...mine,look:{...mine.look,palette:"nope"}}]}),kv)).status,400);
   assert.equal((await put({...settings(),recipes:"x"},kv)).status,400);
 });
-test("settings saved by phase 0 (version 1) are upgraded: empty never-list becomes the default",()=>{
+test("settings saved by phase 0 (version 1) are upgraded: empty never-list stays empty",()=>{
   const legacyBrand={logo:false,slogan:false,logoSource:"/assets/rebecca_studio_logo.png",sloganSource:"/assets/rebecca_studio_slogan.png",logoName:"הלוגו של רבקה",sloganName:"הסלוגן של רבקה",
     logoX:0,logoY:0,logoScale:100,sloganX:10,sloganY:20,sloganScale:100};
   const v1=parseSettings({version:1,neverList:[],brand:legacyBrand});
-  assert.deepEqual(v1?.neverList,["שיש","עומס"]);
+  assert.deepEqual(v1?.neverList,[]);
   assert.equal(v1?.recipes.length,4);
   assert.equal(v1?.version,3);
   const custom=parseSettings({version:1,neverList:["ורוד"],brand:legacyBrand});
   assert.deepEqual(custom?.neverList,["ורוד"]);
-  assert.deepEqual(defaultNeverList,["שיש","עומס"]);
+  assert.deepEqual(defaultNeverList,[]);
 });
 test("generation accepts the look fields and the special request, and refuses bad ones",async()=>{
   const originalFetch=globalThis.fetch;let prompt="";
@@ -204,4 +204,18 @@ test("when the image service rejects the key, the answer says why and never echo
     assert.match(missing.json.error,/OPENAI_IMAGE_MODEL/);
     const other=await send(500,{});assert.equal(other.status,502);assert.equal(other.json.detail,"");
   }finally{globalThis.fetch=originalFetch}
+});
+
+test("legacy never items are removed by removeLegacyNever, others stay",()=>{
+  assert.deepEqual(removeLegacyNever(["שיש","עומס","ורוד"]),["ורוד"]);
+  assert.deepEqual(removeLegacyNever(["עומס"]),[]);
+  assert.deepEqual(parseSettings({...defaultSettings,neverList:["שיש","עומס"]})!.neverList,["שיש","עומס"],"parsing alone never drops what she wrote");
+});
+test("the stored legacy never items are cleaned once on the server; later additions survive",async()=>{
+  const kv=fakeKv();
+  kv.data.set("settings",JSON.stringify(settings({neverList:["עומס","ורוד"]})));
+  assert.deepEqual((await (await call("/api/settings",{},kv)).json() as {settings:StudioSettings}).settings.neverList,["ורוד"]);
+  assert.ok(kv.data.has("migrated:never-legacy-2026-11"));
+  assert.equal((await put(settings({neverList:["ורוד","שיש"]}),kv)).status,200);
+  assert.deepEqual((await (await call("/api/settings",{},kv)).json() as {settings:StudioSettings}).settings.neverList,["ורוד","שיש"],"she can add it back after the one-time cleanup");
 });

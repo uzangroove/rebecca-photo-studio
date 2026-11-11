@@ -22,7 +22,11 @@ export const defaultBrand: BrandSettings = {
 };
 
 // ברירת המחדל של רבקה: שיש ועומס.
-export const defaultNeverList: readonly string[] = ["שיש", "עומס"];
+// אין רשימת "אף פעם לא" כברירת מחדל (שמעון, נובמבר 2026). רבקה מוסיפה לבד אם תרצה.
+export const defaultNeverList: readonly string[] = [];
+// הפריטים של ברירת המחדל הישנה. מוסרים פעם אחת מההגדרות השמורות בשרת (worker/settings.ts), ורבקה יכולה להוסיף אותם שוב אחר כך.
+export const legacyNeverItems: readonly string[] = ["שיש", "עומס"];
+export const removeLegacyNever = (list: readonly string[]): string[] => list.filter(item => !legacyNeverItems.includes(item));
 export const defaultSettings: StudioSettings = {version: 3, neverList: [...defaultNeverList], recipes: [...builtInRecipes], brand: defaultBrand, layouts: {}, customPalettes: [], hiddenPalettes: [], theme: null};
 
 const builtInSources = new Set(["/assets/rebecca_studio_logo.png", "/assets/rebecca_studio_slogan.png", "/assets/logo.png"]);

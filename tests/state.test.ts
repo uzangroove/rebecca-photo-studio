@@ -11,7 +11,7 @@ const withResult=():State=>({...initialState,photo,result:"data:image/png;base64
 
 test("opening state: the minimalist black-and-white recipe on soap, nothing generated",()=>{
   assert.deepEqual(initialState.selection,{product:"cut-soap",style:"minimal",palette:"mono",props:"none",surface:"paper",background:null,light:null,candleState:"asis",giftWrap:"asis",glassTint:null,angle:null,occasion:null,wish:""});
-  assert.deepEqual(initialState.neverList,["שיש","עומס"]);
+  assert.deepEqual(initialState.neverList,[]);
   assert.equal(initialState.recipes.length,4);
   assert.equal(initialState.result,null);
   assert.equal(initialState.tab,"style");
@@ -92,13 +92,13 @@ test("never-list: add, de-duplicate, remove, and release an explicit choice it n
   let s=reducer(initialState,{type:"select",key:"surface",id:"oak"});
   s=reducer(s,{type:"select",key:"light",id:"golden"});
   s=reducer(s,{type:"neverAdd",text:"  עץ   בהיר "});
-  assert.deepEqual(s.neverList,["שיש","עומס","עץ בהיר"]);
+  assert.deepEqual(s.neverList,["עץ בהיר"]);
   assert.equal(s.selection.surface,null,"oak was blocked");
   assert.equal(s.selection.light,"golden");
-  assert.equal(reducer(s,{type:"neverAdd",text:"שיש"}).neverList.length,3);
-  assert.equal(reducer(s,{type:"neverAdd",text:"   "}).neverList.length,3);
-  assert.equal(reducer(s,{type:"neverAdd",text:"x".repeat(41)}).neverList.length,3);
-  assert.deepEqual(reducer(s,{type:"neverRemove",text:"שיש"}).neverList,["עומס","עץ בהיר"]);
+  assert.equal(reducer(s,{type:"neverAdd",text:"עץ בהיר"}).neverList.length,1);
+  assert.equal(reducer(s,{type:"neverAdd",text:"   "}).neverList.length,1);
+  assert.equal(reducer(s,{type:"neverAdd",text:"x".repeat(41)}).neverList.length,1);
+  assert.deepEqual(reducer(s,{type:"neverRemove",text:"עץ בהיר"}).neverList,[]);
 });
 test("recipes can be saved and deleted",()=>{
   const mine={id:"mine",name:"שלי",look:builtInRecipes[0].look};

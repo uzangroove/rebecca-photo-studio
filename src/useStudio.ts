@@ -19,11 +19,15 @@ import type {HistoryItem} from "./state";
 import {mergeHistory, needsUpload, type CloudImage} from "./history-merge";
 import {listCloud, markSentCloud, rateCloud, signedUrls, uploadToCloud} from "./cloud-history";
 import {markSent as markSentLocal, sentKeys} from "./site";
+import {buildEvent, isRepeat} from "../shared/events";
+import {logEvent, saveSource} from "./event-log";
 
 export function useStudio() {
   const [state, dispatch] = useReducer(reducer, initialState, s => ({...s, theme: readLocalTheme()}));
   const photoUrl = useRef<string | null>(null), recentUrl = useRef<string | null>(null), historyUrls = useRef<string[]>([]);
   const request = useRef(0);
+  // היצירה האחרונה: כדי לזהות יצירה חוזרת מאותו צילום ובאותה בחירה (סימן לחוסר שביעות רצון).
+  const lastGeneration = useRef<{sourceId: string | null; selection: Selection | null} | null>(null);
   // סנכרון: כותבים לשרת רק אחרי שקראנו ממנו בהצלחה, כדי לא לדרוס הגדרות ממכשיר אחר.
   const remoteReadable = useRef(false), lastSynced = useRef("");
 
@@ -75,6 +79,7 @@ export function useStudio() {
   /** סימון "נשלחה לאתר" גם במכשיר וגם בענן. */
   async function markSent(keys: string[]) {
     markSentLocal(keys);
+    keys.forEach(k => logEvent(buildEvent({type: "send", imageKey: k})));
     cloudImages.current = cloudImages.current.map(c => keys.includes(c.key) ? {...c, sent: true} : c);
     try { await markSentCloud(keys.filter(k => cloudImages.current.some(c => c.key === k))); } catch { /* נשמר במכשיר */ }
     await refreshHistory();
@@ -191,6 +196,7 @@ export function useStudio() {
     if (!image) return;
     const next = image.rating === rating ? null : rating;
     dispatch({type: "rated", key: image.key, rating: next});
+    logEvent(buildEvent({type: "rate", imageKey: image.key, detail: {rating: next}}));
     localImages.current = localImages.current.map(l => l.key === image.key ? {...l, rating: next} : l);
     cloudImages.current = cloudImages.current.map(c => c.key === image.key ? {...c, rating: next} : c);
     try { await rateImage(image.key, next); }
@@ -235,6 +241,7 @@ export function useStudio() {
     if (recentUrl.current) URL.revokeObjectURL(recentUrl.current);
     recentUrl.current = URL.createObjectURL(blob);
     if (photoUrl.current) { URL.revokeObjectURL(photoUrl.current); photoUrl.current = null; }
+    logEvent(buildEvent({type: "open", imageKey: image.key}));
     request.current++;
     dispatch({type: "openRecent", url: recentUrl.current, key: image.key, selection: image.selection, formatId: image.formatId});
   }
@@ -243,6 +250,7 @@ export function useStudio() {
     if (!state.photo) { dispatch({type: "say", text: "העלו קודם צילום מוצר מהמחשב או מהטלפון", error: true}); return; }
     const id = ++request.current, {selection} = state;
     dispatch({type: "generating"});
+    const source = saveSource(state.photo.file); // במקביל ליצירה, בלי לעכב אותה
     try {
       const image = await requestImage(await uploadReady(state.photo.file), selection, ratioOf(formatById(state.formatId)));
       if (id !== request.current) return;
@@ -251,6 +259,11 @@ export function useStudio() {
         const blob = await fetch(image).then(r => r.blob());
         const saved = await saveImage(blob, selection, state.formatId);
         await showHistory(saved.images, saved.key);
+        void source.then(src => {
+          const next = {sourceId: src.sourceId, selection};
+          logEvent(buildEvent({type: "generate", imageKey: saved.key, sourceId: src.sourceId, sourcePath: src.sourcePath, selection, formatId: state.formatId, detail: {repeat: isRepeat(lastGeneration.current, next)}}));
+          lastGeneration.current = next;
+        });
         const fresh = saved.images.find(i => i.key === saved.key);
         if (fresh) uploadToCloud(fresh)
           .then(c => { cloudImages.current = [c, ...cloudImages.current.filter(x => x.key !== c.key)]; return refreshHistory(); })
@@ -266,6 +279,7 @@ export function useStudio() {
   async function download(e: MouseEvent<HTMLAnchorElement>) {
     const composed = state.composed;
     if (!composed) { e.preventDefault(); return; }
+    logEvent(buildEvent({type: "download", imageKey: state.currentKey, detail: {branded: composed.branded}}));
     type SaveHandle = {createWritable: () => Promise<{write: (data: Blob) => Promise<void>; close: () => Promise<void>}>};
     const picker = (window as Window & {showSaveFilePicker?: (options: {suggestedName: string; types: {description: string; accept: Record<string, string[]>}[]}) => Promise<SaveHandle>}).showSaveFilePicker;
     if (!picker) {

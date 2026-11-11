@@ -24,7 +24,7 @@ test("every recipe produces a valid selection and a prompt, on top of any produc
     assert.deepEqual(parseSelection(selection),selection,recipe.id);
     assert.equal(selection.product,product);
     assert.equal(selection.wish,"בקשה","a recipe never touches the special request");
-    assert.ok(buildPrompt(selection,defaultSettings).includes("Strictly avoid: שיש, עומס."));
+    assert.ok(!buildPrompt(selection,defaultSettings).includes("Strictly avoid"));
   }
 });
 test("a recipe is active only while the selection matches it exactly",()=>{
