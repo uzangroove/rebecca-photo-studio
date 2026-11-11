@@ -1,10 +1,25 @@
-import {MAX_SETTINGS_BYTES, defaultSettings, parseSettings, type StudioSettings} from "../shared/settings.ts";
+import {MAX_SETTINGS_BYTES, defaultSettings, parseSettings, removeLegacyNever, type StudioSettings} from "../shared/settings.ts";
 
 const KEY = "settings";
+// סימון שהניקוי החד-פעמי של "שיש" ו"עומס" (נובמבר 2026) כבר בוצע, כדי שרבקה תוכל להוסיף אותם שוב.
+const NEVER_CLEANED = "migrated:never-legacy-2026-11";
+
+/** מסיר פעם אחת את "שיש" ו"עומס" מההגדרות השמורות. */
+export async function cleanLegacyNeverOnce(kv: KVNamespace | undefined): Promise<void> {
+  if (!kv || await kv.get(NEVER_CLEANED, "text") !== null) return;
+  const stored = await kv.get(KEY, "text");
+  if (stored !== null) {
+    let parsed: StudioSettings | null = null;
+    try { parsed = parseSettings(JSON.parse(stored)); } catch { /* ערך פגום: לא נוגעים */ }
+    if (parsed) await kv.put(KEY, JSON.stringify({...parsed, neverList: removeLegacyNever(parsed.neverList)}));
+  }
+  await kv.put(NEVER_CLEANED, new Date().toISOString());
+}
 const json = (body: unknown, status = 200) => Response.json(body, {status, headers: {"Cache-Control": "no-store"}});
 
 // קורא את ההגדרות השמורות; בלי KV או בלי ערך שמור מחזיר ברירות מחדל. ערך פגום זורק, כדי שלא ניצור תמונה בלי רשימת "אף פעם לא".
 export async function readSettings(kv: KVNamespace | undefined): Promise<StudioSettings> {
+  await cleanLegacyNeverOnce(kv);
   const stored = kv ? await kv.get(KEY, "text") : null;
   if (stored === null) return defaultSettings;
   const parsed = parseSettings(JSON.parse(stored));
@@ -17,6 +32,7 @@ export async function settings(request: Request, kv: KVNamespace | undefined): P
   if (request.method !== "GET" && request.method !== "PUT")
     return new Response("Method not allowed", {status: 405, headers: {Allow: "GET, PUT"}});
   if (!kv) return json({error: "סנכרון ההגדרות עדיין אינו מחובר בשרת."}, 503);
+  await cleanLegacyNeverOnce(kv);
   if (request.method === "GET") {
     try {
       const stored = await kv.get(KEY, "text");

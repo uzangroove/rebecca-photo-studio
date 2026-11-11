@@ -2,7 +2,7 @@ import {test} from "node:test";
 import assert from "node:assert/strict";
 import worker from "../worker/index.ts";
 import {defaultLayout} from "../shared/brand-layout.ts";
-import {defaultSettings,defaultNeverList,parseSettings,validSource,MAX_SETTINGS_BYTES,MAX_NEVER_ITEMS,type StudioSettings} from "../shared/settings.ts";
+import {defaultSettings,defaultNeverList,parseSettings,removeLegacyNever,validSource,MAX_SETTINGS_BYTES,MAX_NEVER_ITEMS,type StudioSettings} from "../shared/settings.ts";
 
 const headers={authorization:`Basic ${Buffer.from("rebecca:test-password").toString("base64")}`};
 const fakeKv=()=>{const data=new Map<string,string>();return {data,get:async(key:string)=>data.get(key)??null,put:async(key:string,value:string)=>{data.set(key,value)}}};
@@ -49,13 +49,13 @@ test("invalid settings are rejected and not stored",async()=>{
     settings({brand:{...defaultSettings.brand,logoSource:"javascript:alert(1)"}})
   ];
   for(const body of bad)assert.equal((await put(body as any,kv)).status,400,JSON.stringify(body)?.slice(0,80));
-  assert.equal(kv.data.size,0);
+  assert.equal(kv.data.has("settings"),false);
 });
 test("oversized settings are refused with 413",async()=>{
   const kv=fakeKv();
   const huge=settings({brand:{...defaultSettings.brand,logoName:"x".repeat(MAX_SETTINGS_BYTES)}});
   assert.equal((await put(huge,kv)).status,413);
-  assert.equal(kv.data.size,0);
+  assert.equal(kv.data.has("settings"),false);
 });
 test("logo and slogan sources: built-in files and raster or clean SVG data URIs only",()=>{
   assert.ok(validSource("/assets/rebecca_studio_logo.png"));
@@ -206,9 +206,16 @@ test("when the image service rejects the key, the answer says why and never echo
   }finally{globalThis.fetch=originalFetch}
 });
 
-test("the old untouched default never-list is cleared once; a list she edited is kept",()=>{
-  const legacy={...defaultSettings,neverList:["שיש","עומס"]};
-  assert.deepEqual(parseSettings(legacy)!.neverList,[]);
-  assert.deepEqual(parseSettings({...defaultSettings,neverList:["שיש"]})!.neverList,["שיש"]);
-  assert.deepEqual(parseSettings({...defaultSettings,neverList:["שיש","עומס","ורוד"]})!.neverList,["שיש","עומס","ורוד"]);
+test("legacy never items are removed by removeLegacyNever, others stay",()=>{
+  assert.deepEqual(removeLegacyNever(["שיש","עומס","ורוד"]),["ורוד"]);
+  assert.deepEqual(removeLegacyNever(["עומס"]),[]);
+  assert.deepEqual(parseSettings({...defaultSettings,neverList:["שיש","עומס"]})!.neverList,["שיש","עומס"],"parsing alone never drops what she wrote");
+});
+test("the stored legacy never items are cleaned once on the server; later additions survive",async()=>{
+  const kv=fakeKv();
+  kv.data.set("settings",JSON.stringify(settings({neverList:["עומס","ורוד"]})));
+  assert.deepEqual((await (await call("/api/settings",{},kv)).json() as {settings:StudioSettings}).settings.neverList,["ורוד"]);
+  assert.ok(kv.data.has("migrated:never-legacy-2026-11"));
+  assert.equal((await put(settings({neverList:["ורוד","שיש"]}),kv)).status,200);
+  assert.deepEqual((await (await call("/api/settings",{},kv)).json() as {settings:StudioSettings}).settings.neverList,["ורוד","שיש"],"she can add it back after the one-time cleanup");
 });
