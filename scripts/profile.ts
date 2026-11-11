@@ -4,7 +4,7 @@ import {readFileSync} from "node:fs";
 import {parseSelection} from "../shared/selection.ts";
 import {computeProfile, canSuggest, PROFILE_DIMS} from "../shared/profile.ts";
 
-const names: Record<string, string> = {style: "סגנון", palette: "פלטה", props: "אביזרים", surface: "משטח", background: "רקע", light: "תאורה"};
+const names: Record<string, string> = {style: "סגנון", palette: "פלטה", props: "אביזרים", surface: "משטח", background: "רקע", light: "תאורה", technique: "טכניקה"};
 const rows = JSON.parse(readFileSync(process.argv[2] ?? "rows.json", "utf8")) as Array<Record<string, unknown>>;
 const inputs = rows.flatMap(r => { const selection = parseSelection(r.selection); return selection ? [{selection, rating: r.rating === "up" || r.rating === "down" ? r.rating : null, sent: r.sent_to_site === true}] : []; });
 const p = computeProfile(inputs);

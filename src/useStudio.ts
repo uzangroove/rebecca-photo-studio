@@ -176,7 +176,7 @@ export function useStudio() {
   }, [state.result, state.screen, state.brand, layout, focal, autoTextColor, state.formatId]);
 
   // כל שינוי בחירה מבטל יצירה שעדיין רצה, כדי שתוצאה ישנה לא תחליף את המסך.
-  function select(key: Exclude<keyof Selection, "wish">, id: string | null) {
+  function select(key: Exclude<keyof Selection, "wish" | "technique">, id: string | null) {
     request.current++;
     dispatch({type: "select", key, id});
   }

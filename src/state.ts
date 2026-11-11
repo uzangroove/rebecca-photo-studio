@@ -2,7 +2,7 @@ import type {Focal} from "../shared/brand-geometry.ts";
 import {layoutFor, type BrandLayout, type Layouts} from "../shared/brand-layout.ts";
 import {findItem, isBlocked} from "../shared/catalog.ts";
 import {builtInRecipes, applyRecipe, MAX_RECIPES, type Recipe} from "../shared/recipes.ts";
-import {defaultSelection, MAX_WISH_CHARS, type SceneKey, type Selection} from "../shared/selection.ts";
+import {defaultSelection, MAX_TECHNIQUE_CHARS, MAX_WISH_CHARS, type SceneKey, type Selection} from "../shared/selection.ts";
 import {defaultBrand, defaultNeverList, MAX_NEVER_CHARS, MAX_NEVER_ITEMS, type BrandSettings, type StudioSettings} from "../shared/settings.ts";
 import {customToken, MAX_CUSTOM_PALETTES, type CustomPalette} from "../shared/palette-custom.ts";
 import {formatById, formats} from "../shared/social-formats.ts";
@@ -63,8 +63,9 @@ export type Action =
   | {type: "tab"; tab: TabId}
   | {type: "view"; view: ViewMode}
   | {type: "zoom"; zoom: Zoom}
-  | {type: "select"; key: Exclude<keyof Selection, "wish">; id: string | null}
+  | {type: "select"; key: Exclude<keyof Selection, "wish" | "technique">; id: string | null}
   | {type: "wish"; text: string}
+  | {type: "technique"; text: string}
   | {type: "recipe"; recipe: Recipe}
   | {type: "resetScene"}
   | {type: "saveRecipe"; recipe: Recipe}
@@ -115,6 +116,8 @@ export function reducer(state: State, action: Action): State {
       return {...state, ...cleared, selection: {...state.selection, [action.key]: action.id}, status: ready};
     // בקשה מיוחדת היא טקסט חופשי: הקלדה לא מוחקת את התמונה שעל המסך, היא נכנסת ליצירה הבאה.
     case "wish": return {...state, selection: {...state.selection, wish: action.text.slice(0, MAX_WISH_CHARS)}};
+    // טכניקה: גם היא טקסט חופשי, ולכן הקלדה לא מוחקת את התמונה שעל המסך.
+    case "technique": return {...state, selection: {...state.selection, technique: action.text.replace(/[\r\n]/g, " ").slice(0, MAX_TECHNIQUE_CHARS)}};
     case "recipe": return {...state, ...cleared, selection: applyRecipe(state.selection, action.recipe), status: ready};
     case "resetScene": return {...state, ...cleared, selection: {...state.selection, surface: null, background: null, light: null}, status: ready};
     case "saveRecipe": return {...state, recipes: [...state.recipes, action.recipe].slice(-MAX_RECIPES)};
@@ -169,7 +172,8 @@ export function reducer(state: State, action: Action): State {
     case "sync": return {...state, sync: action.sync};
     case "history": return {...state, history: action.items, currentKey: action.currentKey ?? state.currentKey};
     case "photo":
-      return {...state, ...cleared, photo: action.photo,
+      // צילום חדש = מוצר חדש: הטכניקה מתחילה ריקה.
+      return {...state, ...cleared, photo: action.photo, selection: {...state.selection, technique: ""},
         status: {text: "הצילום נטען. בחרו סגנון וצבעים וצרו תמונה", error: false}};
     case "openRecent":
       return {...state, ...cleared, photo: null, result: action.url, view: "single", currentKey: action.key,

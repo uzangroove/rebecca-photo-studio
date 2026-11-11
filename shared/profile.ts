@@ -1,10 +1,11 @@
 // "פרופיל רבקה": מה היא בוחרת בפועל, לפי סוג מוצר. פונקציות טהורות (בלי רשת ובלי AI).
 // זה השלב הראשון של הלמידה: ספירה משוקללת פשוטה. מודל מורכב יותר רק כשיהיו מספיק נתונים.
-import type {Selection} from "./selection.ts";
+import {techniqueKey, type Selection} from "./selection.ts";
 
-export const PROFILE_DIMS = ["style", "palette", "props", "surface", "background", "light"] as const;
+export const PROFILE_DIMS = ["style", "palette", "props", "surface", "background", "light", "technique"] as const;
 export type ProfileDim = typeof PROFILE_DIMS[number];
 export const DEFAULT_LABEL = "(ברירת מחדל)";
+export const NO_TECHNIQUE_LABEL = "(לא צוינה)";
 
 export type ProfileInput = {selection: Selection; rating: "up" | "down" | null; sent?: boolean};
 export type Choice = {value: string; count: number; share: number};
@@ -15,6 +16,7 @@ export type Profile = {total: number; rated: number; products: ProductProfile[]}
 const WEIGHT = {up: 2, down: 0.25, none: 1} as const;
 // פלטה מותאמת (custom:#...) נספרת כקבוצה אחת.
 const valueOf = (s: Selection, dim: ProfileDim) => {
+  if (dim === "technique") return techniqueKey(s.technique ?? "") || NO_TECHNIQUE_LABEL;
   const v = s[dim];
   if (v === null || v === undefined || v === "") return DEFAULT_LABEL;
   return dim === "palette" && v.startsWith("custom:") ? "custom" : v;

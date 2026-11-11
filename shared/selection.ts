@@ -2,6 +2,13 @@ import {findItem, hasItem, legacyProductIds} from "./catalog.ts";
 import {isPaletteValue} from "./palette-custom.ts";
 
 export const MAX_WISH_CHARS = 200;
+export const MAX_TECHNIQUE_CHARS = 60;
+
+// טכניקה / עיצוב של המוצר (למשל "סחרור", "marbled"): טקסט חופשי בעברית או באנגלית, לא חובה.
+// נשמר עם כל תמונה ללמידה בלבד. לא נשלח ל-OpenAI ולא נכנס לפרומפט.
+export const cleanTechnique = (text: string): string => text.replace(/\s+/g, " ").trim().slice(0, MAX_TECHNIQUE_CHARS);
+// מפתח השוואה: אותיות לטיניות קטנות, כדי ש-"Swirl" ו-"swirl" יחשבו אותו דבר.
+export const techniqueKey = (text: string): string => cleanTechnique(text).toLowerCase();
 
 // הבחירה של רבקה למסך אחד. surface, background ו-light ריקים (null) = ברירת המחדל של הסגנון.
 export type Selection = {
@@ -10,6 +17,7 @@ export type Selection = {
   // הנחיות לפי סוג מוצר (שלב 3). מצב נר ועטיפה נשמרים תמיד, אבל נכנסים לפרומפט רק לסוג המוצר המתאים.
   candleState: string; giftWrap: string; glassTint: string | null; angle: string | null; occasion: string | null;
   wish: string;
+  technique: string;
 };
 export type SceneKey = "surface" | "background" | "light";
 
@@ -20,7 +28,7 @@ export type LookSelection = Pick<Selection, "style" | "palette" | "props" | Scen
 export const defaultSelection: Selection = {
   product: "cut-soap", style: "minimal", palette: "mono", props: "none",
   surface: "paper", background: null, light: null,
-  candleState: "asis", giftWrap: "asis", glassTint: null, angle: null, occasion: null, wish: ""
+  candleState: "asis", giftWrap: "asis", glassTint: null, angle: null, occasion: null, wish: "", technique: ""
 };
 
 const sceneCategory = {surface: "surfaces", background: "backgrounds", light: "lights"} as const;
@@ -55,7 +63,10 @@ export function parseSelection(value: unknown): Selection | null {
   if (glassTint === undefined || angle === undefined || occasion === undefined) return null;
   const wish = v.wish === undefined || v.wish === null ? "" : v.wish;
   if (typeof wish !== "string" || wish.length > MAX_WISH_CHARS) return null;
-  return {...look, product, candleState, giftWrap, glassTint, angle, occasion, wish};
+  // שדה חדש: הגדרות והיסטוריה ישנות בלעדיו נקראות עם ערך ריק.
+  const technique = v.technique === undefined || v.technique === null ? "" : v.technique;
+  if (typeof technique !== "string" || technique.length > MAX_TECHNIQUE_CHARS || /[\r\n]/.test(technique)) return null;
+  return {...look, product, candleState, giftWrap, glassTint, angle, occasion, wish, technique: cleanTechnique(technique)};
 }
 
 // הערך בפועל: בחירה מפורשת, ואם אין אז ברירת המחדל של הסגנון.
@@ -64,3 +75,18 @@ export function effectiveScene(selection: Selection, key: SceneKey): string {
 }
 
 export const sceneItem = (selection: Selection, key: SceneKey) => findItem(sceneCategory[key], effectiveScene(selection, key));
+
+/**
+ * הצעות להשלמה לשדה הטכניקה: כל מה שנרשם בעבר, בלי כפילויות (בלי הבדל בין אותיות גדולות וקטנות ורווחים),
+ * הנפוץ ראשון ובשוויון האחרון ראשון. הקלט: הטכניקות מההיסטוריה, מהחדשה לישנה. לא מכין שום רשימה מראש.
+ */
+export function techniqueSuggestions(history: readonly string[], limit = 30): string[] {
+  const seen = new Map<string, {text: string; count: number; first: number}>();
+  history.forEach((raw, i) => {
+    const text = cleanTechnique(raw), key = techniqueKey(text);
+    if (!key) return;
+    const entry = seen.get(key);
+    if (entry) entry.count++; else seen.set(key, {text, count: 1, first: i});
+  });
+  return [...seen.values()].sort((a, b) => b.count - a.count || a.first - b.first).slice(0, limit).map(e => e.text);
+}
