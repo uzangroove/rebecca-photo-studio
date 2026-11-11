@@ -43,11 +43,16 @@ export type State = {
   downloadFallback: boolean;
   busy: boolean;
   status: {text: string; error: boolean};
+  notice: Notice | null;
+  progress: string | null;
   history: HistoryItem[];
   currentKey: string | null;
   ready: boolean;
   sync: SyncState;
 };
+
+// הודעה קופצת: שגיאה נשארת עד שמאשרים (alert), אישור קצר נעלם לבד (toast).
+export type Notice = {id: number; text: string; kind: "alert" | "toast"};
 
 export const initialState: State = {
   tab: "style", view: "split", zoom: "fit",
@@ -56,6 +61,7 @@ export const initialState: State = {
   customPalettes: [], hiddenPalettes: [],
   photo: null, result: null, composed: null, downloadFallback: false, busy: false,
   status: {text: "העלו צילום של סבון או נר כדי להתחיל", error: false},
+  notice: null, progress: null,
   history: [], currentKey: null, ready: false, sync: "checking"
 };
 
@@ -96,6 +102,8 @@ export type Action =
   | {type: "generated"; image: string}
   | {type: "failed"; text: string}
   | {type: "say"; text: string; error?: boolean}
+  | {type: "progress"; text: string | null}
+  | {type: "dismissNotice"; id: number}
   | {type: "composeReset"}
   | {type: "composed"; composed: Composed}
   | {type: "composeFailed"; composed: Composed | null; text: string}
@@ -103,6 +111,7 @@ export type Action =
 
 // בחירה חדשה (סגנון, פלטה, מוצר או אביזרים) מבטלת את התוצאה הקודמת, כמו שהיה עד היום.
 const cleared = {result: null, composed: null, currentKey: null, busy: false, downloadFallback: false, crops: {}} as const;
+const popup = (state: State, text: string, error: boolean): Notice => ({id: (state.notice?.id ?? 0) + 1, text, kind: error ? "alert" : "toast"});
 const ready = {text: "הבחירות מוכנות. צרו תמונה חדשה", error: false};
 const sceneKeys: readonly SceneKey[] = ["surface", "background", "light"];
 const sceneCategory = {surface: "surfaces", background: "backgrounds", light: "lights"} as const;
@@ -183,14 +192,17 @@ export function reducer(state: State, action: Action): State {
       return {...state, busy: true, status: {text: "יוצרים סצנה חדשה בתוך התמונה…", error: false}};
     case "generated":
       return {...state, busy: false, result: action.image, composed: null, currentKey: null, downloadFallback: false, crops: {},
-        status: {text: "התמונה מוכנה. בדקו את המוצר והתווית לפני שימוש", error: false}};
-    case "failed": return {...state, busy: false, status: {text: action.text, error: true}};
-    case "say": return {...state, status: {text: action.text, error: action.error ?? false}};
+        status: {text: "התמונה מוכנה. בדקו את המוצר והתווית לפני שימוש", error: false},
+        notice: popup(state, "התמונה מוכנה ✓ בדקו את המוצר והתווית לפני שימוש", false)};
+    case "failed": return {...state, busy: false, status: {text: action.text, error: true}, notice: popup(state, action.text, true)};
+    case "say": return {...state, status: {text: action.text, error: action.error ?? false}, notice: popup(state, action.text, action.error ?? false)};
+    case "progress": return {...state, progress: action.text};
+    case "dismissNotice": return state.notice?.id === action.id ? {...state, notice: null} : state;
     case "composeReset": return {...state, composed: null, downloadFallback: false};
     case "composed":
       return {...state, composed: action.composed, status: {text: "התמונה מוכנה להורדה. בדקו את פרטי המוצר והמיתוג", error: false}};
-    case "composeFailed": return {...state, composed: action.composed, status: {text: action.text, error: true}};
-    case "downloadFallback": return {...state, downloadFallback: true, status: {text: action.text, error: true}};
+    case "composeFailed": return {...state, composed: action.composed, status: {text: action.text, error: true}, notice: popup(state, action.text, true)};
+    case "downloadFallback": return {...state, downloadFallback: true, status: {text: action.text, error: true}, notice: popup(state, action.text, true)};
   }
 }
 

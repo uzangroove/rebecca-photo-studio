@@ -630,3 +630,14 @@ figcaption.is-result,.compare-tag.is-result{background:var(--green);color:var(--
 @media(max-width:600px){
   .option-panel dialog h2{position:static;width:auto;height:auto;overflow:visible;clip-path:none}
 }
+
+/* הודעות קופצות */
+.notice-dialog{border:0;border-radius:var(--r-lg);padding:0;background:var(--surface);color:var(--text);max-width:min(420px,calc(100vw - 32px));box-shadow:0 20px 60px rgba(22,59,48,.35)}
+.notice-dialog::backdrop{background:rgba(31,42,36,.55)}
+.notice-body{display:flex;flex-direction:column;align-items:center;gap:14px;padding:28px 28px 24px;text-align:center}
+.notice-body p{margin:0;font-size:19px;line-height:1.5;font-weight:600;color:var(--green)}
+.notice-body.is-error p{color:var(--danger)}
+.notice-body small{color:var(--muted)}
+.notice-body .cta{min-height:44px;min-width:140px}
+.notice-spinner{width:34px;height:34px;border:3px solid color-mix(in srgb,var(--green) 25%,var(--bg));border-top-color:var(--green);border-radius:50%;animation:spin .8s linear infinite}
+.notice-toast{position:fixed;inset:auto auto 24px 50%;transform:translateX(-50%);margin:0;border:0;padding:14px 22px;border-radius:var(--r-md);background:var(--green);color:var(--cream);font-size:16px;max-width:min(520px,calc(100vw - 32px));box-shadow:0 10px 30px rgba(22,59,48,.35);text-align:center}
