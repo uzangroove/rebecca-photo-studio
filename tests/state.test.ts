@@ -162,3 +162,20 @@ test("the interface theme is a palette choice or the default",()=>{
   assert.equal(reducer(reducer(initialState,{type:"theme",id:"desert"}),{type:"theme",id:null}).theme,null);
   assert.equal(reducer(initialState,{type:"settings",settings:{...defaultSettings,theme:"mint"}}).theme,"mint");
 });
+
+test("errors raise an alert notice, confirmations a toast, and dismiss only clears its own notice",()=>{
+  const failed=reducer(initialState,{type:"failed",text:"נכשל"});
+  assert.deepEqual([failed.notice?.kind,failed.notice?.text],["alert","נכשל"]);
+  const said=reducer(failed,{type:"say",text:"נשלח"});
+  assert.equal(said.notice?.kind,"toast");
+  assert.equal(said.notice!.id>failed.notice!.id,true);
+  assert.equal(reducer(said,{type:"dismissNotice",id:failed.notice!.id}).notice,said.notice);
+  assert.equal(reducer(said,{type:"dismissNotice",id:said.notice!.id}).notice,null);
+  assert.equal(reducer(initialState,{type:"generated",image:"data:x"}).notice?.kind,"toast");
+});
+
+test("progress text is set and cleared",()=>{
+  const p=reducer(initialState,{type:"progress",text:"שולחים 1 מתוך 3…"});
+  assert.equal(p.progress,"שולחים 1 מתוך 3…");
+  assert.equal(reducer(p,{type:"progress",text:null}).progress,null);
+});

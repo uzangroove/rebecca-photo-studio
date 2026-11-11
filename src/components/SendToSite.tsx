@@ -12,7 +12,7 @@ export function SendToSite({studio}: {studio: Studio}) {
   if (!clean) return null;
   const meta = {style: state.selection.style, palette: state.selection.palette, product: state.selection.product, formatId: state.formatId};
   async function send(variant: InboxVariant) {
-    setOpen(false); setBusy(true);
+    setOpen(false); setBusy(true); dispatch({type: "progress", text: "שולחים את התמונה לאתר…"});
     try {
       const blob = variant === "branded" && branded ? branded : await fetch(clean!).then(r => r.blob());
       await sendToSite(blob, variant, meta);
@@ -20,7 +20,7 @@ export function SendToSite({studio}: {studio: Studio}) {
       dispatch({type: "say", text: "נשלח לאתר ✓ התמונה ממתינה ב״תמונות חדשות״ בממשק הניהול"});
     } catch (e) {
       dispatch({type: "say", text: e instanceof Error ? e.message : "השליחה לאתר נכשלה", error: true});
-    } finally { setBusy(false); }
+    } finally { setBusy(false); dispatch({type: "progress", text: null}); }
   }
   return <span className="send-site">
     <button type="button" className="pill" title="שליחה לאתר" aria-label="שליחה לאתר" disabled={busy} aria-expanded={open} onClick={() => branded ? setOpen(o => !o) : send("clean")}>

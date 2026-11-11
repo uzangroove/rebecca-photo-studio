@@ -3,6 +3,7 @@ import {BrandEditor} from "./components/BrandEditor";
 import {Header} from "./components/Header";
 import {IntroVideo} from "./components/IntroVideo";
 import {HistoryStrip} from "./components/HistoryStrip";
+import {Notices} from "./components/Notices";
 import {OptionPanel} from "./components/OptionPanel";
 import {Stage} from "./components/Stage";
 import {TabRail} from "./components/TabRail";
@@ -16,6 +17,7 @@ export default function Studio() {
   if (state.screen === "editor") return <BrandEditor studio={studio}/>;
   return <div className="app">
     {intro && <IntroVideo onDone={endIntro}/>}
+    <Notices studio={studio}/>
     <Header studio={studio}/>
     <div className="body">
       <TabRail tab={state.tab} onTab={tab => dispatch({type: "tab", tab})}/>

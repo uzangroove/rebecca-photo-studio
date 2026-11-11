@@ -21,7 +21,8 @@ export function HistoryGallery({studio, onClose}: {studio: Studio; onClose: () =
     const done: string[] = [];
     try {
       for (let k = 0; k < items.length; k++) {
-        setProgress(`שולחים ${k + 1} מתוך ${items.length}…`);
+        const text = `שולחים ${k + 1} מתוך ${items.length}…`;
+        setProgress(text); studio.dispatch({type: "progress", text});
         const i = items[k];
         const blob = i.blob ?? (i.fullUrl ? await fetch(i.fullUrl).then(r => { if (!r.ok) throw new Error("לא הצלחנו לטעון תמונה מהענן"); return r.blob(); }) : null);
         if (!blob) throw new Error("תמונה אחת לא זמינה כרגע");
@@ -33,7 +34,7 @@ export function HistoryGallery({studio, onClose}: {studio: Studio; onClose: () =
       studio.dispatch({type: "say", text: `${e instanceof Error ? e.message : "השליחה נכשלה"}${done.length ? ` (${done.length} נשלחו לפני התקלה)` : ""}`, error: true});
     } finally {
       if (done.length) await studio.markSent(done);
-      setProgress(""); setPicked(new Set()); setSelecting(false);
+      setProgress(""); studio.dispatch({type: "progress", text: null}); setPicked(new Set()); setSelecting(false);
     }
   }
   return <dialog ref={ref} className="gallery" aria-label="ההיסטוריה" onClose={onClose} onClick={e => {if (e.target === ref.current) ref.current?.close();}}>
