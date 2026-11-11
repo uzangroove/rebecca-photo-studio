@@ -38,5 +38,5 @@ test("a chosen surface and wall reach the prompt, and the server accepts them",(
   const prompt=buildPrompt(selection,defaultSettings);
   assert.ok(prompt.includes("an olive wood board surface with its distinctive swirling grain"));
   assert.ok(prompt.includes("a plain wall with soft dappled shadows of leaves"));
-  assert.ok(prompt.includes("Strictly avoid:"));
+  assert.ok(!prompt.includes("Strictly avoid"));
 });

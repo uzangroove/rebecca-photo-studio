@@ -22,7 +22,10 @@ export const defaultBrand: BrandSettings = {
 };
 
 // ברירת המחדל של רבקה: שיש ועומס.
-export const defaultNeverList: readonly string[] = ["שיש", "עומס"];
+// אין רשימת "אף פעם לא" כברירת מחדל (שמעון, נובמבר 2026). רבקה מוסיפה לבד אם תרצה.
+export const defaultNeverList: readonly string[] = [];
+// ברירת המחדל הישנה. הגדרות שמורות שלא שונו ממנה מנוקות פעם אחת בקריאה.
+const legacyDefaultNeverList = ["שיש", "עומס"];
 export const defaultSettings: StudioSettings = {version: 3, neverList: [...defaultNeverList], recipes: [...builtInRecipes], brand: defaultBrand, layouts: {}, customPalettes: [], hiddenPalettes: [], theme: null};
 
 const builtInSources = new Set(["/assets/rebecca_studio_logo.png", "/assets/rebecca_studio_slogan.png", "/assets/logo.png"]);
@@ -83,8 +86,9 @@ export function parseSettings(value: unknown): StudioSettings | null {
   if (typeof value !== "object" || value === null) return null;
   const v = value as Record<string, unknown>;
   if (v.version !== 1 && v.version !== 2 && v.version !== 3) return null;
-  const neverList = parseNeverList(v.neverList);
-  if (!neverList) return null;
+  const parsedNever = parseNeverList(v.neverList);
+  if (!parsedNever) return null;
+  const neverList = parsedNever.length === legacyDefaultNeverList.length && legacyDefaultNeverList.every((x, i) => parsedNever[i] === x) ? [] : parsedNever;
   if (v.version === 3) {
     const brand = parseBrand(v.brand), recipes = parseRecipes(v.recipes), layouts = parseLayouts(v.layouts);
     // הערך אופציונלי: הגדרות שנשמרו לפני שנוסף בחירת צבעי הממשק נקראות כברירת מחדל.

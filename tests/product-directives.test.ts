@@ -93,7 +93,7 @@ test("fidelity wording and the minimalism directive survive every directive toge
   const p=prompt({product:"glass-candle",candleState:"lit",glassTint:"amber",angle:"top",occasion:"wedding",props:"subtle"});
   assert.ok(p.includes("Do not redesign or invent products. Do not change the words on any existing label."));
   assert.ok(p.includes("uncluttered composition, generous negative space, at most one small prop."));
-  assert.ok(p.includes("Strictly avoid: שיש, עומס."));
+  assert.ok(!p.includes("Strictly avoid"),"no never-list by default");
   assert.ok(p.indexOf("Camera:")>p.indexOf("Composition:"));
 });
 test("all new directives are validated against the catalog",()=>{

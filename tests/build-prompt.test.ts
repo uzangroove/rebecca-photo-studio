@@ -15,11 +15,13 @@ test("prompts match the reviewed snapshots",()=>{
   assert.equal(Object.keys(snapshots).length,9);
   for(const [name,{selection,prompt}] of Object.entries(snapshots))assert.equal(buildPrompt(selection,settings),prompt,name);
 });
-test("every combination carries the never-list, so marble is always avoided",()=>{
+test("by default there is no never-list; one she writes is carried into every combination",()=>{
   let count=0;
+  const custom={neverList:["ורוד"]};
   for(const product of catalog.productTypes)for(const style of catalog.styles)for(const palette of catalog.palettes)for(const props of catalog.props){
-    const prompt=buildPrompt({...base,product:product.id,style:style.id,palette:palette.id,props:props.id},settings);
-    assert.ok(prompt.includes("\nStrictly avoid: שיש, עומס."),`${style.id}/${palette.id}/${props.id}`);
+    const sel={...base,product:product.id,style:style.id,palette:palette.id,props:props.id};
+    assert.ok(!buildPrompt(sel,settings).includes("Strictly avoid"),`${style.id}/${palette.id}/${props.id}`);
+    assert.ok(buildPrompt(sel,custom).includes("\nStrictly avoid: ורוד."),`${style.id}/${palette.id}/${props.id}`);
     count++;
   }
   assert.equal(count,8*10*20*3);
@@ -74,7 +76,7 @@ test("the special request is appended last, as a single line",()=>{
   assert.ok(!buildPrompt({...base,wish:"   "},settings).includes("Additional wish"));
 });
 test("an item blocked by the never-list is left out instead of contradicting it",()=>{
-  const prompt=buildPrompt({...base,surface:"marble"},settings);
+  const prompt=buildPrompt({...base,surface:"marble"},{neverList:["שיש"]});
   assert.ok(!prompt.includes("marble")&&!prompt.includes("Surface:"));
   const noOak=buildPrompt({...base,style:"rustic",surface:null},{neverList:["עץ בהיר"]});
   assert.ok(!noOak.includes("oak")&&noOak.includes("Strictly avoid: עץ בהיר."));
