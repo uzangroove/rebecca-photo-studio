@@ -1,3 +1,4 @@
+import {techniqueSuggestions, MAX_TECHNIQUE_CHARS} from "../../../shared/selection";
 import {angles, candleStates, giftWraps, glassTints, occasions, productTypes, findItem} from "../../../shared/catalog";
 import type {Studio} from "../../useStudio";
 import {Icon} from "../Icon";
@@ -10,11 +11,18 @@ export function ProductPanel({studio}: {studio: Studio}) {
   const isCandle = product?.family === "candle", isGlass = product?.id === "glass-candle", isGift = product?.family === "gift";
   const pill = (selected: boolean, label: string, onClick: () => void) =>
     <button key={label} type="button" className={`pill-opt${selected ? " is-selected" : ""}`} aria-pressed={selected} onClick={onClick}>{label}</button>;
+  // ההצעות נאספות ממה שרבקה כבר רשמה בתמונות קודמות. הדפדפן מסנן אותן תוך כדי הקלדה.
+  const suggestions = techniqueSuggestions(studio.state.history.map(h => h.selection.technique));
   return <div className="panel-body">
     <h2>המוצר</h2>
     <div className="grid grid-2 grid-dense phone-4">
       {productTypes.map(p => <Tile key={p.id} selected={selection.product === p.id} onClick={() => pick("product", p.id)} visual={<Icon d={p.icon} size={22}/>} label={p.label}/>)}
     </div>
+    <label className="field">טכניקה / עיצוב <small className="counter">לא חובה</small>
+      <input type="text" dir="auto" list="technique-options" maxLength={MAX_TECHNIQUE_CHARS} value={selection.technique} autoComplete="off" placeholder="למשל: סחרור, marbled"
+        onChange={e => studio.dispatch({type: "technique", text: e.target.value})}/>
+      <datalist id="technique-options">{suggestions.map(t => <option key={t} value={t}/>)}</datalist>
+    </label>
     {isCandle && <div className="group"><span className="group-title">מצב הנר</span>
       <div className="grid grid-3">
         {candleStates.map(s => <Tile key={s.id} layout="col" selected={selection.candleState === s.id} onClick={() => pick("candleState", s.id)} visual={<Icon d={s.icon}/>} label={s.label}/>)}
