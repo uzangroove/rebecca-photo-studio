@@ -2,7 +2,7 @@
 // פונקציות טהורות בלבד (בלי רשת), כדי שאפשר יהיה לבדוק אותן.
 import {parseSelection, type Selection} from "./selection.ts";
 
-export const EVENT_TYPES = ["generate", "download", "send", "rate", "open"] as const;
+export const EVENT_TYPES = ["generate", "download", "send", "rate", "open", "tab"] as const;
 export type EventType = typeof EVENT_TYPES[number];
 
 export type StudioEvent = {
