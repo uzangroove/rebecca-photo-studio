@@ -26,7 +26,7 @@ export type LookSelection = Pick<Selection, "style" | "palette" | "props" | Scen
 
 // פתיחת הסטודיו: מתכון "מינימליסטי שחור-לבן" (ראו shared/recipes.ts).
 export const defaultSelection: Selection = {
-  product: "cut-soap", style: "minimal", palette: "mono", props: "none",
+  product: "soap", style: "minimal", palette: "mono", props: "none",
   surface: "paper", background: null, light: null,
   candleState: "asis", giftWrap: "asis", glassTint: null, angle: null, occasion: null, wish: "", technique: ""
 };
