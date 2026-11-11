@@ -86,6 +86,13 @@ export function useStudio() {
   }
 
   // צבעי הממשק: מוחלים מיד, ונשמרים גם במכשיר כדי שלא יהבהבו בטעינה הבאה.
+  // רישום שימוש בלשוניות ובעורך המיתוג (בלי הפעם הראשונה, בפתיחת הסטודיו).
+  const seenView = useRef<string | null>(null);
+  useEffect(() => {
+    const view = state.screen === "editor" ? "brand-editor" : state.tab;
+    if (seenView.current !== null && seenView.current !== view) logEvent(buildEvent({type: "tab", detail: {tab: view}}));
+    seenView.current = view;
+  }, [state.tab, state.screen]);
   useEffect(() => { applyTheme(state.theme); saveLocalTheme(state.theme); }, [state.theme]);
 
   useEffect(() => {
@@ -279,7 +286,7 @@ export function useStudio() {
   async function download(e: MouseEvent<HTMLAnchorElement>) {
     const composed = state.composed;
     if (!composed) { e.preventDefault(); return; }
-    logEvent(buildEvent({type: "download", imageKey: state.currentKey, detail: {branded: composed.branded}}));
+    logEvent(buildEvent({type: "download", imageKey: state.currentKey, formatId: state.formatId, detail: {branded: composed.branded}}));
     type SaveHandle = {createWritable: () => Promise<{write: (data: Blob) => Promise<void>; close: () => Promise<void>}>};
     const picker = (window as Window & {showSaveFilePicker?: (options: {suggestedName: string; types: {description: string; accept: Record<string, string[]>}[]}) => Promise<SaveHandle>}).showSaveFilePicker;
     if (!picker) {

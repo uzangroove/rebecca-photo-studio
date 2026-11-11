@@ -32,3 +32,11 @@ test("isRepeat: same source and same selection only", () => {
   assert.equal(isRepeat(a, {sourceId: "s1", selection: {...defaultSelection, style: "spa"}}), false);
   assert.equal(isRepeat({sourceId: null, selection: defaultSelection}, {sourceId: null, selection: defaultSelection}), false);
 });
+
+test("tab events are valid and carry the tab name; downloads can carry the format",()=>{
+  const tab=buildEvent({type:"tab",detail:{tab:"palette"}});
+  assert.deepEqual(toRow(tab!).detail,{tab:"palette"});
+  assert.equal(toRow(tab!).event_type,"tab");
+  const dl=buildEvent({type:"download",formatId:"instagram-square",detail:{branded:true}});
+  assert.equal(toRow(dl!).format_id,"instagram-square");
+});
