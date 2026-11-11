@@ -16,8 +16,8 @@ export type SurfaceItem = CatalogItem & {swatch: string; group: SurfaceGroup};
 export const surfaceGroups: readonly {id: SurfaceGroup; label: string}[] = [
   {id: "fabric", label: "בדים"}, {id: "paper", label: "נייר וטיח"}, {id: "wood", label: "עץ וטבע"}, {id: "hard", label: "משטחים קשים"}
 ];
-// family קובע אילו הנחיות רלוונטיות (מצב נר לנרות, עטיפה למארז). guidance הוא מקטע הפרומפט של סוג המוצר.
-export type ProductFamily = "candle" | "soap" | "melts" | "bomb" | "gift";
+// family קובע אילו הנחיות רלוונטיות (מצב נר לנרות). guidance הוא מקטע הפרומפט של סוג המוצר.
+export type ProductFamily = "candle" | "soap" | "gift" | "other";
 export type ProductItem = CatalogItem & {family: ProductFamily; guidance: string | null};
 export type PaletteItem = CatalogItem & {colors: readonly [string, string, string]; iconFill?: string};
 
@@ -128,28 +128,23 @@ export const palettes: readonly PaletteItem[] = [
   palette("linen","פשתן",["#A4937A","#D6C7B3","#F2EBE1"],"M4 6h16v4H4z M4 10c0 3 2 4 4 4h12 M4 14v4h16v-4")
 ];
 
-// סוגי המוצר. אין כלי בטון לנרות. ההנחיה (guidance) נכנסת לפרומפט רק לסוג המתאים.
+// ארבע קטגוריות מוצר (נובמבר 2026). אין כלי בטון לנרות. ההנחיה (guidance) נכנסת לפרומפט רק לקטגוריה המתאימה.
 export const productTypes: readonly ProductItem[] = [
-  {id:"glass-candle",label:"נר בכלי זכוכית",family:"candle",icon:"M7 8h10v11a1 1 0 0 1-1 1H8a1 1 0 0 1-1-1z M7 12h10 M12 8V6 M12 6c.8-.8 1-1.8 0-3-1 1.2-.8 2.2 0 3z",
-    prompt:"handmade candles in glass vessels",guidance:"Render true glass refraction and reflections, with no glare or hot spot covering the label"},
-  {id:"ceramic-candle",label:"נר בקרמיקה",family:"candle",icon:"M5 11h14l-1.5 7a2 2 0 0 1-2 1.5h-7a2 2 0 0 1-2-1.5z M12 11V9 M12 9c.8-.8 1-1.8 0-3-1 1.2-.8 2.2 0 3z M8 15h8",
-    prompt:"handmade candles in ceramic vessels",guidance:"The ceramic vessel keeps a matte texture, with no gloss"},
-  {id:"pillar-candle",label:"נר עמוד / מפוסל",family:"candle",icon:"M8 9h8v11H8z M12 9V7 M12 7c.8-.8 1-1.8 0-3-1 1.2-.8 2.2 0 3z M8 13c1.5 1 3 1 4 0s2.5-1 4 0",
-    prompt:"handmade pillar and sculpted candles",guidance:"Preserve the sculpted shape of the candle exactly, including every carved detail"},
-  {id:"wax-melts",label:"נמסים ריחניים",family:"melts",icon:"M3 14h5v5H3z M9.5 14h5v5h-5z M16 14h5v5h-5z M6.5 8h5v5h-5z",
-    prompt:"handmade scented wax melts",guidance:null},
-  {id:"cut-soap",label:"סבון חתוך",family:"soap",icon:"M3 11l5-4h13v7l-5 4H3z M3 11h13v7 M16 11l5-4",
-    prompt:"handmade cut soaps",guidance:"Show the natural cut texture on the soap, with no plastic or glossy look"},
-  {id:"molded-soap",label:"סבון בתבנית",family:"soap",icon:"M12 20a8 8 0 1 0 0-16a8 8 0 1 0 0 16z M12 14a2 2 0 1 0 0-4a2 2 0 1 0 0 4z M12 6.5V10 M12 14v3.5 M6.5 12H10 M14 12h3.5",
-    prompt:"handmade molded soaps",guidance:null},
-  {id:"bath-bomb",label:"פצצת אמבט",family:"bomb",icon:"M12 20a8 8 0 1 0 0-16a8 8 0 1 0 0 16z M9 9h.01 M14 8h.01 M15 13h.01 M9.5 14h.01 M12 11.5h.01",
-    prompt:"handmade bath bombs",guidance:"Show a powdery, matte texture"},
-  {id:"gift-box",label:"מארז מתנה",family:"gift",icon:"M4 10h16v4H4z M5 14h14v6H5z M12 10v10 M12 10c-2-4-6-4-6-1.5S10 10 12 10c2 0 6 1 6-1.5S14 6 12 10z",
-    prompt:"a handmade gift box set",guidance:null}
+  {id:"candle",label:"נרות",family:"candle",icon:"M7 8h10v11a1 1 0 0 1-1 1H8a1 1 0 0 1-1-1z M7 12h10 M12 8V6 M12 6c.8-.8 1-1.8 0-3-1 1.2-.8 2.2 0 3z",
+    prompt:"handmade candles",guidance:"Keep each vessel's material exactly as in the supplied photo: real glass refraction and reflections for glass, a matte texture with no gloss for ceramic. Preserve any sculpted shape exactly, with no glare or hot spot covering the label"},
+  {id:"soap",label:"סבונים",family:"soap",icon:"M3 11l5-4h13v7l-5 4H3z M3 11h13v7 M16 11l5-4",
+    prompt:"handmade soaps",guidance:"Show the natural texture of the soap, including any cut texture, with no plastic or glossy look"},
+  {id:"gift",label:"מארזים",family:"gift",icon:"M4 10h16v4H4z M5 14h14v6H5z M12 10v10 M12 10c-2-4-6-4-6-1.5S10 10 12 10c2 0 6 1 6-1.5S14 6 12 10z",
+    prompt:"a handmade gift box set",guidance:null},
+  {id:"other",label:"אחר",family:"other",icon:"M12 20a8 8 0 1 0 0-16a8 8 0 1 0 0 16z M9 9h.01 M14 8h.01 M15 13h.01 M9.5 14h.01 M12 11.5h.01",
+    prompt:"handmade products",guidance:"Keep the material and texture of the products exactly as in the supplied photo"}
 ];
 
-// ערכים ישנים (עד שלב 2) שנשמרו בהיסטוריה ובבקשות: סבון ונר.
-export const legacyProductIds: Readonly<Record<string, string>> = {soap: "cut-soap", candle: "glass-candle"};
+// ערכים ישנים שנשמרו בהיסטוריה ובבקשות: שמונת הסוגים הקודמים וגם "soap" ו"candle" מהשלבים הראשונים.
+export const legacyProductIds: Readonly<Record<string, string>> = {
+  "glass-candle": "candle", "ceramic-candle": "candle", "pillar-candle": "candle",
+  "cut-soap": "soap", "molded-soap": "soap", "gift-box": "gift", "wax-melts": "other", "bath-bomb": "other"
+};
 
 // מצב הנר: רק לנרות. "כמו בצילום" משאיר את הלהבה כפי שהיא.
 export const candleStates: readonly CatalogItem[] = [
@@ -174,11 +169,12 @@ export const giftWraps: readonly CatalogItem[] = [
 ];
 
 // זווית צילום. בלי בחירה אין הנחיה, והזווית נשארת כמו בצילום.
+// "כמו בצילום" (בלי זווית) הוא הערך הריק, ולכן אין לו פריט בקטלוג. זווית "גובה עיניים" הוסרה: היא לא שינתה דבר.
+export const angleAsPhotoIcon = "M2 12s4-6 10-6 10 6 10 6-4 6-10 6S2 12 2 12z M12 14.5a2.5 2.5 0 1 0 0-5a2.5 2.5 0 1 0 0 5z";
 export const angles: readonly CatalogItem[] = [
-  {id:"eye",label:"גובה עיניים",icon:"M2 12s4-6 10-6 10 6 10 6-4 6-10 6S2 12 2 12z M12 14.5a2.5 2.5 0 1 0 0-5a2.5 2.5 0 1 0 0 5z",prompt:"eye-level camera angle"},
-  {id:"45",label:"45°",icon:"M4 20L20 4 M4 20h7 M4 20v-7",prompt:"a 45-degree camera angle"},
-  {id:"top",label:"מלמעלה",icon:"M12 3v9 M8 8l4 4 4-4 M4 18h16",prompt:"a top-down camera angle"},
-  {id:"macro",label:"תקריב",icon:"M10.5 17a6.5 6.5 0 1 0 0-13a6.5 6.5 0 1 0 0 13z M15.5 15.5L21 21",prompt:"a close-up macro framing"}
+  {id:"45",label:"45°",icon:"M4 20L20 4 M4 20h7 M4 20v-7",prompt:"a 45-degree camera angle, keeping the exact colors of the products"},
+  {id:"top",label:"מלמעלה",icon:"M12 3v9 M8 8l4 4 4-4 M4 18h16",prompt:"a top-down camera angle, keeping the exact arrangement of the products, which stand, lie or stack exactly as in the supplied photo, and their exact colors"},
+  {id:"macro",label:"תקריב",icon:"M10.5 17a6.5 6.5 0 1 0 0-13a6.5 6.5 0 1 0 0 13z M15.5 15.5L21 21",prompt:"a close-up macro framing, keeping the exact arrangement and exact colors of the products"}
 ];
 
 // אירוע: משפיע רק על פרטים בסצנה, אף פעם לא על המוצר. בלי בחירה = ללא.

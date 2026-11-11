@@ -6,9 +6,9 @@ import {defaultSelection, type Selection} from "../shared/selection.ts";
 const img = (over: Partial<Selection>, rating: "up" | "down" | null = null) => ({selection: {...defaultSelection, ...over}, rating});
 
 test("profile groups by product and ranks choices", () => {
-  const p = computeProfile([img({style: "minimal"}), img({style: "minimal"}), img({style: "spa"}), img({product: "glass-candle", style: "boutique"})]);
+  const p = computeProfile([img({style: "minimal"}), img({style: "minimal"}), img({style: "spa"}), img({product: "candle", style: "boutique"})]);
   assert.equal(p.total, 4);
-  assert.deepEqual(p.products.map(x => [x.product, x.images]), [["cut-soap", 3], ["glass-candle", 1]]);
+  assert.deepEqual(p.products.map(x => [x.product, x.images]), [["soap", 3], ["candle", 1]]);
   const soap = p.products[0];
   assert.equal(soap.dims.style[0].value, "minimal"); assert.equal(soap.dims.style[0].share, 0.67);
 });

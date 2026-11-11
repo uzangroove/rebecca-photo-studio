@@ -24,7 +24,7 @@ test("by default there is no never-list; one she writes is carried into every co
     assert.ok(buildPrompt(sel,custom).includes("\nStrictly avoid: ורוד."),`${style.id}/${palette.id}/${props.id}`);
     count++;
   }
-  assert.equal(count,8*10*20*3);
+  assert.equal(count,4*10*20*3);
 });
 test("palette names never reach the prompt, only HEX codes marked as environment colors",()=>{
   for(const palette of catalog.palettes){

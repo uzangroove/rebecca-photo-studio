@@ -16,10 +16,10 @@ test("there are four built-in recipes with the agreed looks",()=>{
 test("the opening selection is the minimalist black-and-white recipe",()=>{
   const opening=builtInRecipes.find(r=>r.id==="minimal-bw")!;
   assert.ok(recipeMatches(defaultSelection,opening));
-  assert.equal(defaultSelection.product,"cut-soap");
+  assert.equal(defaultSelection.product,"soap");
 });
 test("every recipe produces a valid selection and a prompt, on top of any product",()=>{
-  for(const recipe of builtInRecipes)for(const product of ["cut-soap","glass-candle"]){
+  for(const recipe of builtInRecipes)for(const product of ["soap","candle"]){
     const selection=applyRecipe({...defaultSelection,product,wish:"בקשה"},recipe);
     assert.deepEqual(parseSelection(selection),selection,recipe.id);
     assert.equal(selection.product,product);

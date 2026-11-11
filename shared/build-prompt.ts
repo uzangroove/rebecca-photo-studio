@@ -19,17 +19,13 @@ export function buildPrompt(selection: Selection, settings: PromptSettings): str
   const props = findItem("props", selection.props);
   if (!product || !style || !palette || !props) throw new Error("Selection is not in the catalog");
   const never = settings.neverList.map(oneLine).filter(Boolean);
-  const wrap = findItem("giftWraps", selection.giftWrap), candle = findItem("candleStates", selection.candleState);
-  const tint = selection.glassTint ? findItem("glassTints", selection.glassTint) : undefined;
+  const candle = findItem("candleStates", selection.candleState);
   const angle = selection.angle ? findItem("angles", selection.angle) : undefined;
   const occasion = selection.occasion ? findItem("occasions", selection.occasion) : undefined;
   const scene = (label: string, item: CatalogItem | undefined) =>
     item && !isBlocked(item, never) ? ` ${label}: ${item.prompt}.` : "";
-  // הנחיות לפי סוג מוצר: מקטע הסוג, ואז מצב נר (רק לנרות), גוון זכוכית (רק לנר בזכוכית) ועטיפה (רק למארז).
-  const notes = [product.guidance,
-    product.family === "candle" ? candle?.prompt : null,
-    product.id === "glass-candle" ? tint?.prompt : null,
-    product.family === "gift" ? wrap?.prompt : null].filter((n): n is string => !!n).map(n => ` ${n}.`).join("");
+  // הנחיות לפי קטגוריה: מקטע הקטגוריה, ואז מצב נר (רק לנרות).
+  const notes = [product.guidance, product.family === "candle" ? candle?.prompt : null].filter((n): n is string => !!n).map(n => ` ${n}.`).join("");
   // אירוע משפיע על פרטי הסצנה בלבד. בלי אביזרים הוא מתבטא באווירה וצבע, בלי חפצים נוספים.
   const occasionNote = occasion ? ` Occasion: ${occasion.prompt}, expressed ${selection.props === "none" ? "only through subtle mood and color, with no added objects" : "only through subtle scene details"}, never on the products themselves.` : "";
   const prompt = `Create a single photorealistic commercial product photograph by editing the supplied photo of ${product.prompt}.
