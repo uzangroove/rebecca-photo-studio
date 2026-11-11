@@ -1,5 +1,5 @@
 import {techniqueSuggestions, MAX_TECHNIQUE_CHARS} from "../../../shared/selection";
-import {angles, candleStates, occasions, productTypes, findItem} from "../../../shared/catalog";
+import {angleAsPhotoIcon, angles, candleStates, occasions, productTypes, findItem} from "../../../shared/catalog";
 import type {Studio} from "../../useStudio";
 import {Icon} from "../Icon";
 import {Tile} from "../Tile";
@@ -30,6 +30,7 @@ export function ProductPanel({studio}: {studio: Studio}) {
     </div>}
     <div className="group"><span className="group-title">זווית צילום</span>
       <div className="grid grid-4">
+        <Tile layout="col" selected={selection.angle === null} onClick={() => pick("angle", null)} visual={<Icon d={angleAsPhotoIcon}/>} label="כמו בצילום"/>
         {angles.map(a => <Tile key={a.id} layout="col" selected={selection.angle === a.id} onClick={() => pick("angle", selection.angle === a.id ? null : a.id)} visual={<Icon d={a.icon}/>} label={a.label}/>)}
       </div>
     </div>

@@ -56,8 +56,8 @@ test("glass tint and gift wrap are retired: still readable from old records, nev
     for(const wrap of giftWraps)assert.ok(!prompt({product:product.id,giftWrap:wrap.id}).includes(wrap.prompt),`${product.id}/${wrap.id}`);
   }
 });
-test("camera angle: four options, none by default, and only the chosen one is sent",()=>{
-  assert.deepEqual(angles.map(a=>a.label),["גובה עיניים","45°","מלמעלה","תקריב"]);
+test("camera angle: three options plus as-in-the-photo (none), none by default, and only the chosen one is sent",()=>{
+  assert.deepEqual(angles.map(a=>a.label),["45°","מלמעלה","תקריב"]);
   assert.ok(!prompt({angle:null}).includes("Camera:"));
   for(const a of angles){
     const p=prompt({angle:a.id});
@@ -97,4 +97,10 @@ test("old saved products (the eight earlier types, soap, candle) map to the four
 test("every catalog category in this phase has Hebrew labels and valid icons",()=>{
   for(const cat of ["productTypes","candleStates","glassTints","giftWraps","angles","occasions"] as const)
     for(const item of catalog[cat]){assert.ok(item.icon.length>10,`${cat}/${item.id}`)}
+});
+test("the retired eye-level angle reads as 'as in the photo'; top and macro lock arrangement and color",()=>{
+  assert.equal(parseSelection({...defaultSelection,angle:"eye"})?.angle,null);
+  assert.match(prompt({angle:"top"}),/keeping the exact arrangement of the products, which stand, lie or stack exactly as in the supplied photo, and their exact colors/);
+  assert.match(prompt({angle:"macro"}),/exact arrangement and exact colors/);
+  assert.match(prompt({angle:"45"}),/exact colors of the products/);
 });

@@ -169,11 +169,12 @@ export const giftWraps: readonly CatalogItem[] = [
 ];
 
 // זווית צילום. בלי בחירה אין הנחיה, והזווית נשארת כמו בצילום.
+// "כמו בצילום" (בלי זווית) הוא הערך הריק, ולכן אין לו פריט בקטלוג. זווית "גובה עיניים" הוסרה: היא לא שינתה דבר.
+export const angleAsPhotoIcon = "M2 12s4-6 10-6 10 6 10 6-4 6-10 6S2 12 2 12z M12 14.5a2.5 2.5 0 1 0 0-5a2.5 2.5 0 1 0 0 5z";
 export const angles: readonly CatalogItem[] = [
-  {id:"eye",label:"גובה עיניים",icon:"M2 12s4-6 10-6 10 6 10 6-4 6-10 6S2 12 2 12z M12 14.5a2.5 2.5 0 1 0 0-5a2.5 2.5 0 1 0 0 5z",prompt:"eye-level camera angle"},
-  {id:"45",label:"45°",icon:"M4 20L20 4 M4 20h7 M4 20v-7",prompt:"a 45-degree camera angle"},
-  {id:"top",label:"מלמעלה",icon:"M12 3v9 M8 8l4 4 4-4 M4 18h16",prompt:"a top-down camera angle"},
-  {id:"macro",label:"תקריב",icon:"M10.5 17a6.5 6.5 0 1 0 0-13a6.5 6.5 0 1 0 0 13z M15.5 15.5L21 21",prompt:"a close-up macro framing"}
+  {id:"45",label:"45°",icon:"M4 20L20 4 M4 20h7 M4 20v-7",prompt:"a 45-degree camera angle, keeping the exact colors of the products"},
+  {id:"top",label:"מלמעלה",icon:"M12 3v9 M8 8l4 4 4-4 M4 18h16",prompt:"a top-down camera angle, keeping the exact arrangement of the products, which stand, lie or stack exactly as in the supplied photo, and their exact colors"},
+  {id:"macro",label:"תקריב",icon:"M10.5 17a6.5 6.5 0 1 0 0-13a6.5 6.5 0 1 0 0 13z M15.5 15.5L21 21",prompt:"a close-up macro framing, keeping the exact arrangement and exact colors of the products"}
 ];
 
 // אירוע: משפיע רק על פרטים בסצנה, אף פעם לא על המוצר. בלי בחירה = ללא.

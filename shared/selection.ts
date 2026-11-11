@@ -36,6 +36,7 @@ const sceneCategory = {surface: "surfaces", background: "backgrounds", light: "l
 // אפשרות ריקה (null, undefined או מחרוזת ריקה מטופס) = ברירת מחדל. ערך שאינו בקטלוג = לא תקין.
 function optional(category: "surfaces" | "backgrounds" | "lights" | "glassTints" | "angles" | "occasions", value: unknown): string | null | undefined {
   if (value === null || value === undefined || value === "") return null;
+  if (category === "angles" && value === "eye") return null; // זווית שהוסרה: נקראת כ"כמו בצילום"
   return hasItem(category, value) ? value : undefined;
 }
 
