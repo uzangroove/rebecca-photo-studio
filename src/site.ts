@@ -45,7 +45,8 @@ export async function toJpeg(blob: Blob, max = 2048, quality = 0.9): Promise<Blo
 }
 
 export type InboxVariant = "clean" | "branded";
-export type InboxMeta = {style?: string; palette?: string; product?: string; formatId?: string};
+export type InboxMeta = {style?: string; palette?: string; product?: string; formatId?: string; technique?: string};
+export {withTechnique} from "../shared/selection.ts";
 
 /**
  * שולח תמונה ל"תמונות חדשות" בממשק הניהול של האתר.

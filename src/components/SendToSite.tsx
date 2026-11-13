@@ -1,6 +1,6 @@
 import {useState} from "react";
 import type {Studio} from "../useStudio";
-import {sendToSite, type InboxVariant} from "../site";
+import {sendToSite, withTechnique, type InboxVariant} from "../site";
 import {Icon, icons} from "./Icon";
 
 // "שליחה לאתר": התמונה עוברת ל"תמונות חדשות" בממשק הניהול ולא מתפרסמת עד שרבקה תחליט.
@@ -10,7 +10,7 @@ export function SendToSite({studio}: {studio: Studio}) {
   const [open, setOpen] = useState(false), [busy, setBusy] = useState(false);
   const clean = state.result, branded = state.composed?.branded ? state.composed.blob : null;
   if (!clean) return null;
-  const meta = {style: state.selection.style, palette: state.selection.palette, product: state.selection.product, formatId: state.formatId};
+  const meta = withTechnique({style: state.selection.style, palette: state.selection.palette, product: state.selection.product, formatId: state.formatId}, state.selection.technique);
   async function send(variant: InboxVariant) {
     setOpen(false); setBusy(true); dispatch({type: "progress", text: "שולחים את התמונה לאתר…"});
     try {

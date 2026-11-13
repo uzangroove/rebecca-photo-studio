@@ -3,7 +3,7 @@ import {paletteLabel} from "../../shared/palette-custom";
 import {findItem} from "../../shared/catalog";
 import {formatById} from "../../shared/social-formats";
 import type {Studio} from "../useStudio";
-import {sendToSite} from "../site";
+import {sendToSite, withTechnique} from "../site";
 import {Icon, icons} from "./Icon";
 import {RatingBadge} from "./RatingBadge";
 
@@ -26,7 +26,7 @@ export function HistoryGallery({studio, onClose}: {studio: Studio; onClose: () =
         const i = items[k];
         const blob = i.blob ?? (i.fullUrl ? await fetch(i.fullUrl).then(r => { if (!r.ok) throw new Error("לא הצלחנו לטעון תמונה מהענן"); return r.blob(); }) : null);
         if (!blob) throw new Error("תמונה אחת לא זמינה כרגע");
-        await sendToSite(blob, "clean", {style: i.selection.style, palette: i.selection.palette, product: i.selection.product, formatId: i.formatId});
+        await sendToSite(blob, "clean", withTechnique({style: i.selection.style, palette: i.selection.palette, product: i.selection.product, formatId: i.formatId}, i.selection.technique));
         done.push(i.key);
       }
       studio.dispatch({type: "say", text: `נשלחו ${done.length} תמונות לאתר ✓ הן ממתינות ב״תמונות חדשות״ בממשק הניהול`});

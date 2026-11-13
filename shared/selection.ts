@@ -91,3 +91,9 @@ export function techniqueSuggestions(history: readonly string[], limit = 30): st
   });
   return [...seen.values()].sort((a, b) => b.count - a.count || a.first - b.first).slice(0, limit).map(e => e.text);
 }
+
+/** פרטי שליחה לאתר: הטכניקה מצורפת רק כשרבקה כתבה משהו — כך היא מודפסת בטופס ונכנסת לכרטיס המוצר. */
+export function withTechnique<T extends object>(meta: T, technique: string | undefined): T & {technique?: string} {
+  const t = cleanTechnique(technique ?? "");
+  return t ? {...meta, technique: t} : meta;
+}
