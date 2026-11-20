@@ -10,11 +10,11 @@ export type CatalogItem = {
 };
 export type SceneDefaults = {surface: string; background: string; light: string};
 export type StyleItem = CatalogItem & {defaults: SceneDefaults};
-// group מסדר את המשטחים בלשונית "משטח" לקבוצות: בדים, נייר וטיח, עץ וטבע, משטחים קשים.
-export type SurfaceGroup = "fabric" | "paper" | "wood" | "hard";
+// group מסדר את המשטחים בלשונית "משטח" לקבוצות: בדים, נייר וטיח, עץ וטבע, משטחים קשים, מבריק ומים.
+export type SurfaceGroup = "fabric" | "paper" | "wood" | "hard" | "gloss";
 export type SurfaceItem = CatalogItem & {swatch: string; group: SurfaceGroup};
 export const surfaceGroups: readonly {id: SurfaceGroup; label: string}[] = [
-  {id: "fabric", label: "בדים"}, {id: "paper", label: "נייר וטיח"}, {id: "wood", label: "עץ וטבע"}, {id: "hard", label: "משטחים קשים"}
+  {id: "fabric", label: "בדים"}, {id: "paper", label: "נייר וטיח"}, {id: "wood", label: "עץ וטבע"}, {id: "hard", label: "משטחים קשים"}, {id: "gloss", label: "מבריק ומים"}
 ];
 // family קובע אילו הנחיות רלוונטיות (מצב נר לנרות). guidance הוא מקטע הפרומפט של סוג המוצר.
 export type ProductFamily = "candle" | "soap" | "gift" | "other";
@@ -73,7 +73,13 @@ export const surfaces: readonly SurfaceItem[] = [
   {id:"terracotta",group:"hard",label:"טרקוטה",swatch:"#C06C4B",icon:"M5 4h14l-2 16H7z M6 9h12",prompt:"an unglazed terracotta clay surface"},
   {id:"terrazzo",group:"hard",label:"טרצו",swatch:"#E2DDD3",icon:"M6 7h.01 M11 6l2 1 M17 8h.01 M8 12l2 1 M15 12h.01 M18 15l-2 1 M6 16h.01 M11 17h.01",prompt:"a fine terrazzo surface"},
   {id:"concrete",group:"hard",label:"בטון",swatch:"#A9A6A0",icon:"M4 5h16v14H4z M8 9h.01 M14 8h.01 M10 14h.01 M16 15h.01 M6 16h.01",prompt:"a smooth concrete surface"},
-  {id:"marble",group:"hard",label:"שיש",swatch:"#F2F1EE",icon:"M4 5h16v14H4z M6 9c4 0 4 4 8 4s3 3 4 5 M10 5c0 3 3 4 3 7",prompt:"a marble surface"}
+  {id:"marble",group:"hard",label:"שיש",swatch:"#F2F1EE",icon:"M4 5h16v14H4z M6 9c4 0 4 4 8 4s3 3 4 5 M10 5c0 3 3 4 3 7",prompt:"a marble surface"},
+  // שלב 11 (נובמבר 2026): משטחים שרבקה ביקשה, כולל מראה עם השתקפות.
+  {id:"slate",group:"hard",label:"צפחה רטובה",swatch:"#4A4F52",icon:"M4 6h16v12H4z M9 8.5c1 1.4 1 2.5 0 2.5s-1-1.1 0-2.5z M15 11c1 1.4 1 2.5 0 2.5s-1-1.1 0-2.5z M11 14c.8 1.1.8 2 0 2s-.8-.9 0-2z",prompt:"a dark natural slate surface with a few fresh water droplets"},
+  {id:"travertine",group:"hard",label:"טרוורטין",swatch:"#E4D6C1",icon:"M4 6h16v12H4z M4 10h7 M14 10h6 M4 14h16 M7 8h.01 M17 12h.01 M10 16h.01",prompt:"a warm pale travertine stone surface with its natural small pores"},
+  {id:"mirror",group:"gloss",label:"מראה",swatch:"#D9DEE2",icon:"M4 5h16v14H4z M4 12h16 M8 10l3-3 M13 10l2-2 M8 14l3 3 M13 14l2 2",prompt:"a polished mirror surface; the products stand directly on it and are reflected beneath them as a crisp, physically accurate mirror image"},
+  {id:"acrylic",group:"gloss",label:"אקריליק שחור",swatch:"#1E1E1E",icon:"M3 13h18 M7 13V7h4v6 M14 13V9h3v4 M7 15v2 M11 15v1 M14 15v1.5 M17 15v1",prompt:"a glossy black acrylic surface with a soft, slightly blurred reflection of the products"},
+  {id:"water",group:"gloss",label:"מים רדודים",swatch:"#BFD3D6",icon:"M3 10c2-2 4-2 6 0s4 2 6 0 4-2 6 0 M3 15c2-2 4-2 6 0s4 2 6 0 4-2 6 0 M3 20h18",prompt:"a thin layer of still, shallow clear water over a smooth flat base; the products stand in it with a gentle reflection and a few soft ripples around their bases"}
 ];
 
 export const lights: readonly CatalogItem[] = [
@@ -93,6 +99,10 @@ export const backgrounds: readonly CatalogItem[] = [
   {id:"curtain",label:"וילון פשתן",icon:"M3 4h18 M6 4c0 6-2 11-2 16 M10 4c0 6 1 11 0 16 M14 4c0 6-1 11 0 16 M18 4c0 6 2 11 2 16",prompt:"a softly draped natural linen curtain backdrop"},
   {id:"seamless",label:"רקע נייר חלק",icon:"M5 3v11a6 6 0 0 0 6 6h10 M9 3v10a3 3 0 0 0 3 3h9",prompt:"a seamless paper backdrop sweep in one of the palette colors"},
   {id:"leafshadow",label:"צל עלים",icon:"M4 4h16v16H4z M9 15c-2-3 0-6 4-7 0 4-1 6-4 7z M9 15l3-4",prompt:"a plain wall with soft dappled shadows of leaves"},
+  // שלב 11 (נובמבר 2026): קירות חדשים.
+  {id:"windowshadow",label:"צל חלון",icon:"M4 4h16v16H4z M9 7h7l-2 10H7z M12.5 7l-2 10 M8 12h7",prompt:"a plain wall with a soft diagonal shadow of a window frame cast by sunlight"},
+  {id:"microcement",label:"מיקרו-בטון",icon:"M4 4h16v16H4z M7 9c3-1 5 1 8 0 M7 14c2 1 6-1 9 1",prompt:"a smooth microcement wall with a soft, subtle trowel texture"},
+  {id:"travertinewall",label:"קיר טרוורטין",icon:"M4 4h16v16H4z M4 9h16 M4 14h16 M11 4v5 M8 9v5 M15 9v5 M12 14v6",prompt:"a wall of warm pale travertine stone with its natural small pores"},
   {id:"window",label:"חלון",icon:"M5 21V9a7 7 0 0 1 14 0v12z M12 2v19 M5 13h14",prompt:"a quiet window"},
   {id:"plants",label:"צמחייה",icon:"M12 21v-8 M12 13C8 13 5 10 5 6c4 0 7 3 7 7z M12 16c0-4 3-7 7-7 0 4-3 7-7 7z",prompt:"soft out-of-focus greenery"},
   {id:"blur",label:"פנים מטושטש",icon:"M8 10a3 3 0 1 0 0-6a3 3 0 1 0 0 6z M16 14a4 4 0 1 0 0-8a4 4 0 1 0 0 8z M9 20a3 3 0 1 0 0-6a3 3 0 1 0 0 6z",prompt:"a softly blurred interior"},
@@ -213,11 +223,12 @@ export function hasItem(category: CatalogCategory, id: unknown): id is string {
 
 // פריטים שלא נבחרו אף פעם ב-110 התמונות הראשונות של רבקה (אוקטובר-נובמבר 2026) מוסתרים מהממשק.
 // ההסתרה היא בתצוגה בלבד: הפריטים נשארים בקטלוג, נקראים מהיסטוריה, ועובדים בפרומפט. מחזירים פריט בהסרת ה-id מכאן.
+// נישה, וילון וצל עלים הוחזרו בשלב 11 (נובמבר 2026) לבקשת שמעון.
 // אירועים (חנוכה, ראש השנה...) נשארים כי הם עונתיים. פלטות מוסתרות אצל רבקה בכפתור משלהן.
 export const hiddenIds: Readonly<Record<"styles" | "surfaces" | "backgrounds", readonly string[]>> = {
   styles: ["mediterranean"],
   surfaces: ["muslin", "velvet", "satin", "felt", "walnut", "olivewood", "reclaimed", "rattan", "cork", "terracotta"],
-  backgrounds: ["slats", "arch", "curtain", "leafshadow"]
+  backgrounds: ["slats"]
 };
 // הפריטים שמוצגים: כל מה שלא מוסתר, ובנוסף הפריט הנבחר כרגע (למשל כשנפתחת תמונה ישנה שהשתמשה בו).
 export function shown<T extends CatalogItem>(category: keyof typeof hiddenIds, items: readonly T[], selectedId?: string | null): T[] {
