@@ -12,11 +12,11 @@ const newWalls=["limewash","brick","slats","zellige","arch","curtain","seamless"
 test("the new surfaces and walls are in the catalog",()=>{
   for(const id of newSurfaces)assert.ok(findItem("surfaces",id),id);
   for(const id of newWalls)assert.ok(findItem("backgrounds",id),id);
-  assert.equal(surfaces.length,23);
-  assert.equal(backgrounds.length,14);
+  assert.equal(surfaces.length,28);
+  assert.equal(backgrounds.length,17);
 });
 
-test("every surface sits in one of the four groups and has a HEX swatch",()=>{
+test("every surface sits in one of the groups and has a HEX swatch",()=>{
   const groups=new Set(surfaceGroups.map(g=>g.id));
   for(const s of surfaces){
     assert.ok(groups.has(s.group),s.id);
@@ -46,7 +46,32 @@ test("hidden items stay valid in the catalog and come back when currently select
   for(const [cat,ids] of Object.entries(hiddenIds))for(const id of ids)assert.ok(hasItem(cat as "styles",id),`${cat}/${id}`);
   assert.ok(!shown("surfaces",surfaces).some(s=>s.id==="velvet"));
   assert.ok(shown("surfaces",surfaces,"velvet").some(s=>s.id==="velvet"));
-  assert.ok(!shown("backgrounds",backgrounds).some(b=>b.id==="arch"));
+  assert.ok(!shown("backgrounds",backgrounds).some(b=>b.id==="slats"));
+  for(const id of ["arch","curtain","leafshadow"])assert.ok(shown("backgrounds",backgrounds).some(b=>b.id===id),id);
   assert.ok(!shown("styles",styles).some(s=>s.id==="mediterranean"));
   assert.equal(shown("surfaces",surfaces).length,surfaces.length-hiddenIds.surfaces.length);
+});
+
+// שלב 11: מראה, אקריליק, מים, צפחה וטרוורטין; צל חלון, מיקרו-בטון וקיר טרוורטין.
+test("phase 11 surfaces and walls are shown, English, and reach the prompt",async()=>{
+  const {shown}=await import("../shared/catalog.ts");
+  const added={surfaces:["mirror","acrylic","water","slate","travertine"],backgrounds:["windowshadow","microcement","travertinewall"]} as const;
+  for(const id of added.surfaces){
+    const item=findItem("surfaces",id)!;
+    assert.ok(item,id);
+    assert.match(item.prompt,/^[\x20-\x7E]+$/,id);
+    assert.ok(shown("surfaces",surfaces).some(s=>s.id===id),id);
+  }
+  for(const id of added.backgrounds){
+    const item=findItem("backgrounds",id)!;
+    assert.ok(item,id);
+    assert.match(item.prompt,/^[\x20-\x7E]+$/,id);
+    assert.ok(shown("backgrounds",backgrounds).some(b=>b.id===id),id);
+  }
+  assert.deepEqual(surfaces.filter(s=>s.group==="gloss").map(s=>s.id),["mirror","acrylic","water"]);
+  const selection={...defaultSelection,surface:"mirror",background:"windowshadow"};
+  assert.deepEqual(parseSelection(selection),selection);
+  const prompt=buildPrompt(selection,defaultSettings);
+  assert.ok(prompt.includes("physically accurate mirror image"));
+  assert.ok(prompt.includes("shadow of a window frame"));
 });
